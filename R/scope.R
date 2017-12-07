@@ -215,11 +215,10 @@ plot_dvsd=function(fig=parent(fig,1),n=parent(n.dvsd,20)) {
                  xlab="Cohen's d",ylab='true population d',main=title));
   grid();
   pval_legend(-1.25,1,width=.25);
-  fig<<-fig+1;                # bump for next guy
   dev1=dev.cur();
   ## zoom to sig boundary
   dev.new();
-  title=paste(sep='','Figure ',fig,". Cohen's d vs. true d for n=",n,' (zoomed to significance region)');
+  title=paste(sep='','Figure ',fig+1,". Cohen's d vs. true d for n=",n,' (zoomed to significance region)');
   sim2=sim[[case]];
   d.sig=d_sig(20);
   sim2=subset(sim2,subset=near(d.sdz,d.sig,tol=.01));
@@ -227,7 +226,7 @@ plot_dvsd=function(fig=parent(fig,1),n=parent(n.dvsd,20)) {
                  xlab="Cohen's d",ylab='true population d',main=title,cex.main=.9));
   grid();
   abline(v=d.sig,col='red');
-  fig<<-fig+1;                # bump for next guy
+  fig<<-fig+2;                # bump for next guy
   dev2=dev.cur();
   c(dev1,dev2);
 }
@@ -456,7 +455,7 @@ if ('RColorBrewer' %in% .packages()) {
 } else {
   ## use hardcoded values previoulsy generated
   blues=colorRampPalette(c("#EFF3FF","#BDD7E7","#6BAED6","#3182BD","#08519C"));
-  reds=colorRampPalette(rev(c"#FEE5D9","#FCAE91","#FB6A4A","#CB181D"));
+  reds=colorRampPalette(rev(c("#FEE5D9","#FCAE91","#FB6A4A","#CB181D")));
 }
 nonsig.breaks=seq(0,-log10(0.05),length.out=11)
 sig.breaks=seq(-log10(0.05),4,length.out=11)
