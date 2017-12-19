@@ -56,8 +56,8 @@ init=function(
   ## pval.plot=c(.001,.01,.03,.05,.1), # pvalues for which we plot results
   ## 
   ## program parameters, eg, for output files, error messages, etc.
-  scriptname='scope',            #  
-  datadir=file.path('data',scriptname), # directory for data files
+  scriptname='scope_0.90',               #  
+  datadir=file.path('data',scriptname),  # directory for data files
   figdir=file.path('figure',scriptname), # directory for plots
   id=NULL,                       # identifying info tacked onto filenames
   verbose=F,                     # print progress messages
