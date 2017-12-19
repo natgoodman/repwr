@@ -52,8 +52,8 @@ source('script/scope.R');
 ## run default process and save simulations and results in directories data/scope and figure/scope
 run(save=T);
 
-## reduce runtime by loading simulation saved above
-run(init.mode='auto');
+## subsequent runs load simulation saved above. set save=F to avoid resaving it
+run(save=F);
 
 ## change sample size
 run(n=100);

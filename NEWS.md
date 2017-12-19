@@ -1,9 +1,16 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-December 07, 2017
+December 19, 2017
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 0.91 2017-12-19
+-----------------------
+
+-   Change sampling distribution from normal to noncentral t.
+-   Remove unused code.
+-   Clean up code for translating Cohen's d to t-statistic and t-distribution; simplify function names.
+
 Release 0.90 2017-12-07
 -----------------------
 

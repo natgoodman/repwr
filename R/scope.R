@@ -37,12 +37,7 @@ init=function(
   ## simulation parameters 
   m=1e5,                         # total number of instances
   n=20,                          # sample size 
-  d.pop=runif(m,-1.5,3),         # 'manual' mode: population effect sizes (means)
-  d.test=1.5,                    # 'auto' mode: max or range of d.pop we intend to test
-                                 #   can also be list keyed by n
-  init.mode='manual',            # choices: 'manual','automatic'
-                                 #   'manual': software uses d.pop as given
-                                 #   'auto': software sets d.pop
+  d.pop=runif(m,0,1.5),          # population effect sizes (means)
   ## analysis parameters
   small.power=0.33,              # min small telescope power
   close.level=0.05,              # pval for big telescope "close enough" calculation
@@ -63,7 +58,7 @@ init=function(
   verbose=F,                     # print progress messages
   ## program control
   load=NA,                       # shorthand to override defaults for load.sim & load.res
-  load.sim=load,                 # load saved simulations in automatic mode
+  load.sim=load,                 # load saved simulations
                                  #   NA means load if file exists
                                  #   T, F mean always or never load
   save=F,                        # shorthand for save.sim & save.res 
@@ -76,8 +71,7 @@ init=function(
   clean.fig=clean,               # remove contents of figdir and start fresh
   end=NULL                       # placeholder for last parameter
   ) {
-  init.mode=match.arg(init.mode,c('manual','automatic'),several.ok=T);
-  cases=expand.grid(m=m,n=n,load.sim=load.sim,init.mode=init.mode,stringsAsFactors=F);
+  cases=expand.grid(m=m,n=n,load.sim=load.sim,stringsAsFactors=F);
   ## clean and create output directories as needed
   if (clean.data) unlink(datadir,recursive=T);
   dir.create(datadir,recursive=TRUE,showWarnings=FALSE);
@@ -89,8 +83,6 @@ init=function(
   m<<-m;
   n<<-n;
   d.pop<<-d.pop;
-  d.test<<-d.test;
-  init.mode<<-init.mode;
   small.power<<-small.power;
   close.level<<-close.level;
   n1.dcrit<<-n1.dcrit;
@@ -124,27 +116,17 @@ dosim=function(save.sim=parent(save.sim)) {
   ## do simulations! case by case
   for (i in seq_len(nrow(cases))) {
     ## extract args this way to preserve type (numeric vs string) and avoid conversion to list
-    m=cases[i,'m']; n=cases[i,'n']; load.sim=cases[i,'load.sim']; init.mode=cases[i,'init.mode'];
+    m=cases[i,'m']; n=cases[i,'n']; load.sim=cases[i,'load.sim']; 
     case=paste(m,n);
     file=filename_sim(m,n,id);
-    if (init.mode=='automatic') {
      ## use saved simulation if possible
-      if (file.exists(file)) {
-        ## saved simulation exists. use if params permit
-        if (is.na(load.sim)|load.sim) {
-          sim[[case]]=load_sim(file);
-          next;
-        } else {
-          if (load.sim) stop(paste(sep=' ','load.sim is TRUE but file',file,'does not exist'));
-        }}
-      ## no saved simulation or params prevent its use. run simulation
-      ## sd=sdd(n,d), ie, sd of Cohen's d
-      ## data range +/- 4*sd will get (essentially) all of it
-     if (is.list(d.test)) d.test=d.test[[as.character(n)]];
-      if (length(d.test)==1) d.test=c(0,d.test);
-      lo=min(d.test); hi=max(d.test); sd.lo=sdd(n,lo); sd.hi=sdd(n,hi);
-      d.pop=runif(m,lo-4*sd.lo,hi+4*sd.hi);
+    if (load.sim&!file.exists(file))
+      stop(paste(sep=' ','load.sim is TRUE but file',file,'does not exist'));
+    if ((is.na(load.sim)|load.sim)&file.exists(file)) {
+      sim[[case]]=load_sim(file);
+      next;
     }
+    ## no saved simulation or params say not to use it. run simulation
     sim2=sim[[case]]=dosim2(m,n,d.pop);
     if (save.sim) save_sim(sim2,file);
   }
@@ -209,18 +191,18 @@ plot_dvsd=function(fig=parent(fig,1),n=parent(n.dvsd,20)) {
   sim2=sim[[case]];
   if (is.null(sim2)) stop(paste(sep='','simulation results for n=',n,' m=',m,' not in memory'));
   ## sim2=subset(sim2,subset=d.sdz>=0);
-  sim2=subset(sim2,subset=between(d.sdz,-2,2));
+  sim2=subset(sim2,subset=between(d.sdz,-1,2));
   sim2=sim2[sample.int(nrow(sim2),1e4),];
-  with(sim2,plot(d.sdz,d.pop,pch=20,col=pval2col(pval),
+  with(sim2,plot(d.sdz,d.pop,pch=20,col=pval2col(pval),xlim=c(-1,2),
                  xlab="Cohen's d",ylab='true population d',main=title));
   grid();
-  pval_legend(-1.25,1,width=.25);
+  pval_legend(-1,0.5,width=.25,height=.95);
   dev1=dev.cur();
   ## zoom to sig boundary
   dev.new();
   title=paste(sep='','Figure ',fig+1,". Cohen's d vs. true d for n=",n,' (zoomed to significance region)');
   sim2=sim[[case]];
-  d.sig=d_sig(20);
+  d.sig=d_sig(n);
   sim2=subset(sim2,subset=near(d.sdz,d.sig,tol=.01));
   with(sim2,plot(d.sdz,d.pop,pch=20,col=pval2col(pval),
                  xlab="Cohen's d",ylab='true population d',main=title,cex.main=.9));
@@ -236,11 +218,11 @@ plot_bounds=function(fig=parent(fig,3),n1=parent(n1.bound,20),n2=parent(n2.bound
   title=paste(sep='','Figure ',fig,'. d.sig and d.close bounds for n1=',n1,', n2=',n2);
   d.33=d_33(n1);
   x=seq(-1,2,length=1e4);
-  ymax=dnorm(d.33,mean=d.33,sd=sdd(n2,d.33));
+  ymax=dd2t(n2,d.33,d0=d.33);
   plot(x=NULL,y=NULL,type='n',xlim=range(x),ylim=c(0,ymax),xlab='d',ylab='density',main=title);
   grid();
-  seglines(x,dnorm(x,mean=d.33,sd=sdd(n1,d.33)),col=pval2col(d2pval(n1,x)),lwd=4);
-  seglines(x,dnorm(x,mean=d.33,sd=sdd(n2,d.33)),col=pval2col(d2pval(n2,x)),lwd=4);
+  seglines(x,dd2t(n1,x,d0=d.33),col=pval2col(d2pval(n1,x)),lwd=4);
+  seglines(x,dd2t(n2,x,d0=d.33),col=pval2col(d2pval(n2,x)),lwd=4);
   ## abline(v=d_sig(20),col='red',lty='dashed');
   dsig=d_sig(n2);
   dclose=d_close(n2,n1)
@@ -250,13 +232,15 @@ plot_bounds=function(fig=parent(fig,3),n1=parent(n1.bound,20),n2=parent(n2.bound
   ## for axis call below!
   at=c(dsig,dclose);
   axis(side=1,at=at,labels=round(at,2),tck=-.02,cex.axis=.75,mgp=c(3,.4,0));
-c
-  text(d.33,ymax+.01,"sampling distribution for n=50 centered on d.33",adj=c(0.5,0),cex=.75);
-  text(d.33,dnorm(d.33,mean=d.33,sd=sdd(n1,d.33))+.01,
-       "sampling distribution for n=20 centered on d.33",adj=c(0.5,0),cex=.75);
-  text(d_sig(50)+.01,0.5,"replication\nsignificant",adj=c(0,0),cex=.75);
-  text(d_close(50,20)-.01,1.5,"replication\n'close enough' to d.33%",adj=c(1,0),cex=.75);
-  pval_legend(1.5,0.625);
+  y.text=0.15;
+  x.text=suppressWarnings(uniroot(function(d) dd2t(n1,d,d0=d.33)-y.text,c(d.33,2))$root)
+  text(x.text+.02,y.text,"sampling distribution for n=20\ncentered on d.33",adj=c(0,0.5),cex=.75);
+  y.text=0.05;
+  x.text=suppressWarnings(uniroot(function(d) dd2t(n2,d,d0=d.33)-y.text,c(d.33,2))$root)
+  text(x.text+.02,y.text,"sampling distribution for n=50\ncentered on d.33",adj=c(0,0.5),cex=.75);
+  text(d_close(n2,n1)-.01,0.2,"replication\n'close enough'\nto d.33%",adj=c(0.5,0.5),cex=.75);
+  text(d_sig(n2)-.01,0.1,"replication\nsignificant",adj=c(0.5,0.5),cex=.75);
+  pval_legend(1.25,0.2,height=0.15);
   fig<<-fig+1;                # bump for next guy
   dev.cur();
 }
@@ -303,7 +287,7 @@ save_sim=function(sim,file=NULL,m,n,id=NULL,save.simtxt=parent(save.simtxt),F) {
   if (save.simtxt)
     write.table(sim,file=filename(base=base,suffix='txt'),sep='\t',quote=F,row.names=F);
 }
-## load saved parameters and results
+## load saved simulation
 ## call with file or software attempts to construct file name
 ## CAUTION: when called in a fresh workspace, datadir variable not yet defined
 load_sim=function(file=NULL,m,n,id=NULL) {
@@ -337,29 +321,27 @@ save_plot=function(dev,filebase) {
 ##   standard formula: sqrt(((n-1)*sd0^2+(n-1)*sd1^2)/(n+n-2));
 pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2);
 
-## t statistic 
-t_stat1=function(n,mean,sd) mean/sqrt(sd^2/n);
-t_stat=t_stat2=function(n,mean0,mean1,sd0,sd1) (mean0-mean1)/sqrt((sd0^2+sd1^2)/n);
-## pval
-t_pval=function(...) t.test(...)$p.value;
-## confidence interval
-t_ci1=function(n,mean,sd,conf.level=0.95) {
-  p0=(1-conf.level)/2; p1=1-p0;
-  tstar=(sd/sqrt(n))*qt(p1,df=n-1);
-  setNames(c(mean-tstar,mean+tstar),paste(sep='',100*c(p0,p1),'%'));
-}
-t_ci=t_ci2=function(n,mean0,mean1,sd0,sd1,conf.level=0.95) {
-  d=mean0-mean1;
-  p0=(1-conf.level)/2; p1=1-p0;
-  tstar=pooled_sd(sd0,sd1)/sqrt(n/2)*qt(p1,df=2*n-2);
-  setNames(c(d-tstar,d+tstar),paste(sep='',100*c(p0,p1),'%'));
-}
+## t statistic (not used)
+tstat=function(n,mean0,mean1,sd0,sd1) (mean0-mean1)/sqrt((sd0^2+sd1^2)/n);
 ## t statistic to pval
-tstat2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
+t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
 ## Cohen's d to t statistic & pval
-d2tstat=function(n,d) d*sqrt(n^2/(2*n))
-d2pval=function(n,d) tstat2pval(n,d2tstat(n,d))
- 
+d2t=function(n,d) d*sqrt(n^2/(2*n))
+d2pval=function(n,d) t2pval(n,d2t(n,d))
+
+## probability functions for t-distribution of d
+ncp=function(n,d) sqrt(n/2)*d
+pd2t=function(n,d,d0=NULL) {
+  df=2*(n-1);
+  t=d2t(n,d);
+  if (!is.null(d0)) pt(t,df=df,ncp=ncp(n,d0)) else pt(t,df=df)
+}
+dd2t=function(n,d,d0=NULL) {
+  df=2*(n-1);
+  t=d2t(n,d);
+  if (!is.null(d0)) dt(t,df=df,ncp=ncp(n,d0)) else dt(t,df=df)
+}
+
 ## sd of Cohen's d for two samples
 ## from https://stats.stackexchange.com/questions/144084/variance-of-cohens-d-statistic
 ## also in compute.es::des
@@ -374,7 +356,8 @@ d_33=function(n=20) power.t.test(n,power=0.33)$delta
 d_close=function(n2,n1=20,
   small.power=parent(small.power,0.33),close.level=parent(close.level,0.05),
   d.33=power.t.test(n1,power=small.power)$delta)
-  uniroot(function(d) pnorm(d,mean=d.33,sd=sdd(n2,d.33),lower.tail=T)-close.level,c(-10,10))$root
+  ## suppress annoying warning from pt: full precision may not have been achieved in 'pnt{final}'
+  suppressWarnings(uniroot(function(d) pd2t(n2,d,d0=d.33)-close.level,c(-10,10))$root)
 
 ## ---- Utility Functions ----
 ## file related functions
@@ -482,7 +465,7 @@ pval_legend=function(x0,y0,steps=100,width=0.2,height=1) {
   nonsig.pval=seq(0.05,1,length=steps);
   y=seq(y0,by=height/(2*steps),length=2*steps);
   rect(x0,head(y,-1),x0+width,y[-1],col=pval2col(c(sig.pval,nonsig.pval)),border=NA);
-  text(x0,y0+height+0.1,"pvalues",adj=0);
+  text(x0,y0+(1.05*height),"pvalues",adj=0,cex=.8);
   text(x0+width,y0,'0',pos=4,cex=.8);
   text(x0+width,y0+height/2,'0.05',pos=4,cex=.8);
   text(x0+width,y0+height,'1',pos=4,cex=.8);
