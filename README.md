@@ -1,7 +1,7 @@
 Replication Power
 ================
 Nathan (Nat) Goodman
-December 07, 2017
+December 19, 2017
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 *A collection of R scripts (and someday short articles) exploring replication power, which we define broadly as techniques for replicating scientific studies. The only content at present is a script that builds on Uri Simonsohn's Small Telescopes paper and related blog posts. The main finding is that if an initial study is too small, it not only limits the effect size that it can see but also the effect size that will ever be deemed a successful replication.*
