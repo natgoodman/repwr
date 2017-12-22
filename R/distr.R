@@ -289,11 +289,13 @@ plotsd_pop_vs_sdz=
     lines(d.sdz,theo,col='gold',lwd=6);
     lines(empi.smooth,col='blue');
     lines(theosim.smooth,col='green');
+    lines(d.sdz,sdd(n,d.sdz),col='red');
     grid();
     ## add legend
     legend.text=
-      c('empirical','smoothed empirical','theoretical (s_d2t)','simulated theo (r_d2t)');
-    legend.col=c('grey','blue','gold','green');
+      c('empirical','smoothed empirical','theoretical (s_d2t)','simulated theo (r_d2t)',
+        'approximation from compute.es');
+    legend.col=c('grey','blue','gold','green','red');
     legend('top',bty='n',legend=legend.text,col=legend.col,pch=19,cex=.8)
     fig<<-fig+1;                # bump for next guy
     dev.cur();
@@ -501,7 +503,7 @@ r_d2t=function(m,n,d0=NULL) {
   t2d(n,t)
 }
 ## sd of Cohen's d for two samples
-## sdd (probably wrong...)
+## sdd (probably wrong in general but seems to work for sd(d.pop) vs d.sdz ...)
 ##   from https://stats.stackexchange.com/questions/144084/variance-of-cohens-d-statistic
 ##   also in compute.es::des
 ## sd_d2t   sd of t-distribution of d
