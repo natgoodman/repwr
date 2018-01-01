@@ -1,9 +1,23 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-December 19, 2017
+January 1, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 0.92 2018-01-01
+-----------------------
+
+### scope.R
+
+-   Added plot\_cross, plot\_pclose1
+-   Integrated d2t probability functions from distr.R
+-   Systematically precomputed useful data tables: d1, d33, dcross, dsig, dclose, dcrit
+
+### distr.R
+
+-   Added pval2t, pval2d functions
+-   Corrected usage of lower.tail parameter in d2t probability functions
+
 Release 0.91 2017-12-19
 -----------------------
 
