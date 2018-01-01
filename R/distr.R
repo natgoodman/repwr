@@ -198,7 +198,7 @@ dores=function(save.res=parent(save.res)) {
   }
   invisible(plots);
 }
-## run plot function and label result with function name
+## run plot function and  label result with function name
 doplot=function(what) {
   what=as.character(pryr::subs(what));
   f=get(what,envir=parent.frame(n=2));
@@ -465,6 +465,9 @@ t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
 ## Cohen's d to t statistic & pval
 d2t=function(n,d) d*sqrt(n^2/(2*n))
 d2pval=function(n,d) t2pval(n,d2t(n,d))
+## pval to t statistic & Cohen's d
+pval2t=function(n,pval) qt(pval/2,df=2*(n-1),lower.tail=F)
+pval2d=function(n,pval) q_d2t(n,q=pval/2,lower.tail=F)
 
 ## confidence intervals for normal and  t-distribution of d
 ci_norm=function(n,d,conf.level=.95) {
@@ -483,7 +486,8 @@ ci_d2t=function(n,d,d0=NULL,conf.level=.95) {
 d_d2t=function(n,d,d0=NULL) {
   df=2*(n-1);
   t=d2t(n,d);
-  if (!is.null(d0)) suppressWarnings(dt(t,df=df,ncp=ncp(n,d0))) else dt(t,df=df)
+  if (!is.null(d0)) suppressWarnings(dt(t,df=df,ncp=ncp(n,d0)))
+  else dt(t,df=df)
 }
 p_d2t=function(n,d,d0=NULL,lower.tail=TRUE) {
   df=2*(n-1);
