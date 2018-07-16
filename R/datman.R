@@ -44,8 +44,8 @@ load_nd=function(file=NULL,n,d,id=NULL,what) {
 ## get data already in memory (eg, in sim.list) or read from file
 ##   fail if data does not exist unless must.exist is FALSE
 get_nd=function(n,d,id=NULL,what,load,keep,must.exist=T) {
+  case=casename_nd(n,d,id,short=T);
   if (is.na(load)|load) {
-    case=casename_nd(n,d,id,short=T);
     what.list=get(paste(sep='.',what,'list'))
     data=what.list[[case]];
     if (is.null(data)) {
@@ -53,7 +53,7 @@ get_nd=function(n,d,id=NULL,what,load,keep,must.exist=T) {
       if (file.exists(file)) data=load_nd(file=file)
       else {
         if (must.exist)
-          stop(paste(sep=' ',what,'for case',casename_nd(n,d,id),
+          stop(paste(sep=' ',what,'for case',case,
                      'not in memory and file',file,'does not exist'));
         data=NULL;
       }
@@ -61,8 +61,7 @@ get_nd=function(n,d,id=NULL,what,load,keep,must.exist=T) {
     }}
     else {
       if (must.exist)
-        stop(paste(sep=' ','must.exist is TRUE but load is FALSE for',what,'case',
-                   casename_nd(n,d,id)));
+        stop(paste(sep=' ','must.exist is TRUE but load is FALSE for',what,'case',cse));
       data=NULL;
     }
   invisible(data);
@@ -94,8 +93,8 @@ load_nndd=function(file=NULL,n1,n2,d1,d2,id=NULL,what) {
 ## get data already in memory (eg, in detl.list) or read from file
 ##   fail if data does not exist unless must.exist is FALSE
 get_nndd=function(n1,n2,d1,d2,id=NULL,what,load,keep,must.exist=T) {
+  case=casename_nndd(n1,n2,d1,d2,id,short=T);
   if (is.na(load)|load) {
-    case=casename_nndd(n1,n2,d1,d2,id,short=T);
     what.list=get(paste(sep='.',what,'list'))
     data=what.list[[case]];
     if (is.null(data)) {
@@ -103,7 +102,7 @@ get_nndd=function(n1,n2,d1,d2,id=NULL,what,load,keep,must.exist=T) {
       if (file.exists(file)) data=load_nndd(file=file)
       else {
         if (must.exist)
-          stop(paste(sep=' ',what,'for case',casename_nndd(n1,n2,d1,d2,id),
+          stop(paste(sep=' ',what,'for case',case,
                      'not in memory and file',file,'does not exist'))
         else data=NULL;
       }
@@ -111,8 +110,7 @@ get_nndd=function(n1,n2,d1,d2,id=NULL,what,load,keep,must.exist=T) {
     }}
     else {
       if (must.exist)
-        stop(paste(sep=' ','must.exist is TRUE but load is FALSE for',what,'case',
-                   casename_nnd(n1,n2,d1,d2,id)));
+        stop(paste(sep=' ','must.exist is TRUE but load is FALSE for',what,'case',case));
       data=NULL;
     }
   invisible(data);
@@ -136,14 +134,14 @@ load_simr=function(file=NULL,n,d,id=NULL) load_nd(file,n,d,id,what='simr');
 get_simr=function(n,d,id=NULL,load=load.simr,keep=keep.simr,must.exist=T)
   get_nd(n,d,id,what='simr',load,keep,must.exist);
 
-##### i1 - s1 permutation indexes (mostly for testing)
-save_i1=function(i1,n1,n2,d1,d2,id=NULL,file=NULL,save=save.i1,save.txt=save.txt.i1,keep=keep.i1)
-  save_nndd(i1,n1,n2,d1,d2,id,file,what='i1',save,save.txt,keep);
-load_i1=function(file=NULL,n1,n2,d1,d2,id=NULL)
-  load_nndd(file,n1,n2,d1,d2,id,what='i1');
-get_i1=function(n1,n2,d1,d2,id=NULL,load=load.i1,keep=keep.i1,must.exist=T)
-  get_nndd(n1,n2,d1,d2,id,what='i1',load,keep,must.exist);
-##### detl - detailed rule results
+##### si - s1 permutation indexes (mostly for testing)
+save_si=function(si,n1,n2,d1,d2,id=NULL,file=NULL,save=save.si,save.txt=save.txt.si,keep=keep.si)
+  save_nndd(si,n1,n2,d1,d2,id,file,what='si',save,save.txt,keep);
+load_si=function(file=NULL,n1,n2,d1,d2,id=NULL)
+  load_nndd(file,n1,n2,d1,d2,id,what='si');
+get_si=function(n1,n2,d1,d2,id=NULL,load=load.si,keep=keep.si,must.exist=T)
+  get_nndd(n1,n2,d1,d2,id,what='si',load,keep,must.exist);
+##### detl - detailed measure results
 save_detl=function(detl,n1,n2,d1,d2,id=NULL,file=NULL,
                    save=save.detl,save.txt=save.txt.detl,keep=keep.detl)
   save_nndd(detl,n1,n2,d1,d2,id,file,what='detl',save,save.txt,keep);
@@ -151,7 +149,7 @@ load_detl=function(file=NULL,n1,n2,d1,d2,id=NULL)
   load_nndd(file,n1,n2,d1,d2,id,what='detl');
 get_detl=function(n1,n2,d1,d2,id=NULL,load=load.detl,keep=keep.detl,must.exist=T)
   get_nndd(n1,n2,d1,d2,id,what='detl',load,keep,must.exist);
-##### smry - summary rule results
+##### smry - summary measure results
 save_smry=function(smry,n1,n2,d1,d2,id=NULL,file=NULL,
                    save=save.smry,save.txt=save.txt.smry,keep=keep.smry)
   save_nndd(smry,n1,n2,d1,d2,id,file,what='smry',save,save.txt,keep);
@@ -159,6 +157,60 @@ load_smry=function(file=NULL,n1,n2,d1,d2,id=NULL)
   load_nndd(file,n1,n2,d1,d2,id,what='smry');
 get_smry=function(n1,n2,d1,d2,id=NULL,load=load.smry,keep=keep.smry,must.exist=T)
   get_nndd(n1,n2,d1,d2,id,what='smry',load,keep,must.exist);
+##### posr - positive rate results
+save_posr=function(posr,
+                   from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
+                   id=NULL,file=NULL,
+                   save=save.posr,save.txt=save.txt.posr,keep=keep.posr) {
+  if (missing(file)) base=basename_posr(from.type,relto.type,id)
+  else base=desuffix(file);
+  file=filename(base=base,suffix='RData');
+  if ((is.na(save)&!file.exists(file))|(!is.na(save)&save)) {
+    save(posr,file=file);
+    if (save.txt)
+      write.table(posr,file=filename(base=base,suffix='txt'),sep='\t',quote=F,row.names=F);
+  }
+  if (keep) keep_posr(posr,from.type,relto.type,id);
+  invisible(data);
+} 
+load_posr=
+  function(file=NULL,from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
+           id=NULL) {
+    if (is.null(file)) file=filename_posr(from.type,relto.type,id);
+    what=load(file=file);               # what is name of saved data
+    get(what);                          # return it
+  }
+get_posr=
+  function(from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
+           id=NULL,load=load.posr,keep=keep.posr,must.exist=T) {
+    what='posr';
+    case=casename_posr(from.type,relto.type,id);
+    if (is.na(load)|load) {
+      data=posr.list[[case]];
+      if (is.null(data)) {
+        file=filename_posr(from.type,relto.type,id);
+        if (file.exists(file)) data=load_posr(file=file)
+        else {
+          if (must.exist)
+            stop(paste(sep=' ',what,'for case',case,
+                       'not in memory and file',file,'does not exist'));
+          data=NULL;
+        }
+        if (keep) keep_posr(data,from.type,relto.type,id);
+      }}
+    else {
+      if (must.exist)
+        stop(paste(sep=' ','must.exist is TRUE but load is FALSE for',what,'case',case));
+      data=NULL;
+    }
+    invisible(data);
+  }
+keep_posr=function(data,from.type,relto.type,id=NULL) {
+  case=casename_posr(from.type,relto.type,id);
+  what=paste(sep='.','posr',case);
+  assign(what,data,envir=.GlobalEnv); # assign globally
+  posr.list[[case]]<<-data;             # assign to global list
+}
 
 ##### data - top-level data saved in datadir
 ## save data in RData and txt formats
@@ -173,8 +225,12 @@ save_data=function(what,file=NULL,data=NULL,id=NULL,
   file=filename(base=base,suffix='RData');
   if ((is.na(save)&!file.exists(file))|(!is.na(save)&save)) {
     save(data,file=file);
-    if (save.txt)
-      write.table(data,file=filename(base=base,suffix='txt'),sep='\t',quote=F,row.names=F);
+    if (save.txt) {
+      file=filename(base=base,suffix='txt');
+      if (length(dim(data))==2) write.table(data,file=file,sep='\t',quote=F,row.names=F)
+      else if (is.vector(data)) writeLines(data,file)
+      else stop('Trying to save object with more than 2 dimensions as text. Is "what" set correctly?');
+    }
   }
   if (keep) keep_data(name=what,data=data);
   invisible(data);
@@ -192,9 +248,10 @@ load_data=function(file=NULL,what=NULL,id=NULL) {
 get_data=function(what,id=NULL,load=load.data,keep=keep.data,must.exist=T,name=NULL) {
   if (is.na(load)|load) {
     if (!is.null(name)) what=name else what=as.character(pryr::subs(what));
+    if (!is.null(id)) what=paste(sep='.',what,id);
     data=data.list[[what]];
     if (is.null(data)) {
-      file=filename_data(what,id);
+      file=filename_data(what);
       if (file.exists(file)) {
         data=load_data(file=file);          # what is name of saved data
       } else {
@@ -212,16 +269,17 @@ get_data=function(what,id=NULL,load=load.data,keep=keep.data,must.exist=T,name=N
   invisible(data);
 }
 ## keep top-level data. assign globally and keep in global list
-keep_data=function(what,data=NULL,name=NULL) {
+keep_data=function(what,id=NULL,data=NULL,name=NULL) {
  if (!is.null(name)) what=name else what=as.character(pryr::subs(what));
-  if (missing(data) && exists(what,envir=parent.frame(n=1)))
-    data=get(what,envir=parent.frame(n=1));
-  if (is.null(data)) stop("Trying to keep NULL object. Is 'what' set correctly?");
-  assign(what,data,envir=.GlobalEnv); # assign globally
-  data.list[[what]]<<-data;  # assign to global list
+ if (missing(data) && exists(what,envir=parent.frame(n=1)))
+   data=get(what,envir=parent.frame(n=1));
+ if (is.null(data)) stop("Trying to keep NULL object. Is 'what' set correctly?");
+ if (!is.null(id)) what=paste_id(what,id);
+ assign(what,data,envir=.GlobalEnv); # assign globally
+ data.list[[what]]<<-data;  # assign to global list
 }
 
-##### plot - save one or more plots
+##### plot - save one or more plots - NOT USED - saving done in dofig
 save_plot=function(dev,file=NULL,what=NULL,id=NULL) {
   if (is.null(file)&is.null(what)) stop('Cannot save plot unless file or what is set');
   if (is.null(file)) {
@@ -285,16 +343,27 @@ filename_smry=function(n1,n2,d1,d2,id=NULL,suffix='RData')
   filename(basename_smry(n1,n2,d1,d2,id),suffix=suffix);
 basename_smry=function(n1,n2,d1,d2,id=NULL) basename_nndd(n1,n2,d1,d2,id,what='smry');
 casename_smry=casename_nndd;
+##### posr
+filename_posr=function(from.type,relto.type,id=NULL,suffix='RData')
+  filename(base=basename_posr(from.type,relto.type,id),suffix=suffix);
+basename_posr=function(from.type,relto.type,id=NULL)
+  filename(posrdir,base='posr',tail=casename_posr(from.type,relto.type,id));
+casename_posr=function(from.type,relto.type,id=NULL) 
+  if (is.null(id)) paste(sep='_',from.type[1],relto.type[1]) else id;
 ##### data - arbitrary objects saved in datadir
 filename_data=function(what,id=NULL,suffix='RData')
   filename(basename_data(what,id),suffix=suffix);
 basename_data=function(what,id=NULL) filename(datadir,base=paste_id(what,id));
-##### plot - saved in figdir. may have numeric tail
-filename_plot=function(what,id=NULL,i=NULL,suffix='png')
-  filename(basename_plot(what,id,i),suffix=suffix);
-basename_plot=function(what,id=NULL,i=NULL) {
+
+##### figure - saved in figdir. may have numeric tail
+filename_fig=function(figname,fignum=NULL,doc=NULL,id=NULL,i=NULL,suffix='png')
+  filename(basename_fig(figname,fignum,doc,id,i),suffix=suffix);
+basename_fig=function(figname,fignum=NULL,doc=NULL,id=NULL,i=NULL) {
   if (!is.null(i)) i=sprintf("%02i",i);
-  basename=filename(figdir,base=what,tail=i);
+  if (!is.null(doc)) figdir=file.path(figdir,doc);
+  if (!is.null(fignum)) fignum=c('figure',sprintf("%03i",fignum));
+  base=paste(collapse='_',c(fignum,figname));
+  basename=filename(figdir,base=base,tail=i);
   paste_id(basename,id);
 }
 
@@ -332,11 +401,16 @@ dirname=filebasename;
 ## clean specific data type. deletes directory, any top level files and in-memory list
 cleanq=function(what,cleandir=T) {
   what=as.character(pryr::subs(what));
-  ## delete top level files if exist
-  unlink(sapply(cq(RData,txt), function(suffix) filename_data(what,suffix=suffix)));
+  ## delete top level files if exist, inclusing ones with ids
+  ## unlink(sapply(cq(RData,txt), function(suffix) filename_data(what,suffix=suffix)));
+  unlink(filename(datadir,list.files(datadir,pattern=paste(sep='','^',what,'\\.'))));
   ## delete in-memory list
   whatlist=paste(sep='.',what,'list');
   if (exists(whatlist,envir=.GlobalEnv)) rm(list=whatlist,envir=.GlobalEnv);
+  ## delete from top level data.list
+  ## CAUTION: have to use loop (not sapply) for scoping to work
+  pat=paste(sep='','^',what,'(\\.|$)');
+  for (name in grep(pat,names(data.list),value=T)) data.list[[name]]<<-NULL;
   if (cleandir) {
     whatdir=paste(sep='',what,'dir');
     ## delete directory if exists

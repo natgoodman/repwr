@@ -98,7 +98,7 @@ dosimr=function(sim=NULL,n,d) {
 ## dores. compute the results. do it case by case to avoid rereading large detail files
 dopost=function() {
   ## construct cases
-  if (dores.allcases) cases=expand.grid(n1=n,n2=n,d1=d,d2=d)
+  if (dopost.allcases) cases=expand.grid(n1=n,n2=n,d1=d,d2=d)
   else {
     ## NG 18-02-22: this branch is obsolete
     ##   I originally thought it would be too slow to do 'em all, but it's okay
@@ -125,16 +125,17 @@ dopost=function() {
     if (is.na(d2)) d2=d1;
     ## compute detailed results or use saved detl
     detl=dodetl(n1=n1,n2=n2,d1=d1,d2=d2);
-    ## compute summaries unless they already exist
+    ## compute summary or used saved smry
     smry=dosmry(detl=detl,n1=n1,n2=n2,d1=d1,d2=d2)
   }));
-  ## optionally save detl head and add to in-memory list. usually do - needed for analysis
-  detl=get_detl(n1=cases[1,'n1'],n2=cases[1,'n2'],d1=cases[1,'d1'],d2=cases[1,'d2']);
-  detl=detl[0,];
-  save_data(detl);
-  ## optionally save smryand add to in-memory list. usually do - needed for analysis
+  ## optionally get mesrs from smry and save. usually do - needed for analysis
+  mesr=setdiff(colnames(smry),cq(n1,n2,d1,d2,type,m));
+  save_data(mesr);
+  ## optionally save smry and add to in-memory list. usually do - needed for analysis
   save_data(smry);
-  invisible(smry);
+  ## generate default posr (positive rate) cases. also saves results if desired
+  posr=doposr(smry=smry);
+  invisible(posr);
 }
 ## contruct one detl case
 dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
@@ -146,17 +147,21 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
   if (is.null(s1)) s1=get_simr(n1,d1,id,load=T);
   if (is.null(s2)) s2=get_simr(n2,d2,id,load=T);
   ## NG 18-02-23: permute s1 else self-comparisons meaningless
-  ## use saved i1 if exists and args permit
-  i1=get_i1(n1,n2,d1,d2,id,must.exist=F);
-  if (is.null(i1)) {
+  ## NG 18-06-26: permute s2 also. not needed, but makes narrative easier
+  ## use saved si if exists and args permit
+  si=get_si(n1,n2,d1,d2,id,must.exist=F);
+  if (is.null(si)) {
     m=nrow(s1);
-    if (dores.permute) {
-      i1=sample.int(m)
-      s1=s1[i1,];
-    } else i1=seq_len(m);
+    if (dopost.permute) {
+      i1=sample.int(m);
+      i2=sample.int(m);
+    } else i1=i2=seq_len(m);
+    si=data.frame(i1=i1,i2=i2);
     ## optionally add i1 to in-memory list and save to file (mostly for testing)
-    save_i1(i1,n1,n2,d1,d2,id);
+    save_si(si,n1,n2,d1,d2,id);
   }
+  s1=s1[si$i1,];
+  s2=s2[si$i2,];
   ## define variables that depend on both studies
   ## prediction intervals
   p1=pi(s1,predvl[predvl$n1==n1&predvl$n2==n2,]);
@@ -186,8 +191,8 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
   sig1=s1$pval<=sig.level;
   sig2=s2$pval<=sig.level;
   sigm=meta.pval<=sig.level;
-  ## same sign: s1,s2
-  sign=s1$d.sign==s2$d.sign;
+  ## same direction (ie, sign): s1,s2
+  sdir=s1$d.sign==s2$d.sign;
   ## d in confidence interval: each vs other two
   d1.c2=between(s1$d.sdz,s2$ci.lo,s2$ci.hi);
   d2.c1=between(s2$d.sdz,s1$ci.lo,s1$ci.hi);
@@ -210,23 +215,24 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
   p1.p2=p1$pi.lo<=p2$pi.hi & p2$pi.lo<=p1$pi.hi;
   ## d >= small telescope boundary
   ## NG 18-02-14: to handle negative values, use d.abs instead of d.sdz
-  d1.scp2=(s1$d.abs>=scp2)&sign;
-  d2.scp1=(s2$d.abs>=scp1)&sign;
-  dm.scp2=(meta.abs>=scp2)&sign;
-  dm.scp1=(meta.abs>=scp1)&sign;
+  d1.scp2=(s1$d.abs>=scp2)&sdir;
+  d2.scp1=(s2$d.abs>=scp1)&sdir;
+  dm.scp2=(meta.abs>=scp2)&sdir;
+  dm.scp1=(meta.abs>=scp1)&sdir;
   ## d >= my 'misinterpretation' of small telescope boundary
   ##   need as.vector else R treats it as matrix. screws up naming in data.frame
-  d1.scpd2=as.vector((s1$d.abs>=scpd2)&sign);
-  d2.scpd1=as.vector((s2$d.abs>=scpd1)&sign);
-  dm.scpd2=as.vector((meta.abs>=scpd2)&sign);
-  dm.scpd1=as.vector((meta.abs>=scpd1)&sign);
+  d1.scpd2=as.vector((s1$d.abs>=scpd2)&sdir);
+  d2.scpd1=as.vector((s2$d.abs>=scpd1)&sdir);
+  dm.scpd2=as.vector((meta.abs>=scpd2)&sdir);
+  dm.scpd1=as.vector((meta.abs>=scpd1)&sdir);
   ## d2 bigger (actually more extreme) than d1
-  big2=(s1$d.abs<=s2$d.abs)&sign;
+  big1=(s1$d.abs>=s2$d.abs)&sdir;
+  big2=(s1$d.abs<=s2$d.abs)&sdir;
   ## return as data.frame so dosmry can use as environment
-  detl=data.frame(sig1,sig2,sigm,sign,
+  detl=data.frame(sig1,sig2,sigm,sdir,
     d1.c2,d2.c1,d1.cm,d2.cm,dm.c1,dm.c2,c1.c2,c1.cm,c2.cm,d1.p2,d2.p1,dm.p1,dm.p2,p1.p2,
     d1.scp2,d2.scp1,dm.scp2,dm.scp1,d1.scpd2,d2.scpd1,dm.scpd2,dm.scpd1,
-    big2);
+    big1,big2);
   ## optionally save detl and add to in-memory list. usually don't keep -- too big
   save_detl(detl,n1,n2,d1,d2,id);
   invisible(detl);
@@ -239,32 +245,93 @@ dosmry=function(detl=NULL,n1,n2,d1,d2) {
   ## no saved smry or args say not to use it. construct smry
   if (verbose) print(paste(sep=' ','+++ dosmry',nvq(n1,n2,d1,d2)));
   if (is.null(detl)) detl=get_detl(n1,n2,d1,d2,id,load=T);
-  ## init measures unless already done
-  init_mesr(detl=detl);
   ## construct summaries for several cases
+  type=cq(raw,sig1,bsln,sig2,big2,s2or); # order must be same as rows added to smry!
+  smry.na=rep(NA,ncol(detl));            # used when smry type is empty
   ## 1) raw detail
   smry=data.frame(type='raw',m=nrow(detl),t(colSums(detl)),stringsAsFactors=F);
+  raw=c(nrow(detl),colSums(detl));
   ## 2) sig1.
-  detl.sig1=with(detl,detl[sig1,]);
-  smry[2,]=data.frame('sig1',nrow(detl.sig1),t(colSums(detl.sig1)),stringsAsFactors=F);
-  ## 3) baseline = sig1 & sign. all require this
-  detl.bsln=with(detl.sig1,detl.sig1[sign,]);
-  smry[3,]=data.frame('bsln',nrow(detl.bsln),t(colSums(detl.bsln)),stringsAsFactors=F);
+  detl.sig1=with(detl,detl[sig1,,drop=F]);
+  sig1=c(nrow(detl.sig1),if(nrow(detl.sig1)!=0) colSums(detl.sig1) else smry.na);
+  ## 3) baseline = sig1 & sdir. all require this
+  detl.bsln=with(detl.sig1,detl.sig1[sdir,,drop=F]);
+  bsln=c(nrow(detl.bsln),if(nrow(detl.bsln)!=0) colSums(detl.bsln) else smry.na);
   ## 4) baseline & sig2. small telescopes requires this
-  detl.sig2=with(detl.bsln,detl.bsln[sig2,]);
-  smry[4,]=data.frame('sig2',nrow(detl.sig2),t(colSums(detl.sig2)),stringsAsFactors=F);
-  ## 5) baseline | big2. many authors also accept big2
-  detl.big2=detl.bsln|detl.bsln$big2;
-  smry[5,]=data.frame('big2',nrow(detl.big2),t(colSums(detl.big2)),stringsAsFactors=F);
-  ## 6) baseline & (sig2 | big2). just because..
-  detl.s2bg=with(detl.bsln,detl.bsln[sig2|big2,]);
-  smry[6,]=data.frame('s2bg',nrow(detl.s2bg),t(colSums(detl.s2bg)),stringsAsFactors=F);
-  ## tack on n1,n2,d1,d2
-  smry=data.frame(n1,n2,d1,d2,smry,row.names=NULL);
+  detl.sig2=with(detl.bsln,detl.bsln[sig2,,drop=F]);
+  sig2=c(nrow(detl.sig2),if(nrow(detl.sig2)!=0) colSums(detl.sig2) else smry.na);
+  ## 5) bsln & (sig2 | each other mesr)
+  ## CAUTION: if detl.bsln is empty, OR'ing the terms is error
+  detl.s2or=if(nrow(detl.bsln)!=0) detl.bsln|detl.bsln$sig2 else detl.bsln;
+  s2or=c(nrow(detl.s2or),if(nrow(detl.s2or)!=0) colSums(detl.s2or) else smry.na);
+  ## 6) baseline | big2. many authors also accept big2
+  ## CAUTION: if detl.bsln is empty, OR'ing the terms is error
+  detl.big2=if(nrow(detl.bsln)!=0) detl.bsln|detl.bsln$big2 else detl.bsln;
+  big2=c(nrow(detl.big2),if(nrow(detl.big2)!=0) colSums(detl.big2) else smry.na);
+  ## turn it all into data frame with n1,n2,d1,d2,type at front
+  smry=data.frame(n1,n2,d1,d2,type,rbind(t(raw),t(sig1),t(bsln),t(sig2),t(big2),t(s2or)),
+                  row.names=NULL,stringsAsFactors=F);
+  colnames(smry)=c(cq(n1,n2,d1,d2,type,m),colnames(detl));
   ## optionally save smry and add to in-memory list. usually don't keep -- no point
   save_smry(smry,n1,n2,d1,d2,id);
   invisible(smry);
 }
+## contruct default positive rate objects
+doposr=function(smry=NULL) {
+  if (is.null(smry)) smry=get_data(smry);
+  ## init measures and summary types unless already done
+  init_mesr();
+  init_smry(smry=smry);
+  ## construct positive rates for cases of interest
+  ## 1) standard
+  ## 2) from sig1 relto sig1
+  ## 3) from sig2 relto sig1
+  ## 4) from sig2 relto sig2
+  do_posr(smry,from.type=mesr.fromtype,relto.type=mesr.reltotype,id='std')
+  do_posr(smry,from.type='sig1',relto.type='sig1');
+  do_posr(smry,from.type='bsln',relto.type='sig1');
+  do_posr(smry,from.type='sig2',relto.type='sig1');
+  do_posr(smry,from.type='sig2',relto.type='sig2');
+  do_posr(smry,from.type='s2or',relto.type='sig1');
+  invisible(T);
+}
+
+## get or contruct one positive rate objects and optionally save & keep
+## from, relto are smry types. should be single valued unless id set
+## id used to create file and saved object. if missing, set from from.type, relto.type 
+do_posr=
+  function(smry,from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
+           id=NULL,mesr=mesr.all) {
+    ## use saved posr if exists and args permit
+    posr=get_posr(from.type,relto.type,id,must.exist=F);
+    if (!is.null(posr)) return(invisible(posr));
+    ## no saved posr or args say not to use it. construct posr
+    if (verbose) print(paste(sep=' ','+++ doposr',casename_posr(from.type,relto.type,id)));
+    ## make sure measures & types legal and limit to type we need
+    from.type=check_type(from.type,mesr,multiok=T);
+    relto.type=check_type(relto.type,mesr,multiok=T);
+    check_mesr();
+    smry.bytype=split(smry,smry$type);
+    posr=do.call(cbind,lapply(mesr,function(mesr) {
+      from.type=from.type[mesr];
+      relto.type=relto.type[mesr];
+      count=smry.bytype[[from.type]][,mesr];
+      m=smry.bytype[[relto.type]]$m;
+      ifelse(m==0,0,count/m);
+    }));
+    if (any(posr[!is.na(posr)]>1))
+      stop(paste(sep='',"Some posr values are greater than 1. This usually means from.type is 'before' relto.type in the workflow: from.type=",from.type,", relto.type=",relto.type));
+   if (any(posr[!is.na(posr)]<0))
+      stop(paste(sep='',"Some posr values are negative. I have no idea how this could happen..."));
+    colnames(posr)=mesr;
+    ## tack on x-params
+    xdata=smry.bytype[[1]][,cq(n1,n2,d1,d2)];
+    posr=data.frame(xdata,posr);
+    ## optionally save posr and add to in-memory list. usually do
+    save_posr(posr,from.type,relto.type,id);
+    invisible(posr);
+  }
+
 ## ---- Small Telescopes Functions ----
 ## generate & optionally save or load data for small telescopes
 ## presently just scope - matrix of "close enough" small telescopes d values for n1, n2
@@ -396,47 +463,6 @@ pi=function(simr,predvl) {
   hi=with(predvl,akima::aspline(d,y=hi,xout=simr$d.sdz)$y);
   data.frame(pi.lo=lo,pi.hi=hi)
 }
-
-## get values for measures from smry and convert to desired rates
-## from, relto are smry types
-## return list of x=xdata (params), y=ydata (rates), yes (or NULL if not relevant)
-data_rate=
-  function(smry,mesr=parent(mesr,mesr.plotdflt),
-           rate=parent(rate,'pos'),error.rate=parent(error.rate,T),
-           from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1')) {
-    pos.rate=pos_rate(smry,mesr,from.type,relto.type);
-    if (rate=='pos') return(pos.rate);
-    if (rate=='neg') return(neg_rate(pos.rate));
-    yes=x_yes(pos.rate,rate);
-    if (error.rate) error_rate(pos.rate,yes) else correct_rate(pos.rate,yes);
-  }
-## get values for measures from smry
-## from, relto are smry types. ither single values or vectors keyed by mesr
-## return list of x=xdata (params), y=ydata (rates)
-pos_rate=
-  function(smry,mesr=parent(mesr,mesr.plotdflt),
-           from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1')) {
-    ## set names of from, relto to mesr if single value w/o names
-    if (is.null(names(from.type))) from.type=setNames(rep(from.type[1],length=length(mesr)),mesr);
-    if (is.null(names(relto.type)))
-      relto.type=setNames(rep(relto.type[1],length=length(mesr)),mesr);
-    smry.bytype=split(smry,smry$type);
-    pos.rate=do.call(cbind,lapply(mesr,function(mesr) {
-      from.type=from.type[mesr];
-      relto.type=relto.type[mesr];
-      count=smry.bytype[[from.type]][,mesr];
-      m=smry.bytype[[relto.type]]$m;
-      count/m;
-    }));
-    colnames(pos.rate)=mesr;
-    xdata=smry.bytype[[1]][,cq(n1,n2,d1,d2)];
-    ## use 1.1 threshold (not 1) 'cuz interpolation can overshoot
-    if (any(pos.rate>1.1))
-      stop(paste(sep='',"Some pos_rate values are great than 1. This usually means from.type is 'before' relto.type in the workflow: from.type=",from.type,", relto.type=",relto.type));
-    ## clamp pos.rate to [0,1]. interpolation can under- or over-shoot
-    pos.rate=apply(pos.rate,c(1,2),function(y) max(min(y,1),0));
-    list(x=xdata,y=pos.rate);
-  }
 ## convert pos.rate matrix to correct and error rate matrices
 ##   yes tells which rows are supposed to say 'yes'
 correct_rate=function(pos.rate,yes) {

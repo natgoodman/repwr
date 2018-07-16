@@ -74,6 +74,22 @@ assign_global=function() {
   env=parent.frame(n=1);
   sapply(ls(envir=env),function(what) assign(what,get(what,envir=env),envir=.GlobalEnv));
 }
+## copy variable to parent. used in dofig to update fignum
+assign_parent=function(what,value) {
+  what=as.character(pryr::subs(what));
+  if (missing(value)) value=get(what,envir=parent.frame(n=1));
+  assign(what,value,envir=parent.frame(n=2));
+}
+## like match.arg but uses prefix matching and, if several.ok, returns 'em all
+pmatch_choice=function(arg,choices,several.ok=T,none.ok=F) {
+  ## m=startsWith(choices,arg);
+  m=apply(do.call(cbind,lapply(arg,function(arg) startsWith(choices,arg))),1,any);
+  if (!any(m)&&!none.ok) stop(paste(sep=' ',"'arg' matched none of",paste(collapse=', ',choices)));
+  if (!several.ok&&sum(m)>1)
+    stop(paste(sep=' ',"'arg' matched several of",paste(collapse=', ',choices),
+               "but 'several.ok' is FALSE"));
+  choices[m];
+}
 ## quote names in paramter list. code adapted from base::rm
 cq=function(...) {
  dots=match.call(expand.dots=FALSE)$...
@@ -84,10 +100,13 @@ return(vapply(dots,as.character,""));
 }
 ## extend akima::aspline for matrix
 asplinem=function(x,y,xout,...) {
-  if (is.vector(y)) return(akima::aspline(x,y,xout,...));
+  if (is.vector(y)) y=data.frame(y=y);
   if (length(dim(y))!=2) stop('y must be vector or 2-dimensional matrix-like object');
   ## yout=apply(y,2,function(y) akima::aspline(x,y,xout,...)$y);
-  yout=apply(y,2,function(y) akima::aspline(x,y,xout,...)$y);
+  yout=apply(y,2,function(y) {
+    if (all(is.na(y))) rep(NA,length(xout))
+    else if (length(which(!is.na(y)))==1) rep(y[which(!is.na(y))],length(xout))
+    else akima::aspline(x,y,xout,...)$y;})
   ## if yout has single row (ie, xout has one element), R turns it into a vector...
   if (length(xout)==1) yout=t(yout);
   yout;
@@ -99,7 +118,6 @@ loessm=function(x,y,xout,...) {
   data=data.frame(x=x,y);
   yout=do.call(data.frame,lapply(colnames(y),function(name) {
     fmla=as.formula(paste(name,'~ x'));
-    loess.obj=loess(fmla,data=data,...);
     yout=predict(loess(fmla,data=data),xout)
   }));
   ## if yout has single row (ie, xout has one element), R turns it into a vector...

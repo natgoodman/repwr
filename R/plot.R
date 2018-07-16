@@ -21,96 +21,79 @@
 
 ## ---- Plot Functions ----
 
-## plot rate vs. any of n1, n2, d1, d2
-## operates on full smry unless smryx set
-##   default for n1 10, 20, 40, 80, 160
+## plot rate or draw heat map vs. any of n1, n2, d1, d2
+## specify drat by explicit parameter or get it from posr
+## specify posr by explicit parameter, or id or from, relto smry types
+## specify query (aka filter) by n1,n2,d1,d2 or xdata
+##   n1,n2,d1,d2 - query is row-by-row combination
+##   xdata - data.frame given desired combinations
 ##   nx is n multiplier: n2=nx*n1
-##   x tells which x variable drives the plot, or to use x vars as given
-##     x='asis' also sets xtitle='none' and xaxt='n' so xaxis display will make sense
-##   rate is the kind of rate we're plotting, eg, 'nonz1' or 'sameff'
-##   error tells whether to plot error or correct rates
-##   yesno.multiok tells whether okay to mix 'yes' and 'no' cases on same plot
-##     eg, false positives and false negatives
-##   fpr.cutoff, fnr.cutoff tell where to draw dashed line for 'good' rate, if plot.cutoff=T
-##     code sets cutoff to 1-cutoff for 'correct' rates
-##   cutoff is default for pos, neg, and mixed plots
-##   plot.cutoff tells whether to plot cutoff at all
-##     default, set in code, is T for 'error' or 'correct' rates, F for 'pos' or 'neg'
-##   xtitle tells whether to move single-valued vars from xdata and put in title
-##   xaxt tells whether to let R compute x-axis and x-grid:
-##     n means we do it; r,s,R are synonyms and mean R does it
-##     CAUTION: auto works for reasonable params but not in general...
-##   smooth tells whether to smooth data to make plots prettier
-##     can be T, F, aspline, loess, none. default (T) uses aspline
-##   plot.points tell whether to plot points on top of lines
-##   cex.points is cex for those extra points
-##   cex.single is cex for points drawn when there's only one x value
 ##   d is synonym for d1, usually used when d1==d2
-##   from.type, relto.type are smry types. single values or vectors keyed by mesr
-##     from.type is smry source row
-##     relto.type provides denominator in rate calculation
-##     default is 'standard' interpretation
-##   relto.multiok tells whether okay to plot mesrs with different relto.types
-##     CAUTION: rates not comparable in this case!
-plotrate_nndd=
-  function(smryx,n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.plotdflt,
-           rate=cq(pos,neg,nonzro,nonz1,nonz1or2,nonz1and2,sameff,uni),
-           error.rate=T,yesno.multiok=T,
-           x=cq(auto,n1,n2,d1,d2,asis),xtitle=cq(auto,none,n,d,n1,n2,d1,d2),
+## rate.rule is keyword (eg, nonzro) or function that maps posr,rate.tol to logical vector
+##   specify by keyword or function that maps posr,rate.tol to logical vector
+## rate.type tells whether we want raw pos or neg rates, or error or correct rates
+##   pos is no-op - uses posr as is; neg negates (really complements) everything
+##   error negates  'true' cases to get false negative rate
+##                  'false' cases already are false positive rate
+##   correct negates 'false' cases to get true negative rate
+##                   'true' cases already are true positive rate 
+## truedd.multi tells what to do if rate implies mix of 'true' and 'false' cases
+##   'error' means not allowed, 'asis' means ok but don't reorder,
+##   'false.first','true.first' means move false (resp. true) cases first if x='auto'
+## x tells which x variable drives the plot, or use x vars as given, or select automatically
+## fpr.cutoff, fnr.cutoff tell where to draw dashed line for plot
+##   or switch colors from 'lo' to 'hi' for heatmap
+##   code sets cutoff to 1-cutoff for 'true' rates
+## cutoff is default for pos, neg, and mixed plots
+## plot.cutoff tells whether to plot cutoff at all
+##   default, set in code, is T for 'error' or 'correct' rates, F for 'pos' or 'neg'
+## xtitle tells whether to move single-valued vars from xdata and put in title
+##   default 'no'. clearer in figures
+## fignum is figure number. if not NULL "Figure fignum" prepended to title
+## title.desc is additional text added to title
+## xaxt (plot only) tells whether to let R compute x-axis and x-grid:
+##   n means we do it; r,s,R are synonyms and mean R does it
+##   CAUTION: auto works for reasonable params but not in general...
+## smooth for plot tells whether to smooth data to make plot prettier
+##   can be aspline, loess, none, T, F. default is aspline. T means aspline. F means none
+## smooth for heatmap tells whether to reorder mesrs (y-axis) to make heatmap prettier
+##   can be auto, none, 0, 1; 0 (resp. 1) mean sort toward 0 (resp. 1)
+## plot.points tell whether to plot points on top of lines
+## cex.points is cex for those extra points
+## cex.single is cex for points drawn when there's only one x value
+## from.type, relto.type are smry types. single values or vectors keyed by mesr
+plotrate=
+  function(drat=NULL,posr=NULL,
+           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
+           posr.id='std',
+           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.type=cq(error,pos,neg,correct),rate.tol=0,
+           n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,xdata=NULL,mesr=mesr.plotdflt,
+           truedd.multi=c(cq(false.first,true.first,asis,error),FALSE),
+           x=cq(auto,n1,n2,d1,d2,asis),xtitle=cq(none,auto,n,d,n1,n2,d1,d2),
            fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),cutoff=0.05,
            plot.cutoff=T,
-           xaxt=cq(auto,n,r,s,R),xaxt.max=11,smooth=T,plot.points=F,cex.points=0.75,cex.single=1,
-           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           relto.multiok=F,
-           title=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
+           xaxt=cq(auto,n,r,s,R),xaxt.max=11,
+           smooth=c(cq(aspline,loess,none),TRUE,FALSE),
+           plot.points=F,cex.points=0.75,cex.single=1,
+           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            legend.where='bottomright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
-    init(must.exist=T);            # make sure environment initialized
-    rate=match.arg(rate);
+    ## init(must.exist=T);            # make sure environment initialized
+    rate.rule=match.arg(rate.rule);
+    rate.type=match.arg(rate.type);
+    truedd.multi=as.character(truedd.multi);
+    truedd.multi=match.arg(truedd.multi); if (truedd.multi=='FALSE') truedd.multi='error';
     x=match.arg(x);
     xtitle=match.arg(xtitle);
     xaxt=match.arg(xaxt);
-    if (is.logical(smooth)) smooth=if (smooth) 'aspline' else 'none'
-    else smooth=match.arg(smooth,cq(aspline,loess,none));
-    ## make sure measures & types legal and limit to type we need
-    from.type=check_type(mesr,from.type,multiok=T);
-    relto.type=check_type(mesr,relto.type,multiok=relto.multiok);
+    if (is.logical(smooth)) smooth=if (smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
     check_mesr();
-    ## get the smry subset for the parameters unless smryx passed as paramter
-    if (missing(smryx)) {
-      smry=get_data(smry);
-      smryx=smry_select(smry,n1,n2,d1,d2,x=x);
-    }
-    smry=smryx$smry;
     ## if (missing(xlim)) xlim=range(x);
-    data=data_rate(smry,mesr,rate,error.rate,from.type,relto.type);
-    xdata=data$x; ydata=data$y; yes=data$yes;
-    if (length(unique(yes))>1&&!yesno.multiok)
-      stop("Cannot mix 'yes' and 'no' cases (eg, false positives and false negatives) on same plot unless yesno.multiok is TRUE");
-    ## get rate type, eg, false positive or negative, and set cutoff
-    rate.type=rate_type();
-    cutoff=rate_cutoff();
-    if (!is.null(yes)) {
-      ## deal with 'yes' vs. 'no' cases. want 'no' cases first - these are false positives
-      yes.run=rle(yes)$lengths;
-      if (length(yes.run)==1|(length(yes.run)==2&yes[1]==F))
-        ## in correct order already. use x ordering from smryx
-        x=smryx$x
-      else {
-        ## sort 'no' cases first if allowed (ie, x='auto')
-        if (x=='auto') {
-          i=order(yes);
-          xdata=xdata[i,]; ydata=ydata[i,]; yes=yes[i];
-          x='asis'
-        } else {
-          stop('In line plots, all false positive cases have to be first unless x="auto"');
-        }}
-    } else {
-      ## it's pos or neg - yes/no not relevant. use x ordering from smryx
-      yes=rep(T,nrow(xdata));
-      x=smryx$x;
-    }
-    if (is.null(ylab)) ylab=ylab.rate();
+    if (is.null(drat)) drat=drat_order(data_rate(posr));
+    xdata=drat$xdata; ydata=drat$ydata; true.dd=drat$true.dd; x=drat$x; rate.type=drat$rate.type;
+    cutoff=rate_cutoff();               # set cutoff based on rate.type
+    if (is.null(ylab)) ylab=ylab_rate();
     ## if (is.null(xlab)) xlab=x;
     if (x=='asis') {
       x=seq_len(nrow(xdata));
@@ -120,7 +103,8 @@ plotrate_nndd=
     if (is.null(title)) {
       xdt=xdata_xtitle(xdata,xtitle);
       xdata=xdt$xdata; xtitle=xdt$xtitle;
-      title=paste(collapse="\n",c(title_rate(),xtitle));
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      title=paste(collapse="\n",c(fignum,title_rate(),title.desc,xtitle));
     }
     if (xaxt=='auto') if (nrow(xdata)<=xaxt.max) xaxt='n' else xaxt='s';
     if (xaxt=='n') {
@@ -130,16 +114,22 @@ plotrate_nndd=
       grid(nx=NA,ny=NULL);
       abline(v=x,lty='dotted',col='lightgray');
     } else {
-      matplot(x,ydata,type='n',xlab=xlab,ylab=ylab,main=title,cex.main=cex.title,
+      matplot(x,ydata,type='n',xlab=drat$x,ylab=ylab,main=title,cex.main=cex.title,
               xlim=xlim,ylim=ylim,xaxt='s');
       grid();
     }
     col=mesr2col(ydata);
     lwd=mesr2lwd(ydata);
     lty=mesr2lty(ydata);
-    sapply(c(F,T),function(want) {
-      ## if (want %notin% yes) return();
-      x=x[yes==want]; ydata=ydata[yes==want,,drop=FALSE];
+
+    run.len=rle(true.dd)$lengths;
+    run.end=cumsum(run.len);
+    run.end=cumsum(run.len);
+    run.start=c(1,head(run.end,-1)+1);
+    run.intvl=cbind(run.start,run.end);
+    apply(run.intvl,1,function(intvl) {
+      i=intvl[1]:intvl[2];
+      x=x[i]; ydata=ydata[i,,drop=FALSE];
       if (length(x)>1) {
         if (smooth=='none') {
           matlines(x,ydata,col=col,lty=lty,lwd=lwd);
@@ -150,7 +140,7 @@ plotrate_nndd=
             y.smooth=asplinem(x,ydata,xout=x.smooth,method='improved')
           else y.smooth=loessm(x,ydata,xout=x.smooth);
           ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
-          y.smooth=apply(y.smooth,c(1,2),function(y) max(min(y,1),0));
+          y.smooth=apply(y.smooth,c(1,2),function(y) if (!is.na(y)) max(min(y,1),0) else y);
           matlines(x.smooth,y.smooth,col=col,lty=lty,lwd=lwd);
         }
         if (plot.points) matpoints(x,ydata,col=col,pch=16,cex=cex.points);
@@ -160,97 +150,50 @@ plotrate_nndd=
           ## only one x-point. draw points instead of lines. nothing to smooth obviously
           matpoints(x,ydata,col=col,pch=19,cex=cex.single);
       }});
-    mesr_legend(ydata,where=legend.where,x=x.legend,y=y.legend);
+    ## mesr_legend(ydata,where=legend.where,x=x.legend,y=y.legend);
+    mesr_legend(mesr,where=legend.where,x=x.legend,y=y.legend);
     if (plot.cutoff) abline(h=cutoff,lty='dashed',lwd=0.5)
     dev.cur();
   }
-## wrapper for plotrate_nndd which gets params from smry
-plotrate_smry=function(smry,...) plotrate_nndd(n1=smry$n1,n2=smry$n2,d1=smry$d1,d2=smry$d2,...)
-
-## draw heat map of rate vs. any of n1, n2, d1, d2
-## operates on full smry unless smryx set
-##   defaults set n1,n2,d1 to fixed values and d2 to d
-##   nx is n multiplier: n2=nx*n1
-##   rate is the kind of rate we're plotting, eg, 'nonz1' or 'sameff'
-##   error tells whether to plot error or correct rates
-##   yesno.multiok tells whether okay to mix 'yes' and 'no' cases on same plot
-##     eg, false positives and false negatives
-##   fpr.cutoff, fnr.cutoff tell where to switch colors from 'lo' to 'hi'
-##     code sets cutoff to 1-cutoff for 'correct' rates
-##   cutoff is default for pos, neg, and mixed plots
-##   xtitle tells whether to move single-valued vars from xdata and put in title
-##   d is synonym for d1, usually used when d1==d2
-##   from.type, relto.type are smry types. single values or vectors keyed by mesr
-##     from.type is smry source row
-##     relto.type provides denominator in rate calculation
-##     default is 'standard' interpretation
-##   relto.multiok tells whether okay to plot mesrs with different relto.types
-##     CAUTION: rates not comparable in this case!
-heatrate_nndd=
-  function(smryx,n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.heatdflt,
-           rate=cq(pos,neg,nonzro,nonz1,nonz1or2,nonz1and2,sameff,uni),
-           error.rate=T,yesno.multiok=T,
-           x=cq(asis,auto,n1,n2,d1,d2),xtitle=cq(auto,none,n,d,n1,n2,d1,d2),y=cq(auto,asis),
-           fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),cutoff=0.05,
-           ## xaxt=cq(n,auto,r,s,R),xaxt.max=11,
+heatrate=
+  function(drat=NULL,posr=NULL,
            from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           relto.multiok=F,
-           title=NULL,cex.title=0.9,xlab=NULL,
+           posr.id='std',
+           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.type=cq(error,pos,neg,correct),rate.tol=0,
+           n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,xdata=NULL,mesr=mesr.heatdflt,
+           ## truedd.multi=cq(false.first,true.first,asis,error),
+           truedd.multi=c(cq(false.first,true.first,asis,error),FALSE),
+           x=cq(auto,n1,n2,d1,d2,asis),xtitle=cq(none,auto,n,d,n1,n2,d1,d2),
+           fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),cutoff=0.05,
+           smooth=c(cq(auto,none),0,1,FALSE),
+           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            legend.where='farright',x.legend=NULL,y.legend=NULL,cex.legend=0.75) {
-    init(must.exist=T);            # make sure environment initialized
-    rate=match.arg(rate);
+    ## init(must.exist=T);            # make sure environment initialized
+    rate.rule=match.arg(rate.rule);
+    rate.type=match.arg(rate.type);
+    truedd.multi=as.character(truedd.multi);
+    truedd.multi=match.arg(truedd.multi); if (truedd.multi=='FALSE') truedd.multi='error';
     x=match.arg(x);
     xtitle=match.arg(xtitle);
-    y=match.arg(y);
-    ## xaxt=match.arg(xaxt);
-     ## make sure measures & types legal and limit to type we need
-    from.type=check_type(mesr,from.type,multiok=T);
-    relto.type=check_type(mesr,relto.type,multiok=relto.multiok);
+    smooth=as.character(smooth);
+    smooth=match.arg(smooth); if (smooth=='FALSE') smooth='none';
     check_mesr();
-    ## get the smry subset for the parameters unless smryx passed as paramter
-    if (missing(smryx)) {
-      smry=get_data(smry);
-      smryx=smry_select(smry,n1,n2,d1,d2,x=x);
-    }
-    smry=smryx$smry; 
-    ## if (missing(xlim)) xlim=range(x);
-    data=data_rate(smry,mesr,rate,error.rate,from.type,relto.type);
-    xdata=data$x; ydata=data$y; yes=data$yes;
-    if (length(unique(yes))>1&&!yesno.multiok)
-      stop("Cannot mix 'yes' and 'no' cases (eg, false positives and false negatives) on same heatmap unless yesno.multiok is TRUE");
-    rate.type=rate_type();
-    cutoff=rate_cutoff();
-    if (!is.null(yes)) {
-      ## deal with 'yes' vs. 'no' cases. want 'no' cases first - these are false positives
-      yes.run=rle(yes)$lengths;
-      if (length(yes.run)==1|(length(yes.run==2)&yes[1]==F))
-        ## in correct order already. use x ordering from smryx
-        x=smryx$x
-      else {
-        ## sort 'no' cases first if allowed (ie, x='auto')
-        if (x=='auto') {
-          i=order(yes);
-          xdata=xdata[i,]; ydata=ydata[i,]; yes=yes[i];
-          x='asis'
-        }}
-    } else {
-      ## it's pos or neg - yes/no not relevant. use x ordering from smryx
-      yes=rep(T,nrow(xdata));
-      x=smryx$x;
-    }
-    ## if (is.null(xlab)) xlab=x;
+    if (is.null(drat)) drat=drat_order(data_rate(posr));
+    xdata=drat$xdata; ydata=drat$ydata; true.dd=drat$true.dd; x=drat$x; rate.type=drat$rate.type;
+    cutoff=rate_cutoff();               # set cutoff based on rate.type
     if (is.null(title)) {
       xdt=xdata_xtitle(xdata,xtitle);
       xdata=xdt$xdata; xtitle=xdt$xtitle;
-      title=paste(collapse="\n",c(title_rate(),xtitle));
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      title=paste(collapse="\n",c(fignum,title_rate(),title.desc,xtitle));
     }
-    ## if (x=='asis') x=seq_len(nrow(data))
-    ## else x=xdata[,x];
-    ## if (xaxt=='auto') if (nrow(xdata)<=xaxt.max) xaxt='n' else xaxt='s';
-    ## if (xaxt=='n') {
-    if (y=='auto') {
+    if (smooth!='none') {
       ## sort measures by distance from 0 or 1 to make nicer picture
-      if (error.rate||rate=='neg') yzero=rbind(zero=0,t(ydata))
+      if (smooth=='auto') {
+        if (rate.type %in% cq(neg,error,fpr,fnr)) yzero=rbind(zero=0,t(ydata))
+        else yzero=rbind(zero=1,t(ydata));
+      } else if (smooth=='0') yzero=rbind(zero=0,t(ydata))
       else yzero=rbind(zero=1,t(ydata))
       ydist=as.matrix(dist(yzero));
       ycol=rownames(yzero)[order(ydist['zero',])][2:ncol(ydist)];
@@ -280,15 +223,325 @@ heatrate_nndd=
     heat_legend(legend.coord);
     dev.cur();
   }
-
+## 
+## plot ROC-like graph
+## plotroc plots rate vs rate for multiple measures across one data swath
+## plotrocm plots rate vs rate for single measure across multiple data swaths
+## specify drat by explicit parameter or get it from posr
+## specify posr by explicit parameter, or id or from, relto smry types
+## xrate is rate to plot on x-axis. default 'fpr'
+## yrate is rate to plot on y-axis. default 'fnr'
+## for plotroc, specify query (aka filter) by n1,n2,d1,d2 or xdata
+##   n1,n2,d1,d2 - query is row-by-row combination
+##   xdata - data.frame given desired combinations
+##   nx is n multiplier: n2=nx*n1
+##   d is synonym for d1, usually used when d1==d2
+## for plotrocm, specify query (aka filter) by xdata
+##   xdata - list of data.frames given desired combinations
+## xrate is rate plotted on x-axis. default 'fpr'
+## yrate is rate plotted on y-axis. default 'fnr'
+## x tells which x variable to use for grouping when computing fpr,tpr points. default 'n2'
+## fignum is figure number. if not NULL "Figure fignum" prepended to title
+## title.desc is additional text added to title
+## plot.points tells whether to plot points
+## plot.lines tells whether to plot lines
+## from.type, relto.type are smry types. single values or vectors keyed by mesr
+## mesr is vector of mesrs for plotroc, single measure for plotrocm
+plotroc=
+  function(drat=NULL,posr=NULL,
+           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
+           posr.id='std',
+           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.tol=0,
+           n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.rocdflt,
+           xdata=expand.grid(n1=n1,n2=n2,d1=d1,d2=d2),
+           ## x=cq(n2,n1,d1,d2),
+           x=cq(n1,n2),
+           xrate='fpr',yrate='fnr',
+           fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
+           tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
+           plot.points=T,plot.lines=F,
+           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
+           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           xlim=c(0,1),ylim=c(0,1)) {
+    ## init(must.exist=T);            # make sure environment initialized
+    rate.rule=match.arg(rate.rule);
+    ## x=match.arg(x);
+    ## TODO: change to x=pmatch_arg(x);
+    check_mesr();
+    ## if (is.null(drat)) drat=data_rate(posr,rate.type='pos',truedd.multi='asis');
+    ## true.dd=drat$true.dd; drat=drat$drat;
+    if (is.null(drat)) drat=data_rate(posr,rate.type='pos');
+    ## drat.byx=split(drat,drat[,x]);
+    drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
+    if (is.null(title)) {
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      title=paste(collapse="\n",c(fignum,title_rate(rate.type='roc'),title.desc));
+    }
+    plot(x=NULL,y=NULL,type='n',xlab=rate2lab(xrate),ylab=rate2lab(yrate),
+         main=title,cex.main=cex.title,xlim=xlim,ylim=ylim);
+    col=col.mesr[mesr];
+    cex=cex.mesr[mesr];
+    x=rate2val(xrate); y=rate2val(yrate);
+    if (plot.points) matpoints(x,y,col=col,cex=cex,pch=16);
+    if (plot.lines) {
+      lwd=lwd.mesr[mesr];
+      lty=lty.mesr[mesr];
+      matlines(x,y,col=col,lty=lty,lwd=lwd);
+    }
+    grid();
+    abline(v=rate_cutoff(xrate),lty='dashed',lwd=0.5);
+    abline(h=rate_cutoff(yrate),lty='dashed',lwd=0.5);
+    ## abline(a=0,b=1,lty='dashed',lwd=0.5);
+    mesr_legend(mesr,where=legend.where,x=x.legend,y=y.legend,plot.points=T);
+    dev.cur();
+  }
+plotrocm=
+  function(posr=NULL,
+           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
+           posr.id='std',
+           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.tol=0,mesr='sig2',
+           xdata,
+           ## x=cq(n2,n1,d1,d2),
+           x=cq(n1,n2),
+           xrate='fpr',yrate='fnr',
+           fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
+           tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
+           plot.points=T,plot.lines=F,
+           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
+           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           xlim=c(0,1),ylim=c(0,1)) {
+    ## init(must.exist=T);            # make sure environment initialized
+    rate.rule=match.arg(rate.rule);
+    ## x=match.arg(x);
+    check_mesr();
+    if (length(mesr)>1)
+      stop(paste(sep=' ','plotrocm only plots a single measure, not',paste(collapse=', ',mesr)));
+    if (is.data.frame(xdata))
+      stop('plotrocm needs a list of xdata data fromes, not a single data frame');
+    if (is.null(title)) {
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      title=paste(collapse="\n",
+                  c(fignum,paste(sep=' ',title_rate(rate.type='roc'),'for',mesr),title.desc));
+    }
+    plot(x=NULL,y=NULL,type='n',xlab=rate2lab(xrate),ylab=rate2lab(yrate),
+         main=title,cex.main=cex.title,xlim=xlim,ylim=ylim);
+    n.xdata=length(xdata);
+    col=colorRampPalette(c('red',RColorBrewer::brewer.pal(min(8,n.xdata-1),'Dark2')))(n.xdata);
+    sapply(seq_len(n.xdata),function(i) {
+      xdata=xdata[[i]];
+      drat=data_rate(posr,rate.type='pos');
+      ## drat.byx=split(drat,drat[,x]);
+      drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
+      x=rate2val(xrate); y=rate2val(yrate);
+      if (plot.points) matpoints(x,y,col=col[i],pch=16);
+      if (plot.lines) matlines(x,y,col=col[i]);
+    });
+    grid();
+    abline(v=rate_cutoff(xrate),lty='dashed',lwd=0.5);
+    abline(h=rate_cutoff(yrate),lty='dashed',lwd=0.5);
+    ## abline(a=0,b=1,lty='dashed',lwd=0.5);
+    rocm_legend(names(xdata),col=col,where=legend.where,x=x.legend,y=y.legend,plot.points=T);
+    dev.cur();
+  }
+## 
+## plot aggregated rates. aggregation is same as in plotroc
+## plotrag plots aggregated rates for multiple measures across one data swath
+## plotragm plots aggregated rates for single measure across multiple data swaths
+## specify drat by explicit parameter or get it from posr
+## specify posr by explicit parameter, or id or from, relto smry types
+## x tells which x variable to use for grouping. default 'n2'
+## rate is rates to plot on y-axis. default 'fpr','fnr'
+## for plotrag, specify query (aka filter) by n1,n2,d1,d2 or xdata
+##   n1,n2,d1,d2 - query is row-by-row combination
+##   xdata - data.frame given desired combinations
+##   nx is n multiplier: n2=nx*n1
+##   d is synonym for d1, usually used when d1==d2
+## for plotragm, specify query (aka filter) by xdata
+##   xdata - list of data.frames giving desired combinations
+## smooth tells whether to smooth data to make plot prettier
+##   can be aspline, loess, none, T, F. default is aspline. T means aspline. F means none
+## fignum is figure number. if not NULL "Figure fignum" prepended to title
+## title.desc is additional text added to title
+## plot.points tells whether to plot points
+## plot.lines tells whether to plot lines
+## from.type, relto.type are smry types. single values or vectors keyed by mesr
+## mesr is vector of mesrs for plotroc, single measure for plotrocm
+plotrag=
+  function(drat=NULL,posr=NULL,
+           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
+           posr.id='std',
+           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.tol=0,
+           n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.ragdflt,
+           xdata=expand.grid(n1=n1,n2=n2,d1=d1,d2=d2),
+           ## x=cq(n2,n1,d1,d2),
+           x=cq(n1,n2),
+           rate=cq(fpr,fnr),
+           fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
+           tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
+           smooth=c(cq(aspline,loess,none),TRUE,FALSE),
+           plot.points=F,plot.lines=T,
+           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,ylab='rate',
+           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           xlim=NULL,ylim=c(0,1)) {
+    ## init(must.exist=T);            # make sure environment initialized
+    rate.rule=match.arg(rate.rule);
+    ## x=match.arg(x);
+    ## TODO: change to x=pmatch_arg(x);
+    if (is.null(xlab)) xlab=NA;
+    if (is.logical(smooth)) smooth=if (smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
+    check_mesr();
+    ## if (is.null(drat)) drat=data_rate(posr,rate.type='pos',truedd.multi='asis');
+    ## true.dd=drat$true.dd; drat=drat$drat;
+    if (is.null(drat)) drat=data_rate(posr,rate.type='pos');
+    ## drat.byx=split(drat,drat[,x]);
+    drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
+    ## x=as.numeric(names(drat.byx));
+    labels=as.data.frame(apply(do.call(rbind,strsplit(names(drat.byx),' ')),2,as.numeric));
+    colnames(labels)=x;
+    ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!
+    i=do.call(order,labels);
+    drat.byx=drat.byx[i];
+    labels=labels[i,];
+    ## x=seq_along(names(drat.byx));
+    x=seq_along(i);
+    y=sapply(rate,function(rate) rate2val(rate),simplify=F);
+    if (is.null(title)) {
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      title=paste(collapse="\n",c(fignum,title_rate(rate.type='rag'),title.desc));
+    }
+    if (is.null(xlim)) xlim=range(x);
+    plot(x=NULL,y=NULL,type='n',xlab=xlab,ylab=ylab,main=title,cex.main=cex.title,
+         xlim=xlim,ylim=ylim,xaxt='n');
+    xaxis(at=x,labels=labels,xlab=xlab);
+    col=col.mesr[mesr];
+    cex=cex.mesr[mesr];
+    lty=cq(solid,dashed,dotted,dotdash);
+    sapply(seq_along(rate),function(i) {
+      y=y[[i]];
+      if (length(x)>1) {
+        if (plot.lines) {
+          lwd=lwd.mesr[mesr];
+          lty=lty[i];
+          if (smooth=='none') {
+            matlines(x,y,col=col,lwd=lwd,lty=lty);
+          } else {
+          ## smooth ydata so the plot will look nicer
+          x.smooth=seq(min(x),max(x),len=100);
+            if (smooth=='aspline') 
+              y.smooth=asplinem(x,y,xout=x.smooth,method='improved')
+            else y.smooth=loessm(x,y,xout=x.smooth);
+            ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
+            y.smooth=apply(y.smooth,c(1,2),function(y) if (!is.na(y)) max(min(y,1),0) else y);
+            matlines(x.smooth,y.smooth,col=col,lwd=lwd,lty=lty);
+          }}}
+      if (plot.points|length(x)==1) matpoints(x,y,col=col,cex=cex,pch=16);
+    })
+    grid();
+    rate.cutoff=sapply(rate,rate_cutoff);
+    abline(h=rate.cutoff,lty='dashed',lwd=0.5);
+    rag_legend(mesr,rate,rate.lty=lty,where=legend.where,x=x.legend,y=y.legend);
+    dev.cur();
+  }
+plotragm=
+  function(posr=NULL,
+           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
+           posr.id='std',
+           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.tol=0,mesr='sig2',
+           xdata,
+           ## x=cq(n2,n1,d1,d2),
+           x=cq(n1,n2),
+           rate=cq(fpr,fnr),
+           fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
+           tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
+           smooth=c(cq(aspline,loess,none),TRUE,FALSE),
+           plot.points=F,plot.lines=T,lty=cq(solid,dotted,dotdash,longdash),lwd=2,
+           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,
+           ylab=if(length(rate)==1) rate2lab(rate) else 'rate',
+           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           xlim=NULL,ylim=c(0,1)) {
+    ## init(must.exist=T);            # make sure environment initialized
+    rate.rule=match.arg(rate.rule);
+    ## x=match.arg(x);
+    if (is.null(xlab)) xlab=NA;
+    if (is.logical(smooth)) smooth=if (smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
+    check_mesr();
+    if (length(mesr)>1)
+      stop(paste(sep=' ','plotragm only plots a single measure, not',paste(collapse=', ',mesr)));
+    if (is.data.frame(xdata))
+      stop('plotragm needs a list of xdata data fromes, not a single data frame');
+    if (length(rate)==1) rate.desc=rate2lab(rate);
+    if (is.null(title)) {
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      if (length(rate)==1) title.rate=paste(sep=' ',title_rate(rate.type='ragm'),ylab)
+      else title.rate=paste(sep=' ',title_rate(rate.type='ragm'),'rate');
+      title=paste(collapse="\n",c(fignum,paste(sep=' ',title.rate,'for',mesr),title.desc));
+    }
+    n.xdata=length(xdata);
+    ## collect all labels and arrange along x-axis
+    labels=unique(do.call(c,lapply(xdata,function(xdata) 
+      unique(apply(xdata[,x,drop=F],1,function(row) paste(collapse=' ',row))))));
+    labels=as.data.frame(apply(do.call(rbind,strsplit(labels,' ')),2,as.numeric));
+    colnames(labels)=x;
+    ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!
+    i=do.call(order,labels);
+    labels=labels[i,,drop=F];
+    if (is.null(xlim)) xlim=range(i);
+    plot(x=NULL,y=NULL,type='n',xlab=xlab,ylab=ylab,main=title,cex.main=cex.title,
+         xlim=xlim,ylim=ylim,xaxt='n');
+    xaxis(at=1:nrow(labels),labels=labels,xlab=xlab);
+    n.xdata=length(xdata);
+    col=colorRampPalette(c('red',RColorBrewer::brewer.pal(min(8,n.xdata-1),'Dark2')))(n.xdata);
+    sapply(seq_len(n.xdata),function(i) {
+      xdata=xdata[[i]];
+      col=col[i];
+      drat=data_rate(posr,rate.type='pos');
+      ## drat.byx=split(drat,drat[,x]);
+      drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
+      labels=as.data.frame(apply(do.call(rbind,strsplit(names(drat.byx),' ')),2,as.numeric));
+      colnames(labels)=x;
+      ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!
+      i=do.call(order,labels);
+      drat.byx=drat.byx[i];
+      x=1:length(i);
+      y=sapply(rate,function(rate) rate2val(rate),simplify=F);
+      sapply(seq_along(rate),function(i) {
+        y=y[[i]];
+        if (length(x)>1) {
+          if (plot.lines) {
+            lty=lty[i];
+            if (smooth=='none') {
+              matlines(x,y,col=col,lty=lty,lwd=lwd);
+            } else {
+              ## smooth ydata so the plot will look nicer
+              x.smooth=seq(min(x),max(x),len=100);
+              if (smooth=='aspline') 
+                y.smooth=asplinem(x,y,xout=x.smooth,method='improved')
+              else y.smooth=loessm(x,y,xout=x.smooth);
+              ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
+              y.smooth=apply(y.smooth,c(1,2),function(y) if (!is.na(y)) max(min(y,1),0) else y);
+              matlines(x.smooth,y.smooth,col=col,lty=lty,lwd=lwd);
+            }}}
+      if (plot.points|length(x)==1) matpoints(x,y,col=col,cex=cex,pch=16);
+      })})
+    grid();
+    rate.cutoff=sapply(rate,rate_cutoff);
+    abline(h=rate.cutoff,lty='dashed',lwd=0.5);
+    ragm_legend(names(xdata),rate,col=col,lty=lty,where=legend.where,x=x.legend,y=y.legend);
+    dev.cur();
+  }
+   
 ## remove single-valued xvars from xdata and put in title
 xdata_xtitle=function(xdata,xtitle) {
   if (xtitle=='none') xtitle=NULL
   else {
     ## find single valued xvars we want
     xvars=colnames(xdata);          # start with all of 'em
-    if (xtitle=='n') {xvars=grep('^n',xvars)}
-    else if (xtitle=='d') {xvars=grep('^d',xvars)}
+    if (xtitle=='n') {xvars=grep('^n',xvars,value=T)}
+    else if (xtitle=='d') {xvars=grep('^d',xvars,value=T)}
     else if (xtitle!='auto') {xvars=xtitle};
     x.single=do.call(
       c,sapply(xvars,simplify=F,
@@ -316,113 +569,134 @@ xdata_xtitle=function(xdata,xtitle) {
 }
 
 
-## determine the type of rate we're plotting, eg, 'fpr' or 'fnr'
-rate_type=function(rate=parent(rate),error.rate=parent(error.rate),yes=parent(yes)) {
-  if (rate %notin% cq(pos,neg)) {
-    if (error.rate&all(yes)) 'fnr'
-    else if (error.rate&all(!yes)) 'fpr'
-    else if (!error.rate&all(yes)) 'tpr'
-    else if (!error.rate&all(!yes)) 'tnr'
-    else if (error.rate) 'err'
-    else 'corr';
-  } else rate;
-}
 ## determine cutoff for rate type
 rate_cutoff=
-  function(type=parent(rate.type),yes=parent(yes),
+  function(type=parent(rate.type),
            fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),
+           tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
            cutoff=parent(cutoff,.05)) {
     switch(type,
-           neg=cutoff,pos=1-cutoff,err=cutoff,corr=1-cutoff,
-           fpr=fpr.cutoff,fnr=fnr.cutoff,tpr=1-fnr.cutoff,tnr=1-fpr.cutoff);
+           neg=cutoff,pos=1-cutoff,error=cutoff,correct=1-cutoff,
+           fpr=fpr.cutoff,fnr=fnr.cutoff,tpr=1-fnr.cutoff,tnr=tnr.cutoff);
   }
 ## construct colors and breaks for heatmap
-heat_setup=function(cutoff=parent(cutoff),steps=100) {
+heat_setup=function(type=parent(rate.type),cutoff=parent(cutoff),steps=100) {
   hi.brk=seq(0,-log10(cutoff),length.out=(steps)+1);
   lo.brk=seq(-log10(cutoff),4,length.out=(steps)+1);
   blues=colorRampPalette(RColorBrewer::brewer.pal(5,'Blues'))(steps);
   reds=colorRampPalette(RColorBrewer::brewer.pal(4,'Reds'))(steps);
   brk=unique(c(hi.brk,lo.brk));
-  col=c(blues,reds);
+  col=c(rev(blues),reds);
+  ## if (type %in% cq(neg,error,fpr,fnr)) col=c(blues,reds) else col=c(reds,blues); 
   list(brk=brk,col=col);
-  }
+}
 ## generate 'rate' part of title for plots
 title_rate=
-  function(rate=parent(rate),type=parent(rate.type),relto.type=parent(relto.type)) {
-    desc=switch(rate,
-                pos='positive',
-                neg='negative',
-                nonzro='study1 non-zero',
-                nonz1='study1 non-zero',
-                nonz1or2='at least one study non-zero',
-                nonz1and2='both studies non-zero',
-                sameff='both studies have same effect',
-                uni='both studies have same non-zero effect');
-    desc=paste(sep='','(',desc,')');
-    type=switch(type,
-                err='error',
-                corr='correct',
-                fpr='false positive',
-                fnr='false negative',
-                tpr='true positive',
-                tnr='true negative',
-                none=NULL);
-    if (length(unique(relto.type))==1&&relto.type!='sig1')
-      relto=paste(sep=' ','-- relative to',unique(relto.type))
-    else relto=NULL;
-    paste(collapse=' ',c(rate,desc,type,'rate',relto));
-}
+  function(posr.id=parent(posr.id,'std'),rate.rule=parent(rate.rule,'raw'),
+           rate.type=parent(rate.type,'error'),rate.tol=parent(rate.tol,0)) {
+    if (is.function(rate.rule)) desc='user-defined rule'
+    else {
+      if (rate.rule=='raw') desc='raw'
+      else {
+        if (rate.rule=='nonzro') rate.rule='nonz1';
+        desc=switch(rate.rule,
+                    nonz1=if (rate.tol==0) 'study1 non-zero'
+                           else paste(sep=' ','study1 >',rate.tol),
+                    nonz1or2=if (rate.tol==0) 'study1 or study2 non-zero'
+                           else paste(sep=' ','study1 or study2 >',rate.tol),
+                    nonz1and2=if (rate.tol==0) 'study1 and study2 non-zero'
+                           else paste(sep=' ','study1 and study2 >',rate.tol),
+                    nonz2=if (rate.tol==0) 'study2 non-zero'
+                           else paste(sep=' ','study2 >',rate.tol),
+                    sameff=if (rate.tol==0) 'both studies have same effect'
+                           else paste(sep=' ','effects differ by no more than',rate.tol),
+                    ## for backwards compatibility
+                    farzro=paste(sep=' ','study1 at least',rate.tol),
+                    nearff=paste(sep=' ','effects differ by no more than',rate.tol),
+                    ## not used
+                    uni=paste(sep=' ','study1 at least',rate.tol,
+                              'and effects differ by no more than',rate.tol));
+        rule=switch(rate.rule,
+                    nonz1='non-zero-1',
+                    nonz1or2='non-zero-1or2',
+                    nonz1and2='non-zero-1and2',
+                    nonz2='non-zero-2',
+                    sameff='same-effect',
+                    ## for backwards compatibility
+                    rate.rule);
+        desc=paste(sep='',rule,' (',desc,')');
+      }}
+    rate.desc=switch(rate.type,
+                     pos='positive',neg='negative',error='error',correct='correct',
+                     fpr='false positive',fnr='false negative',
+                     tpr='true positive',tnr='true negative',
+                     roc='rate vs rate',rag='mean',ragm='mean');
+    if (rate.type %notin% cq(roc,ragm)) rate.desc=paste(sep=' ',rate.desc,'rate');
+    posr.desc=if (posr.id=='std') NULL else paste_nv('posr',posr.id);
+    paste(collapse=' ',c(desc,rate.desc,posr.desc));
+  }
 ## generate 'rate' part of ylab for plots
-ylab.rate=function(rate=parent(rate),error.rate=parent(error.rate)) {
-  err.or.cor=if (error.rate) 'error' else 'correct';
-  paste(sep=' ',rate,err.or.cor,'rate');
+ylab_rate=function(rate.rule=parent(rate.rule),rate.type=parent(rate.type)) {
+  if (is.function(rate.rule)) rate.rule='user-defined';
+  if (rate.type %notin% cq(fpr,fnr,tpr,tnr)) rate.type=paste(sep=' ',rate.type,'rate');
+  paste(sep=' ',rate.rule,rate.type);
 }
+## generate labels and x, y values (rates) for plotroc, plotrocm
+rate2lab=function(rate)
+  switch(rate,
+         fpr='false positive rate',tpr='true positive rate',
+         fnr='false negative rate',tnr='true negative rate',
+         stop(paste(sep='','Unknown rate ',rate,'. Should be one of ',
+                    paste(collapse=', ',cq(fpr,fnr,tpr,tnr)))));
 
+rate2val=function(rate,drat.byx=parent(drat.byx),mesr=parent(mesr))
+  switch(rate,
+         fpr=do.call(rbind,
+                     lapply(drat.byx,
+                            function(drat) colMeans(drat[!drat$true.dd,mesr,drop=F],na.rm=T))),
+         tnr=do.call(rbind,
+                     lapply(drat.byx,
+                            function(drat) colMeans(1-drat[!drat$true.dd,mesr,drop=F],na.rm=T))),
+         tpr=do.call(rbind,
+                     lapply(drat.byx,
+                            function(drat) colMeans(drat[drat$true.dd,mesr,drop=F],na.rm=T))),
+         fnr=do.call(rbind,
+                     lapply(drat.byx,
+                            function(drat) colMeans(1-drat[drat$true.dd,mesr,drop=F],na.rm=T))),
+         stop(paste(sep='','Unknown rate ',rate,'. Should be one of ',
+                    paste(collapse=', ',cq(fpr,fnr,tpr,tnr)))));
+ 
 ## get line properties for measures in matrix
 mesr2col=function(matrix) col.mesr[colnames(matrix)];
 mesr2lwd=function(matrix) lwd.mesr[colnames(matrix)];
 mesr2lty=function(matrix) lty.mesr[colnames(matrix)];
+mesr2cex=function(matrix) cex.mesr[colnames(matrix)];
 ## construct legend for measures in plotrate
 mesr_legend=
-  function(ydata,where='bottomright',x=NULL,y=NULL,title='measure',
-           bty='n',pch=19,cex=parent(cex.legend,0.8),title.col='black') {
-  mesr=colnames(ydata);
-  mesr=mesr[order(match(mesr,mesr.order))];
-  ydata=ydata[,mesr,drop=FALSE];
-  ## legend.col=col.mesr[legend.text];
-  if (is.null(x)) x=where;
-  col=mesr2col(ydata);
-  lwd=mesr2lwd(ydata);
-  lty=mesr2lty(ydata);
-  legend(x,y,bty=bty,legend=mesr,cex=cex,
-         title=title,title.col=title.col,
-         col=col,lwd=lwd,lty=lty,seg.len=6);
-  ## legend(x,y,bty=bty,legend=mesr,pch=pch,cex=cex,
-  ##        title=title,title.col=title.col,
-  ##        col=col,lwd=lwd,lty=lty,seg.len=8);
-  ## col=col,lwd=lwd,lty=lty);
-  ## lwd=lwd.mesr[legend.text])
-}
+  function(mesr,col=col.mesr[mesr],lwd=lwd.mesr[mesr],lty=lty.mesr[mesr],pt.cex=cex.mesr[mesr],
+           where='bottomright',x=NULL,y=NULL,title='measure',
+           bty='n',pch=16,cex=parent(cex.legend,0.8),title.col='black',
+           plot.lines=T,plot.points=F) {
+    if (missing(plot.lines)&!missing(plot.points)) {plot.lines=!plot.points}
+    else {if (!missing(plot.lines)&missing(plot.points)) plot.points=!plot.lines;}
+    if (!plot.lines) lty=NA;
+    if (!plot.points) {pch=NA; pt.cex=NA}
+    ## legend.col=col.mesr[legend.text];
+    if (is.null(x)) x=where;
+    seg.len=if (plot.lines) 6 else 2;
+    legend(x,y,bty=bty,legend=mesr,cex=cex,
+           title=title,title.col=title.col,
+           pch=pch,pt.cex=pt.cex,col=col,lwd=lwd,lty=lty,seg.len=seg.len);
+  }
 ## construct legend for rate colors in heatrate
 heat_legend=
-  function(coord,cutoff=parent(cutoff,0.05),cex=parent(cex.legend,0.75),steps=100) {
+  function(coord,cutoff=parent(cutoff,0.05),heat=parent(heat),
+           cex=parent(cex.legend,0.75),steps=100) {
     x0=coord$x0; y0=coord$y0; width=coord$width; height=coord$height;
-    heat=heat_setup();
     brk=heat$brk; col=heat$col;
- 
-    ## TODO: refactor color & breaks computation
-    hi.brk=seq(0,-log10(cutoff),length.out=(steps)+1);
-    lo.brk=seq(-log10(cutoff),4,length.out=(steps)+1);
-    blues=colorRampPalette(RColorBrewer::brewer.pal(5,'Blues'))(steps);
-    reds=colorRampPalette(RColorBrewer::brewer.pal(4,'Reds'))(steps);
-    brk=unique(c(hi.brk,lo.brk));
-    col=c(blues,reds);
-    ## define legend grid
-    ##   for some reason, doesn't work to let y range from y0 to y0+height
-    ##   have to stop one unit smaller
     x=c(x0,x0+width);
     y=seq(y0,y0+height,length.out=2*steps+1)[1:(2*steps)];
-    z=t(as.matrix(rev(c(head(hi.brk,-1),lo.brk[-1]))));
+    z=t(as.matrix(rev(head(brk,-1))));
     image(x,y,z,add=T,breaks=brk,col=col);
     ## add legend text
     text(x0+width/2,y0+height,"rates",pos=3,cex=cex);
@@ -437,7 +711,8 @@ heat_legend=
 ##   x1 - end coord of main plat
 heatlegend_coord=
   function(x,y,cutoff=parent(cutoff,0.05),width=0.1*max(x),
-           yq=quantile(y,prob=c(0.1,0.9)),height=diff(yq),cex=parent(cex.legend,0.75)) {
+           yq=if(length(y)>1) quantile(y,prob=c(0.1,0.9)) else c(0.75,1.25),
+           height=diff(yq),cex=parent(cex.legend,0.75)) {
     ## call plot to setup coordinate systme. needed by strwidth
     plot(x=c(min(x),1.2*max(x)),y=range(y),type='n',axes=F,xlab=NA,ylab=NA);
     ## add space to labels to get a smidge more room
@@ -446,7 +721,65 @@ heatlegend_coord=
     x1=x0+width+strwidth(' ',cex=cex);
     list(x0=x0,y0=y0,width=width,height=height,x1=x1);
   }
-    
+## construct legend for plotrocm
+rocm_legend=
+  function(label,col,where='bottomright',x=NULL,y=NULL,title='replication type',
+           bty='n',pch=16,cex=parent(cex.legend,0.8),title.col='black',
+           lty='solid',lwd=1,pt.cex=1,
+           plot.lines=T,plot.points=F) {
+    if (missing(plot.lines)&!missing(plot.points)) {plot.lines=!plot.points}
+    else {if (!missing(plot.lines)&missing(plot.points)) plot.points=!plot.lines;}
+    if (is.null(x)) x=where;
+    if (!plot.lines) lty=NA;
+    seg.len=if (plot.lines) 4 else 2;
+    if (!plot.points) pt.cex=NA;
+    legend(x,y,bty=bty,legend=label,cex=cex,
+           title=title,title.col=title.col,
+           pch=pch,pt.cex=pt.cex,col=col,lwd=lwd,lty=lty,seg.len=seg.len);
+  }
+## construct legend for plotrag
+rag_legend=
+  function(mesr,rate,rate.lty=rate.lty,
+           col=col.mesr[mesr],lwd=lwd.mesr[mesr],mesr.lty='solid',pt.cex=cex.mesr[mesr],
+           where='bottomright',x=NULL,y=NULL,title='measure',
+           bty='n',pch=16,cex=parent(cex.legend,0.8),title.col='black',
+           plot.lines=T,plot.points=F,rate.legend=length(rate)>1) {
+    if (missing(plot.lines)&!missing(plot.points)) {plot.lines=!plot.points}
+    else {if (!missing(plot.lines)&missing(plot.points)) plot.points=!plot.lines;}
+    if (!plot.lines) lty=NA;
+    if (!plot.points) {pch=NA; pt.cex=NA}
+    where.next=mesr_legend(
+      mesr,col=col,lwd=lwd,lty=mesr.lty,pt.cex=pt.cex,where=where,x=x,y=y,title=title,
+      bty=bty,pch=pch,cex=cex,title.col=title.col,plot.lines=plot.lines,plot.points=plot.points);
+    if (!rate.legend) return(where.next);
+    x=where.next$rect$left;
+    y=where.next$rect$top-where.next$rect$h;
+    seg.len=if (plot.lines) 6 else 2;
+    legend(x,y,bty=bty,legend=rate,cex=cex,title='rate type',title.col=title.col,
+           pch=pch,pt.cex=pt.cex,col='black',lwd=lwd,lty=rate.lty,seg.len=seg.len);
+  }
+## construct legend for plotragm
+ragm_legend=
+  function(label,rate,col,lty,where='bottomright',x=NULL,y=NULL,title='replication type',
+           bty='n',pch=16,cex=parent(cex.legend,0.8),title.col='black',
+           lwd=2,pt.cex=1,
+           plot.lines=T,plot.points=F,rate.legend=length(rate)>1) {
+    if (missing(plot.lines)&!missing(plot.points)) {plot.lines=!plot.points}
+    else {if (!missing(plot.lines)&missing(plot.points)) plot.points=!plot.lines;}
+    where.next=rocm_legend(
+      label=label,col=col,where=where,x=x,y=y,title=title,
+      bty=bty,pch=pch,cex=cex,title.col=title.col,lty='solid',lwd=lwd,pt.cex=pt.cex,
+      plot.lines=plot.lines,plot.points=plot.points);
+    if (!rate.legend) return(where.next);
+    x=where.next$rect$left;
+    y=where.next$rect$top-where.next$rect$h;
+    if (!plot.lines) lty=NA;
+    if (!plot.points) {pch=NA; pt.cex=NA}
+    seg.len=if (plot.lines) 6 else 2;
+    legend(x,y,bty=bty,legend=rate,cex=cex,title='rate type',,title.col=title.col,
+           pch=pch,pt.cex=pt.cex,col='black',lwd=lwd,lty=lty,seg.len=seg.len);
+  }
+   
 ## annotate x axis
 ##  at is vector of x positions for ticks and labels. if NULL, no ticks or label
 ##  labels is vector or matrix. if matrix, columns are lines of annotion
