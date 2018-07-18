@@ -136,16 +136,16 @@ posr_select=
   function(posr=parent(posr),n1=parent(n1),n2=parent(n2),d1=parent(d1),d2=parent(d2),
            xdata=parent(xdata,NULL),mesr=parent(mesr,mesr.all)) {
     ## CAUTION: need cbind in case params have incompatible lengths. sigh...
-    if (is.null(xdata)) xdata=suppressWarnings(data.frame(cbind(n1,n2,d1,d2)))
-    else {
-      ## set n1,n2,d1,d2 for sub-functions
-      n1=unique(xdata$n1); n2=unique(xdata$n2); d1=unique(xdata$d1); d2=unique(xdata$d2);
-    }
+    if (is.null(xdata)) xdata=suppressWarnings(data.frame(cbind(n1,n2,d1,d2)));
+    ## round d1,d2 to avoid imprecise decimals
+    xdata$d1=round(xdata$d1,digits=5); xdata$d2=round(xdata$d2,digits=5); 
+    ## set n1,n2,d1,d2 for sub-functions
+    n1=unique(xdata$n1); n2=unique(xdata$n2); d1=unique(xdata$d1); d2=unique(xdata$d2);
+    ## interpolate posr if needed. prune first to improve performance
     posr=posr_prune();
     posr=posr_interp();
-    ## filter posr and sort based on x
+    ## filter posr and sort based on x. in database parlance, the merge is natural semijoin
     xdata$i=seq_len(nrow(xdata));
-    ## in database parlance, the merge is natural semijoin
     posr=merge(posr,xdata);
     ## clamp pos.rate to [0,1]. interpolation can under- or over-shoot ;
     posr[,mesr]=apply(posr[,mesr,drop=F],c(1,2),function(y) max(min(y,1),0));

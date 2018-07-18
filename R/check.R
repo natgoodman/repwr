@@ -57,3 +57,13 @@ check_mesr=function(mesr=parent(mesr,NULL)) {
   }
   T;
 }
+## make sure 'm' and 'datadir' consistent
+## to defend against changing m on-the-fly without rerunning init
+check_m=function(m=parent(m),datadir=parent(datadir)) {
+  mpat=paste(sep='',paste_nv(m,m_pretty(m)),'$');
+  if (!grepl(mpat,datadir))
+    stop(paste(sep='','Inconsistent m and datadir: ',
+               paste(sep=', ',paste_nv(m,m_pretty(m)),paste_nv(datadir)),
+               '. Did you forget to rerun init after changing m?'));
+  T;
+}

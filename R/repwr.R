@@ -22,7 +22,7 @@
 source('R/check.R');
 source('R/datman.R');
 source('R/doc.R');
-source('R/doc_blog.R');
+source('R/doc_repwr.R');
 source('R/doc_tech.R');
 source('R/init.R');
 source('R/plot.R');

@@ -62,6 +62,8 @@
 ## cex.points is cex for those extra points
 ## cex.single is cex for points drawn when there's only one x value
 ## from.type, relto.type are smry types. single values or vectors keyed by mesr
+## vline,hline are vectors of x or y positions for extra vertical or horizontal lines
+##   quick hack to implement 'panels' in doc_repwr nonzro_exact_fnr section
 plotrate=
   function(drat=NULL,posr=NULL,
            from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
@@ -76,6 +78,7 @@ plotrate=
            xaxt=cq(auto,n,r,s,R),xaxt.max=11,
            smooth=c(cq(aspline,loess,none),TRUE,FALSE),
            plot.points=F,cex.points=0.75,cex.single=1,
+           vline=NULL,hline=NULL,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            legend.where='bottomright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
@@ -152,7 +155,10 @@ plotrate=
       }});
     ## mesr_legend(ydata,where=legend.where,x=x.legend,y=y.legend);
     mesr_legend(mesr,where=legend.where,x=x.legend,y=y.legend);
-    if (plot.cutoff) abline(h=cutoff,lty='dashed',lwd=0.5)
+    if (plot.cutoff) abline(h=cutoff,lty='dashed',lwd=0.5);
+    ## plot extra lines if desired. nop if vlinr, hline NULL
+    abline(v=vline);
+    abline(h=hline); 
     dev.cur();
   }
 heatrate=
@@ -168,6 +174,7 @@ heatrate=
            fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),cutoff=0.05,
            smooth=c(cq(auto,none),0,1,FALSE),
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
+           vline=NULL,hline=NULL,
            legend.where='farright',x.legend=NULL,y.legend=NULL,cex.legend=0.75) {
     ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
@@ -221,6 +228,9 @@ heatrate=
     abline(h=y+0.5,lty='dotted',col='lightgray',lwd=0.75);
     abline(v=x+0.5,lty='dotted',col='lightgray',lwd=0.75);
     heat_legend(legend.coord);
+    ## plot extra lines if desired. nop if vlinr, hline NULL
+    abline(v=vline);
+    abline(h=hline); 
     dev.cur();
   }
 ## 
@@ -361,7 +371,9 @@ plotrocm=
 ## for plotragm, specify query (aka filter) by xdata
 ##   xdata - list of data.frames giving desired combinations
 ## smooth tells whether to smooth data to make plot prettier
-##   can be aspline, loess, none, T, F. default is aspline. T means aspline. F means none
+##   can be loess, aspline, none, T, F. default is loess. T means loess. F means none
+##   CAUTION: loess makes prettier plots but suppresses 'waviness' caused by jumps
+##            when n1 changes. to be safe, also try smooth='aspline' or plot.points
 ## fignum is figure number. if not NULL "Figure fignum" prepended to title
 ## title.desc is additional text added to title
 ## plot.points tells whether to plot points
@@ -381,7 +393,7 @@ plotrag=
            rate=cq(fpr,fnr),
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
-           smooth=c(cq(aspline,loess,none),TRUE,FALSE),
+           smooth=c(cq(loess,aspline,none),TRUE,FALSE),
            plot.points=F,plot.lines=T,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,ylab='rate',
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
@@ -391,7 +403,7 @@ plotrag=
     ## x=match.arg(x);
     ## TODO: change to x=pmatch_arg(x);
     if (is.null(xlab)) xlab=NA;
-    if (is.logical(smooth)) smooth=if (smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
+    if (is.logical(smooth)) smooth=if (smooth) 'loess' else 'none' else smooth=match.arg(smooth);
     check_mesr();
     ## if (is.null(drat)) drat=data_rate(posr,rate.type='pos',truedd.multi='asis');
     ## true.dd=drat$true.dd; drat=drat$drat;
@@ -457,7 +469,7 @@ plotragm=
            rate=cq(fpr,fnr),
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
-           smooth=c(cq(aspline,loess,none),TRUE,FALSE),
+           smooth=c(cq(loess,aspline,none),TRUE,FALSE),
            plot.points=F,plot.lines=T,lty=cq(solid,dotted,dotdash,longdash),lwd=2,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,
            ylab=if(length(rate)==1) rate2lab(rate) else 'rate',
@@ -467,7 +479,7 @@ plotragm=
     rate.rule=match.arg(rate.rule);
     ## x=match.arg(x);
     if (is.null(xlab)) xlab=NA;
-    if (is.logical(smooth)) smooth=if (smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
+    if (is.logical(smooth)) smooth=if (smooth) 'loess' else 'none' else smooth=match.arg(smooth);
     check_mesr();
     if (length(mesr)>1)
       stop(paste(sep=' ','plotragm only plots a single measure, not',paste(collapse=', ',mesr)));

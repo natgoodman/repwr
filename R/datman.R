@@ -44,6 +44,7 @@ load_nd=function(file=NULL,n,d,id=NULL,what) {
 ## get data already in memory (eg, in sim.list) or read from file
 ##   fail if data does not exist unless must.exist is FALSE
 get_nd=function(n,d,id=NULL,what,load,keep,must.exist=T) {
+  check_m();                            # are 'm' and 'datadir' consistent?
   case=casename_nd(n,d,id,short=T);
   if (is.na(load)|load) {
     what.list=get(paste(sep='.',what,'list'))
@@ -93,6 +94,7 @@ load_nndd=function(file=NULL,n1,n2,d1,d2,id=NULL,what) {
 ## get data already in memory (eg, in detl.list) or read from file
 ##   fail if data does not exist unless must.exist is FALSE
 get_nndd=function(n1,n2,d1,d2,id=NULL,what,load,keep,must.exist=T) {
+  check_m();                            # are 'm' and 'datadir' consistent?
   case=casename_nndd(n1,n2,d1,d2,id,short=T);
   if (is.na(load)|load) {
     what.list=get(paste(sep='.',what,'list'))
@@ -183,6 +185,7 @@ load_posr=
 get_posr=
   function(from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
            id=NULL,load=load.posr,keep=keep.posr,must.exist=T) {
+    check_m();                            # check 'm' and 'datadir' consistent
     what='posr';
     case=casename_posr(from.type,relto.type,id);
     if (is.na(load)|load) {
@@ -246,6 +249,7 @@ load_data=function(file=NULL,what=NULL,id=NULL) {
 ## get top-level data already in memory or read from file
 ##   fail if data does not exist unless must.exist is FALSE
 get_data=function(what,id=NULL,load=load.data,keep=keep.data,must.exist=T,name=NULL) {
+  check_m();                            # check 'm' and 'datadir' consistent
   if (is.na(load)|load) {
     if (!is.null(name)) what=name else what=as.character(pryr::subs(what));
     if (!is.null(id)) what=paste(sep='.',what,id);
@@ -356,11 +360,10 @@ filename_data=function(what,id=NULL,suffix='RData')
 basename_data=function(what,id=NULL) filename(datadir,base=paste_id(what,id));
 
 ##### figure - saved in figdir. may have numeric tail
-filename_fig=function(figname,fignum=NULL,doc=NULL,id=NULL,i=NULL,suffix='png')
-  filename(basename_fig(figname,fignum,doc,id,i),suffix=suffix);
-basename_fig=function(figname,fignum=NULL,doc=NULL,id=NULL,i=NULL) {
+filename_fig=function(figname,fignum=NULL,id=NULL,i=NULL,suffix='png')
+  filename(basename_fig(figname,fignum,id,i),suffix=suffix);
+basename_fig=function(figname,fignum=NULL,id=NULL,i=NULL) {
   if (!is.null(i)) i=sprintf("%02i",i);
-  if (!is.null(doc)) figdir=file.path(figdir,doc);
   if (!is.null(fignum)) fignum=c('figure',sprintf("%03i",fignum));
   base=paste(collapse='_',c(fignum,figname));
   basename=filename(figdir,base=base,tail=i);

@@ -24,11 +24,18 @@
 ## process parameters and store in global variables.
 ## create output directory if necessary.
 init=function(
+  ## doc parameters 
+  doc='repwr',                       # controls sim defaults, data, figure subdirs
+  docx=match.arg(doc,cq(repwr,tech,readme)), 
   ## simulation parameters 
-  n=10*2^(0:9),                     # sample sizes
-  d=round(seq(0,1,by=0.1),digits=5),# population effect sizes (means)
-                                    # round to avoid imprecise decimals
-  m=1e4,                            # number of instances per pop
+  n=switch(docx,                            # sample sizes
+           repwr=c(10,20,50*1.454215^(0:8)),# 10,20,50,...,1000 (10 values)
+           tech=10*2^(0:9),                 # 10,20,40,...,5120 (10 values)
+           readme=c(10,20,50,100)),
+  d=switch(docx,                            # population effect sizes
+            repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1),readme=c(0,0.2,0.5,0.8,1)),
+  m=switch(docx,                            # instances per study (ie, population)
+            repwr=1e4,tech=1e4,readme=1e2),
   ## analysis parameters
   sig.level=0.05,                   # for conventional significance
   conf.level=0.95,                  # for confidence intervals
@@ -37,28 +44,22 @@ init=function(
   fpr.cutoff=sig.level,             # false positive rate cutoff for plots
   fnr.cutoff=1-pwr.level,           # false negative rate cutoff for plots
                                     # grid for various precacluated data
-  dsdz.grid=round(seq(min(d)-3,max(d)+3,by=.05),digits=5),
-                                    # round to avoid imprecise decimals
+  dsdz.grid=seq(min(d)-3,max(d)+3,by=.05),
   scope.power=0.33,                 # power for small telescope
   scope.close=0.05,                 # pval for big telescope "close enough" calculation
   dopost.allcases=T,                # do all cases (2500 with defaults) or 1500 select ones
-  dopost.permute=T,                 # permute s1 data. else self-comparisons meaningless
-  ## pval.plot=c(.001,.01,.03,.05,.1), # pvalues for which we plot results
-  ## 
+  dopost.permute=T,                 # permute s1,s2 data. else self-comparisons meaningless
   ## program parameters, eg, for output files, error messages, etc.
   scriptname='repwr',                      #
-  subdir=paste_nv(m,m_pretty(m)),          # vector of subdir components
-  ## datadir='data',                       # directory for data files
-  ## datadir=file.path('data',scriptname), # directory for data files
-  datadir=filename('data',tail=subdir),    # directory for data files. default eg, data/m=1e4
+  mdir=paste_nv(m,m_pretty(m)),            # m subdirectory
+  datadir=filename('data',docx,mdir),      # directory for data files. default eg, data/repwr/m=1e4
   simdir=file.path(datadir,'sim'),         # directory for sim files
   simrdir=file.path(datadir,'simr'),       # directory for simr files
   sidir=file.path(datadir,'si'),           # directory for study permutation index files
   detldir=file.path(datadir,'detl'),       # directory for detailed results files
   smrydir=file.path(datadir,'smry'),       # directory for summary results files
   posrdir=file.path(datadir,'posr'),       # directory for positive rate files
-  figdir='figure',                         # directory for figures. don't add m=...
-  doc=cq(blog,tech,readme),                # used for figure subdirs
+  figdir=filename('figure',docx,mdir),     # directory for figures. default eg, figure/repwr/m=1e4
   id=NULL,                                 # info tacked onto filenames. not used much
   verbose=F,                               # print progress messages
   ## program control
@@ -106,42 +107,45 @@ init=function(
   keep.posr=is.na(keep)|keep,    # keep positive rate data. default T
   keep.data=is.na(keep)|keep,    # keep top-level data. default T
                                  #    
-  clean=F,                       # remove contents of datadir and figdir and start fresh
-  clean.all=clean,               # remove everything in datadir and start fresh
-  clean.sim=clean.all,           # clean simulations. default F
-  clean.simr=clean.all,          # clean simr data. default F
-  clean.si=clean.all,            # clean study permutation indexes. default F
-  clean.detl=clean.all,          # clean analysis details. default F
-  clean.smry=clean.all,          # clean case-by-case summaries. default F
-  clean.posr=clean.all,          # clean positive rate files. default F
-  clean.data=clean.all,          # clean top-level data. default F
-  clean.fig=clean,               # remove everything in figdir and start fresh
+  clean=F,                       # remove everything and start fresh
+  clean.data=clean,              # remove datadir & memlist
+  clean.figure=clean,            # remove figdir
+                                 # clean memlist cache - always safe but respect 'clean' param
+  clean.memlist=(missing(clean)&missing(clean.data))|(clean&clean.data),
+  clean.sim=F,                   # clean simulations. default F
+  clean.simr=F,                  # clean simr data. default F
+  clean.si=F,                    # clean study permutation indexes. default F
+  clean.detl=F,                  # clean analysis details. default F
+  clean.smry=F,                  # clean case-by-case summaries. default F
+  clean.posr=F,                  # clean positive rate files. default F
+  clean.toplevel=F,              # clean top-level data. default F
   end=NULL                       # placeholder for last parameter
   ) {
+  ## round d, dsdz.grid to avoid imprecise decimals
+   ## round n since 1.454215^(0:8) generates fractions
+  d=round(d,digits=5); dsdz.grid=round(dsdz.grid,digits=5); n=round(n);
+  doc=docx;                      # to avoid confusion later
   ## assign parameters to global variables
   ## do it before calling any functions that rely on globals
   assign_global();
   ## clean and create output directories and internal memory values as needed
-  outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir);
+  outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir,figdir);
   memlist=cq(sim.list,simr.list,si.list,detl.list,smry.list,posr.list,data.list);
-  if (clean.all) {
-    unlink(datadir,recursive=T);
-    suppressWarnings(rm(list=memlist,envir=.GlobalEnv));
-  } else {
-    ## may want to clean specific types
-    if (clean.sim) cleanq(sim);
-    if (clean.simr) cleanq(simr);
-    if (clean.si) cleanq(si);
-    if (clean.detl) cleanq(detl);
-    if (clean.smry) cleanq(smry);
-    if (clean.posr) cleanq(posr);
-    if (clean.data) cleanq(data,cleandir=F);
- }
-  ## create subdirectories. nop if already exist
+  if (clean.data) unlink(datadir,recursive=T);
+  if (clean.figure) unlink(figdir,recursive=T);
+  if (clean.memlist) suppressWarnings(rm(list=memlist,envir=.GlobalEnv));
+  ## clear init_smry & init_mesr flags so these will be rerun
+  suppressWarnings(rm(list=cq(init.smry,init.mesr),envir=.GlobalEnv));
+  ## clean specific types if desired
+  if (clean.sim) cleanq(sim);
+  if (clean.simr) cleanq(simr);
+  if (clean.si) cleanq(si);
+  if (clean.detl) cleanq(detl);
+  if (clean.smry) cleanq(smry);
+  if (clean.posr) cleanq(posr);
+  if (clean.toplevel) cleanq(data,cleandir=F);
+  ## create data subdirectories. nop if already exist
   sapply(outdir,function(dir) dir.create(dir,recursive=TRUE,showWarnings=FALSE));
-  if (clean.fig) unlink(figdir,recursive=T);
-  sapply(doc,function(doc) 
-    dir.create(file.path(figdir,doc),recursive=TRUE,showWarnings=FALSE));
   ## setup in-memory lists to hold simulations, etc.. do carefully in case already setup
   sapply(memlist,function(what) if (!exists(what)) assign(what,list(),envir=.GlobalEnv));
   ## initialize summary type and measures if possible
@@ -200,62 +204,6 @@ init_mesr=
     mesr.scp=grep('d(1|2)\\.scp(d{0,1})(1|2)',mesr.all,value=T);
     mesr.meta=grep('dm|cm',mesr.all,value=T);
     mesr.other=setdiff(mesr.all,c(mesr.sig,mesr.dcc,mesr.scp,mesr.meta));
-    ## defaults for plotrate and heatrate
-    ## mesr.plotdflt=cq(sig2,sigm,d1.c2,d2.c1,d1.p2,d2.p1);
-    mesr.plotdflt=c(mesr.sig,mesr.dcc,'d1.scp2','d2.scp1');
-    mesr.heatdflt=c(mesr.sig,mesr.dcc,mesr.scp,mesr.meta);
-    mesr.rocdflt=c(mesr.sig,mesr.dcc);
-    mesr.ragdflt=cq(sig2,d1.c2);
-   ## measures ordered for legends and such
-    mesr.order=c(mesr.sig,mesr.dcc,mesr.scp,mesr.other);
-    ## RColorBrewer pallete names for plotrate
-    pal.sig='Reds';
-    pal.dcc='Blues';
-    pal.meta='Greens';
-    pal.scp='Purples';
-    pal.other='Greys';
-    ## line properties
-    lty.max=8;                          # max 'on' value for dashed lines
-    ## convert names into palettes of correct size
-    col.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
-      pal=get(paste(sep='.','pal',what));
-      mesr=get(paste(sep='.','mesr',what));
-      ## col=colorRampPalette(rev(RColorBrewer::brewer.pal(9,pal)[3:8]))(length(mesr));
-      ## col=colorRampPalette(rev(RColorBrewer::brewer.pal(9,pal))[2:7])(length(mesr));
-      ## RColorBrewer sequential palettes can have 3-9 colors. use directly unless too many mesrs
-      ## skip 1st two colors - usually too light - then reverse so darker colors will be first
-      ##   if too many mesrs, colorRampPalette will make more
-      n.mesr=length(mesr);
-      if (n.mesr<=7) col=rev(RColorBrewer::brewer.pal(n.mesr+2,pal))[1:n.mesr]
-      else col=colorRampPalette(rev(RColorBrewer::brewer.pal(9,pal)[3:9]))(n.mesr);
-      col=setNames(col,mesr);
-    }));
-    ## compute line widths to further discriminate measures
-    lwd.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
-      mesr=get(paste(sep='.','mesr',what));
-      n.mesr=length(mesr);
-      lwd=seq(3,1,len=n.mesr);
-      lwd=setNames(lwd,mesr);
-    }));
-    ## compute line types to further discriminate measures
-    lty.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
-      mesr=get(paste(sep='.','mesr',what));
-      n.mesr=length(mesr);
-      ## crude effort to create divergent line types, up to lty.max
-      gap=ceiling(n.mesr/2);
-      on=(do.call(c,lapply(seq_len(floor(n.mesr/2)),function(i) c(i,i+gap))));
-      on=1+on%%(lty.max-1);
-      off=on+1;
-      lty=c('solid',paste(sep='',as.hexmode(on),as.hexmode(off)))[1:n.mesr];
-      lty=setNames(lty,mesr);
-    }));
-    ## compute cex for points in plotroc
-    cex.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
-      mesr=get(paste(sep='.','mesr',what));
-      n.mesr=length(mesr);
-      cex=seq(1,0.5,len=n.mesr);
-      cex=setNames(cex,mesr);
-    }));
     ## setup mesr.from & relto variable for default interpretation
     mesr.fromtype=sapply(mesr.all,function(mesr) {
       if (mesr %in% mesr.fromraw) 'raw'
@@ -267,7 +215,84 @@ init_mesr=
       else if (mesr %in% mesr.relsig1) 'sig1'
       else if (mesr %in% mesr.relsig2) 'sig2'
       else stop(paste('No relto.type for mesr:',mesr))});
-    
+    ## defaults for plot functions. depends on doc
+    if (doc %in% cq(repwr,readme)) {
+      mesr.dflt=cq(sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1);
+      mesr.plotdflt=mesr.heatdflt=mesr.rocdflt=mesr.ragdflt=grep('scp',mesr.dflt,invert=T,value=T);
+      mesr.order=mesr.dflt;
+      n.mesr=length(mesr.dflt);
+      col.mesr=c(colorRampPalette(RColorBrewer::brewer.pal(min(8,n.mesr-1),'Set1'))(n.mesr-1),
+                 'blue');
+      ## manually fix 6th color (d1.p2) - make it darker
+      col.mesr[6]='#FFcc00';
+      ## use line widths, point cex to further discriminate measures
+      ## sig2 is biggest. others gradually diminish. d2.scp1 is special - shouldn't be too small
+      lwd.mesr=c(2,seq(1.5,0.75,len=n.mesr-2),1);
+      cex.mesr=c(1,seq(0.9,0.5,len=n.mesr-2),0.75);
+      ## some docs use line types to further discriminate measures. repwr doesn't
+      lty.mesr=rep('solid',n.mesr);
+      ## set names in all these lists
+      ## CAUTION: have to use loop (not sapply) for scoping to work
+      for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
+        assign(name,setNames(get(name),mesr.dflt));
+    } else if (doc=='tech') {
+      ## TODO: these are old. refine based on experience
+      ## mesr.plotdflt=cq(sig2,sigm,d1.c2,d2.c1,d1.p2,d2.p1);
+      mesr.plotdflt=c(mesr.sig,mesr.dcc,'d1.scp2','d2.scp1');
+      mesr.heatdflt=c(mesr.sig,mesr.dcc,mesr.scp,mesr.meta);
+      mesr.rocdflt=c(mesr.sig,mesr.dcc);
+      mesr.ragdflt=cq(sig2,d1.c2);
+      ## measures ordered for legends and such
+      mesr.order=c(mesr.sig,mesr.dcc,mesr.scp,mesr.other);
+      ## RColorBrewer pallete names for plotrate
+      pal.sig='Reds';
+      pal.dcc='Blues';
+      pal.meta='Greens';
+      pal.scp='Purples';
+      pal.other='Greys';
+      ## line properties
+      lty.max=8;                          # max 'on' value for dashed lines
+      ## convert names into palettes of correct size
+      col.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
+        pal=get(paste(sep='.','pal',what));
+        mesr=get(paste(sep='.','mesr',what));
+        ## col=colorRampPalette(rev(RColorBrewer::brewer.pal(9,pal)[3:8]))(length(mesr));
+        ## col=colorRampPalette(rev(RColorBrewer::brewer.pal(9,pal))[2:7])(length(mesr));
+        ## RColorBrewer sequential palettes can have 3-9 colors. use directly unless too many mesrs
+        ## skip 1st two colors - usually too light - then reverse so darker colors will be first
+        ##   if too many mesrs, colorRampPalette will make more
+        n.mesr=length(mesr);
+        if (n.mesr<=7) col=rev(RColorBrewer::brewer.pal(n.mesr+2,pal))[1:n.mesr]
+        else col=colorRampPalette(rev(RColorBrewer::brewer.pal(9,pal)[3:9]))(n.mesr);
+        col=setNames(col,mesr);
+      }));
+      ## compute line widths to further discriminate measures
+      lwd.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
+        mesr=get(paste(sep='.','mesr',what));
+        n.mesr=length(mesr);
+        lwd=seq(3,1,len=n.mesr);
+        lwd=setNames(lwd,mesr);
+      }));
+      ## compute line types to further discriminate measures
+      lty.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
+        mesr=get(paste(sep='.','mesr',what));
+        n.mesr=length(mesr);
+        ## crude effort to create divergent line types, up to lty.max
+        gap=ceiling(n.mesr/2);
+        on=(do.call(c,lapply(seq_len(floor(n.mesr/2)),function(i) c(i,i+gap))));
+        on=1+on%%(lty.max-1);
+        off=on+1;
+        lty=c('solid',paste(sep='',as.hexmode(on),as.hexmode(off)))[1:n.mesr];
+        lty=setNames(lty,mesr);
+      }));
+      ## compute cex for points in plotroc
+      cex.mesr=do.call(c,sapply(cq(sig,dcc,meta,scp,other),USE.NAMES=F,function(what) {
+        mesr=get(paste(sep='.','mesr',what));
+        n.mesr=length(mesr);
+        cex=seq(1,0.5,len=n.mesr);
+        cex=setNames(cex,mesr);
+      }));
+    }
     ## at end, assign mesr parameters to global variables
     sapply(grep('mesr',ls(),value=T),function(what) assign(what,get(what),envir=.GlobalEnv));
     init.mesr<<-T;         # so dosmry will know init_mesr done
