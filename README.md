@@ -47,7 +47,7 @@ run();
 
 This runs the program in a demo-like mode that quickly generates the simulated data and produces the figures that appear in this README document. The default computation simulates 625,000 replications and produces 16 figures. The simulation takes about 40 seconds on my small Linux server; the figures take about 45 seconds, much of which I think is spent rendering the plots over a remote X11 connection.
 
-You can run either half of the job without the other by running one of the statements below.
+You can run each part separately by running one of the statements below.
 
 ``` r
 ## This code block assumes your working directory is the root of the distribution
@@ -57,7 +57,7 @@ dodata();          # generate the simulated data
 dodoc();           # generate the figures
 ```
 
-The program can also generate the data and figures for the blog post and (soon) technical note discussing the topic. To generate these, execute `run()` with a suitable 'doc\` argument as shown below. **These take much longer to run**: about an hour each on my small Linux server
+The program can also generate the data and figures for the other documents associated with the project - blog post and (soon) technical note discussing the topic. To generate these, execute `run()` with a suitable 'doc\` argument as shown below. **These take much longer to run**: about an hour each on my small Linux server
 
 ``` r
 ## This code block assumes your working directory is the root of the distribution.
