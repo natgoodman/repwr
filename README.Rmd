@@ -41,7 +41,7 @@ All measures assume that the first study is significant (*sig1* in my notation) 
 
 The software is **not a package** and cannot be installed by `devtools::install_github` or related. Sorry. The simplest way to get the software is to download or clone the entire repo.
 
-The code mostly uses base R capabilities but has a few dependencies: RColorBrewer, akima, and pryr. Since it's not a package, you have to manually install these packages unless you already have them.
+The code mostly uses base R capabilities but has a few dependencies: RColorBrewer, akima, and pryr. Since it's not a package, you have to manually install these packages if you don't already have them.
 
 The recommended way to run the program is to `source` the file `R/repwr.R` into your R session; `R/repwr.R` will source the rest. Once loaded, you can run the program by executing the statement `run()`  as shown below.
 
@@ -64,7 +64,7 @@ dodata();          # generate the simulated data
 dodoc();           # generate the figures
 ```
 
-The program can also generate the data and figures for the other documents associated with the project - blog post and (soon) technical note discussing the topic.  To generate these, execute `run()` with a suitable 'doc` argument as shown below.  **These take much longer to run**: about an hour each on my small Linux server
+The program can also generate the data and figures for the other documents associated with the project: a blog post and (soon) a technical note with more details.  To generate these, execute `run()` with a suitable `doc` argument as shown below.  **CAUTION: these take much longer to run**: about an hour each on my small Linux server
 
 ``` {r eval=FALSE}
 ## This code block assumes your working directory is the root of the distribution.
@@ -76,14 +76,14 @@ run(doc='tech');   # generate data and figures for technical note
 
 ## Figures
 
-The default mode produces figures that illustrate the kind of graphs the program can produce.
+The default mode produces figures that illustrate the kinds of graphs the program can produce.
 
-1. line graphs showing error rates for a set of measures across chosen conditions - simple and intuitive, I think, but not good at showing data for too many measures and parameters
-2. heatmaps showing the same kind of data - still reasonably intuitive and somewhat better at depicting more measures and multiple parameters
+1. line graphs showing error rates for a set of measures across chosen conditions - simple and intuitive but poor at showing data for too many measures and parameters
+2. heatmaps showing the same kind of data - still reasonably intuitive and somewhat better at depicting more measures and parameters
 3. rate-vs-rate scatter plots - able to display error rates across large swaths of parameter space but with less parameter resolution and perhaps less intuitive clarity
 4. aggregate line graphs - same data as rate-vs-rate scatter plots but for fewer measures and with better parameter resolution
 
-The first group of figures are line graphs showing false positive and false negative rates for a few measures across a few conditions. The labels on the x-axis show the conditions: *n1*, *n2* are the sample sizes; *d1*, *d2* are the population effect sizes. The horizontal dashed lines demarks the conventionally accepted thresholds of 0.05 for false positives and 0.20 for false negatives.
+The first group of figures are line graphs showing false positive and false negative rates for a few measures across a few conditions. The labels on the x-axis show the conditions: *n1*, *n2* are the sample sizes; *d1*, *d2* are the population effect sizes. The horizontal dashed lines demark the conventionally accepted thresholds of 0.05 for false positives and 0.20 for false negatives.
 
 Figures 1-2 are for the *non-zero* correctness criterion; figures 3-4 are for *same-effect*.
 
@@ -95,7 +95,7 @@ knitr::include_graphics('figure/readme/m=1e3/figure_004_plotrate_sameff_fnr.png'
 ```
 
 The next figures are heatmaps. Figures 5-6 show the same conditions as figures 1-2 but for more measures; figures 7-8 show more conditions. 
-The red-to-blue transition is set at the conventionally accepted thresholds of 0.05 for false positives and 0.20 for false negatives. The  dark vertical lines in figures 7-8 visually split each plot into separate "panels" for each values of *d2*.
+The red-to-blue transition is set at the conventionally accepted thresholds of 0.05 for false positives and 0.20 for false negatives. The  dark vertical lines in figures 7-8 visually split each plot into separate "panels" for each value of *d2*.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/readme/m=1e3/figure_005_heatrate_nonzro_fpr.png');
@@ -111,14 +111,14 @@ knitr::include_graphics('figure/readme/m=1e3/figure_009_roc_exact.png');
 knitr::include_graphics('figure/readme/m=1e3/figure_010_roc_inexact.png');
 ```
 
-Next (figures 11-12) are aggregate line graphs showing the same data as the rate-vs-rate graphs above for fewer measures.
+Figures 11-12 are aggregate line graphs showing the same data as the rate-vs-rate graphs above for fewer measures.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/readme/m=1e3/figure_011_rag_exact.png');
 knitr::include_graphics('figure/readme/m=1e3/figure_012_rag_inexact.png');
 ```
 
-Recall that *sig2* works fine in exact replications but so poorly in inexact ones (see figures 9-10).  The next two figures (figures 13-14) show how *sig2* prforms in  *near exact* replications, ones where the population effect sizes differ slightly. The first is a rate-vs-rate graph showing *sig2* across various nearness values; the second is an aggregate line graph showing the same data.
+Recall that *sig2* works fine in exact replications but poorly in inexact ones (see figures 9-10).  The next two figures (figures 13-14) show how *sig2* performs in  *near exact* replications, ones where the population effect sizes differ slightly. The first is a rate-vs-rate graph showing *sig2* across various nearness values; the second is an aggregate line graph showing the same data.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/readme/m=1e3/figure_013_multi_sig2_rocm.png');

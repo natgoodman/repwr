@@ -18,18 +18,20 @@
 ## file at https://github.com/natgoodman/NewPro/FDR/LICENSE 
 ##
 #################################################################################
-## --- Document Functions ---
-## functions to make figures and tables for documents
+## --- Generate Figures and Tables for Document ---
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 ## fignum is initial figure number
 ## fignew controls whether each figure drawn in new window
 ## figsave controls whether figures are saved
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
-dodoc=function(sect=NULL,fignum=1,fignew=F,figsave=T,docfun=get(paste(sep='_','doc',doc))) {
-  docfun();
+dodoc=
+  function(sect=NULL,fignum=1,fignew=F,figsave=T,clean.figure=T,doc=parent(doc,'readme'),
+           docfun=get(paste(sep='_','doc',doc)),...) {
+    init(doc=doc,clean.figure=clean.figure,...);
+    docfun();
 }
-## --- Document Utilities ---
+## --- Document Functions ---
 ## utility functions to make figures and tables for documents
 ## run plot function, save if required, label result with function name
 ## CAUTION: ... interacts with partial argument matching to cause dofig args to be
@@ -55,16 +57,6 @@ dofig=
     assign_parent(fignum,fignum+length(dev));
     setNames(dev,figname);
   }
-## generate standard xdata for aggregated plots
-xdata_doc=function(near=0,nx=2.5,n2.num=2,n1=seq(20,by=20,len=8)) {
-  d2=round(seq(0,1,by=0.01),digits=5);
-  do.call(rbind,lapply(n1,function(n1) {
-    n2=seq(n1*nx,by=n1*nx,len=n2.num);
-    xdata=expand.grid(n1=n1,n2=n2,d1=d,d2=d2);
-    ## TODO: I don't thing the 1e-4 tolerance still needed
-    subset(xdata,subset=(abs(d1-d2)<=(near+1e-4)));}))
-}
-
 ## NOT YET PORTED
 ## run data-making function, save if required, store result in global workspace
 dodata=function(what) {

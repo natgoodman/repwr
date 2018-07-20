@@ -20,6 +20,14 @@
 ##
 #################################################################################
 
+## --- Generate Data ---
+dodata=function(...) {
+  init(...);               # process parameters & other initialization
+  dopre();                 # precalculate or load global data
+  dosim();                 # load saved simulations or do new ones
+  dopost();                # post-simulation pipeline
+}
+
 ## ---- Precalculate or Load Global Data ----
 dopre=function() {
   doscope();                     # load or generate small telescopes data

@@ -22,6 +22,7 @@
 source('R/check.R');
 source('R/datman.R');
 source('R/doc.R');
+source('R/doc_readme.R');
 source('R/doc_repwr.R');
 source('R/doc_tech.R');
 source('R/init.R');
@@ -35,8 +36,6 @@ source('R/util.R');
 ## run the program
 ## parameters defined in init
 run=function(...) {
-  init(...);                     # process parameters & other initialization
-  dopre();                       # precalculate or load global data
-  dosim();                       # load saved simulations or do new ones
-  dopost();                      # post-simulation pipeline
+  dodata(...);             # generate data - ie, run simulation
+  dodoc(...);              # generate figures for doc
 }

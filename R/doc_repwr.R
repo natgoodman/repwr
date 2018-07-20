@@ -19,9 +19,8 @@
 ## file at https://github.com/natgoodman/NewPro/FDR/LICENSE 
 ##
 #################################################################################
-## --- repwr Post ---
+## --- Generate Figures and Tables for repwr Blog Post ---
 ## make figures and tables for blog post
-## docs are repwr, tech, readme
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 doc_repwr=
@@ -60,20 +59,20 @@ doc_repwr=
      }
     if ((figsect='nonzro_exact_roc') %in% sect) {
       ## show same point with roc
-      xdata=xdata_doc(near=0);
+      xdata=xdata_repwr(near=0);
       dofig(plotroc,rate.rule='nonzro',xdata=xdata);
     }
 ##### inexact
     if ((figsect='nonzro_inexact_roc') %in% sect) {
       ## inexact reps. nonzro. key point: false positives are terrible
-      xdata=xdata_doc(near=1);
+      xdata=xdata_repwr(near=1);
       dofig(plotroc,rate.rule='nonzro',xdata=xdata);
    }
 ##### near exact
     if ((figsect='nonzro_nearexact') %in% sect) {
-      ## near exact. sig1
+      ## near exact. sig2
       near=round(c(0.01,0.05,0.1,0.2),digits=5);
-      xdata=lapply(c(0,near,1),function(near) xdata=xdata_doc(near=near));
+      xdata=lapply(c(0,near,1),function(near) xdata=xdata_repwr(near=near));
       names(xdata)=c('exact',paste(sep=' ','near',near),'inexact')
       dofig(plotrocm,'rocm',rate.rule='nonzro',xdata=xdata,title.desc='near exact',mesr='sig2');
       dofig(plotragm,'ragm',rate.rule='nonzro',xdata=xdata,title.desc='near exact',x='n2',
@@ -81,7 +80,7 @@ doc_repwr=
     }
 ########## sameff
     if ((figsect='sameff_nearexact') %in% sect) {
-      xdata=xdata_doc(near=1);
+      xdata=xdata_repwr(near=1);
       dofig(plotroc,'unconstrained_delta=0.1',rate.rule='sameff',rate.tol=0.1,xdata=xdata,
             title.desc='d1, d2 unconstrained');
       dofig(plotroc,'unconstrained_delta=0.5',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
@@ -95,12 +94,12 @@ doc_repwr=
     }
 ##########
     if ((figsect='small_telescopes') %in% sect) {
-      xdata=xdata_doc(near=0.1);
+      xdata=xdata_repwr(near=0.1);
       dofig(plotroc,'nonzro_roc',rate.rule='nonzro',xdata=xdata,
             title.desc='near=0.1',mesr=cq(sig2,d2.scp1));
       dofig(plotrag,'nonzro_rag',rate.rule='nonzro',xdata=xdata,
             title.desc='near=0.1',mesr=cq(sig2,d2.scp1));
-      xdata=xdata_doc(near=1);
+      xdata=xdata_repwr(near=1);
       xdata=subset(xdata,subset=d2<=d1);
       dofig(plotroc,'sameff_roc',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
             title.desc='d2 <= d1',mesr=cq(sig2,d2.scp1));
@@ -109,3 +108,12 @@ doc_repwr=
     }
     sect;
   }
+## generate standard xdata for aggregated plots
+xdata_repwr=function(near=0,nx=2.5,n2.num=2,n1=seq(20,by=20,len=8)) {
+  d2=round(seq(0,1,by=0.01),digits=5);
+  do.call(rbind,lapply(n1,function(n1) {
+    n2=seq(n1*nx,by=n1*nx,len=n2.num);
+    xdata=expand.grid(n1=n1,n2=n2,d1=d,d2=d2);
+    ## TODO: I don't thing the 1e-4 tolerance still needed
+    subset(xdata,subset=(abs(d1-d2)<=(near+1e-4)));}))
+}

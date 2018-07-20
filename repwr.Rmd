@@ -3,10 +3,10 @@ title: "Replication Has Limited Power to Detect Bad Science"
 author: "Nathan (Nat) Goodman"
 date: "July 18, 2018"
 output:
+  pdf_document: default
   html_document:
     css: css/html_document.css
     highlight: kate
-  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
@@ -48,7 +48,7 @@ Here are the main papers and blog posts that led to this work.
 
 ## The Simulation 
 
-The software first simulates *studys* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes true and false positive and negative rates for measures and conditions of interest.
+The software first simulates *studies* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes true and false positive and negative rates for measures and conditions of interest.
 
 The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is standard normal with $mean=d_{pop} \ge0$. I then calculate basic statistics of interest, most notably the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups. The software simulates many studies (default $10^4$) for each combination of $n$ and $d_{pop}$. 
 
@@ -74,7 +74,7 @@ All measures assume that the first study is significant (*sig1* in my notation) 
 
 I briefly examine Uri Simonsohn's *small telescopes* method (*d2.scp1* in my notation) from his [paper](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) and [post](http://datacolada.org/42). My implementation is based on Uri's [code](http://urisohn.com/sohn_files/BlogAppendix/Colada42/%5b42%5d%20-%20Accepting%20the%20Null%20-%20R%20-%20Reproducibility%20project%20small%20telescope%20vs%20bayesian%202015%2010%2026.R) supporting that post. *Small telescopes*, unlike the others, assumes that *sig2* holds. For this reason, it needs a separate analysis.
 
-The software sumarizes the results by counting the number of positive results for each measure, taking into account the assumptions in the preceding paragraph, and then converts the counts into pass rates. The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, which in turn requires an explicit statement as to which replication instances represent replications that should succeed vs. ones that should fail.
+The software summarizes the results by counting the number of positive results for each measure, taking into account the assumptions in the preceding paragraph, and then converts the counts into pass rates. The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, which in turn requires an explicit statement as to which replication instances represent replications that should succeed vs. ones that should fail.
 
 ## Correctness Criteria
 
@@ -142,7 +142,7 @@ To simplify the presentation
 
 ## Graph Types
 
-The parameter space is vast, because it's possible to vary each of the four paramters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$) across a considerable range. I use several kinds of graphs to present the data in a comprehensive, yet concise, manner.
+The parameter space is vast, because it's possible to vary each of the four parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$) across a considerable range. I use several kinds of graphs to present the data in a comprehensive, yet concise, manner.
 
 1. line graphs - simple and intuitive, I think, but not good at showing data that varies across many parameters
 2. heatmaps - still reasonably intuitive and somewhat better at depicting multiple parameters
@@ -241,9 +241,9 @@ The results are bad in all cases. Error rates are better for $\delta=0.5$ and wi
 
 ### Small telescopes
 
-Uri Simonsohn's *small telescopes* method combines both correctness criteria in a single test. In my notation, *d2.scp1* is true if
+Uri Simonsohn's *small telescopes* method combines both correctness criteria in a single test. In my notation, *d2.scp1* is positive if
 
-1. *sig2* is true (presumably to test *non-zero*) and 
+1. *sig2* is positive (presumably to test *non-zero*) and 
 2. $d2_{sdz}$, the replica's observed effect size, exceeds a threshold deemed to be the smallest effect size likely to be observed if *same-effect* is true.
 
 Figures 15-18 compare *sig2* and *d2.scp1* for the two correctness criteria.  The figures reuse conditions from previous sections: for *non-zero*, I use nearness of 0.1; for *same-effect*, I use $\delta=0.5$ and with $d2_{pop} \le d1_{pop}$. Figures 15 and 17 are rate-vs-rate graphs; figures 16 and 18 show the same data as aggregate line graphs. 

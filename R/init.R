@@ -25,17 +25,17 @@
 ## create output directory if necessary.
 init=function(
   ## doc parameters 
-  doc='repwr',                       # controls sim defaults, data, figure subdirs
-  docx=match.arg(doc,cq(repwr,tech,readme)), 
+  doc='readme',                     # controls sim defaults, data, figure subdirs
+  docx=match.arg(doc,cq(readme,repwr,tech)), 
   ## simulation parameters 
   n=switch(docx,                            # sample sizes
+           readme=20*2^(0:4),               # 20,40,80,160,320 (5 values)
            repwr=c(10,20,50*1.454215^(0:8)),# 10,20,50,...,1000 (10 values)
-           tech=10*2^(0:9),                 # 10,20,40,...,5120 (10 values)
-           readme=c(10,20,50,100)),
+           tech=10*2^(0:9)),                # 10,20,40,...,5120 (10 values)
   d=switch(docx,                            # population effect sizes
-            repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1),readme=c(0,0.2,0.5,0.8,1)),
+           readme=c(0,0.2,0.5,0.8,1),repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1)),
   m=switch(docx,                            # instances per study (ie, population)
-            repwr=1e4,tech=1e4,readme=1e2),
+           readme=1e3,repwr=1e4,tech=1e4),
   ## analysis parameters
   sig.level=0.05,                   # for conventional significance
   conf.level=0.95,                  # for confidence intervals
@@ -216,7 +216,27 @@ init_mesr=
       else if (mesr %in% mesr.relsig2) 'sig2'
       else stop(paste('No relto.type for mesr:',mesr))});
     ## defaults for plot functions. depends on doc
-    if (doc %in% cq(repwr,readme)) {
+   if (doc=='readme') {
+      mesr.dflt=cq(sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1);
+      mesr.plotdflt=mesr.ragdflt=cq(sig2,d1.c2,sigm,d2.c1);
+      mesr.heatdflt=mesr.rocdflt=grep('scp',mesr.dflt,invert=T,value=T);
+      mesr.order=mesr.dflt;
+      n.mesr=length(mesr.dflt);
+      col.mesr=c(colorRampPalette(RColorBrewer::brewer.pal(min(8,n.mesr-1),'Set1'))(n.mesr-1),
+                 'blue');
+      ## manually fix 6th color (d1.p2) - make it darker
+      ## col.mesr[6]='#FFcc00';
+      ## use line widths, point cex to further discriminate measures
+      ## sig2 is biggest. others gradually diminish. d2.scp1 is special - shouldn't be too small
+      lwd.mesr=c(2,seq(1.5,0.75,len=n.mesr-2),1);
+      cex.mesr=c(1,seq(0.9,0.5,len=n.mesr-2),0.75);
+      ## some docs use line types to further discriminate measures. readme doesn't
+      lty.mesr=rep('solid',n.mesr);
+      ## set names in all these lists
+      ## CAUTION: have to use loop (not sapply) for scoping to work
+      for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
+        assign(name,setNames(get(name),mesr.dflt));
+   } else if (doc=='repwr') {
       mesr.dflt=cq(sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1);
       mesr.plotdflt=mesr.heatdflt=mesr.rocdflt=mesr.ragdflt=grep('scp',mesr.dflt,invert=T,value=T);
       mesr.order=mesr.dflt;

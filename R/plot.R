@@ -157,8 +157,7 @@ plotrate=
     mesr_legend(mesr,where=legend.where,x=x.legend,y=y.legend);
     if (plot.cutoff) abline(h=cutoff,lty='dashed',lwd=0.5);
     ## plot extra lines if desired. nop if vlinr, hline NULL
-    abline(v=vline);
-    abline(h=hline); 
+    abline(v=vline,h=hline); 
     dev.cur();
   }
 heatrate=
@@ -229,8 +228,7 @@ heatrate=
     abline(v=x+0.5,lty='dotted',col='lightgray',lwd=0.75);
     heat_legend(legend.coord);
     ## plot extra lines if desired. nop if vlinr, hline NULL
-    abline(v=vline);
-    abline(h=hline); 
+    abline(v=vline,h=hline); 
     dev.cur();
   }
 ## 
