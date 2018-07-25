@@ -24,11 +24,16 @@
 ## fignum is initial figure number
 ## fignew controls whether each figure drawn in new window
 ## figsave controls whether figures are saved
+##   if only one of fignew, figsave set, other is set to complement
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
-  function(sect=NULL,fignum=1,fignew=F,figsave=T,clean.figure=T,doc=parent(doc,'readme'),
+  function(sect=NULL,clean=F,fignum=1,doc=parent(doc,'readme'),
+           fignew=if (doc=='readme') T else F,figsave=T,clean.figure=figsave,
            docfun=get(paste(sep='_','doc',doc)),...) {
-    init(doc=doc,clean.figure=clean.figure,...);
+    if (missing(fignew)&!missing(figsave)) fignew=!figsave;
+    if (!missing(fignew)&missing(figsave)) figsave=!fignew;
+    if (missing(clean.figure)) clean.figure=figsave;
+    init(doc=doc,clean=clean,clean.figure=clean.figure,...);
     docfun();
 }
 ## --- Document Functions ---

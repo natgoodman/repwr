@@ -26,16 +26,18 @@
 init=function(
   ## doc parameters 
   doc='readme',                     # controls sim defaults, data, figure subdirs
-  docx=match.arg(doc,cq(readme,repwr,tech)), 
+  docx=match.arg(doc,cq(readme,repwr,tech,xperiment)), 
   ## simulation parameters 
   n=switch(docx,                            # sample sizes
            readme=20*2^(0:4),               # 20,40,80,160,320 (5 values)
            repwr=c(10,20,50*1.454215^(0:8)),# 10,20,50,...,1000 (10 values)
-           tech=10*2^(0:9)),                # 10,20,40,...,5120 (10 values)
+           tech=10*2^(0:9),                 # 10,20,40,...,5120 (10 values)
+           xperiment=20*2^(0:4)),           # 20,40,80,160,320 (5 values)
   d=switch(docx,                            # population effect sizes
-           readme=c(0,0.2,0.5,0.8,1),repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1)),
+           readme=c(0,0.2,0.5,0.8,1),repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1),
+           xperiment=c(0,0.2,0.5,0.8,1)),
   m=switch(docx,                            # instances per study (ie, population)
-           readme=1e3,repwr=1e4,tech=1e4),
+           readme=1e3,repwr=1e4,tech=1e4,xperiment=1e3),
   ## analysis parameters
   sig.level=0.05,                   # for conventional significance
   conf.level=0.95,                  # for confidence intervals
@@ -107,7 +109,8 @@ init=function(
   keep.posr=is.na(keep)|keep,    # keep positive rate data. default T
   keep.data=is.na(keep)|keep,    # keep top-level data. default T
                                  #    
-  clean=F,                       # remove everything and start fresh
+  clean=switch(docx,             # remove everything and start fresh
+               readme=T,repwr=F,tech=F,xperiment=F),
   clean.data=clean,              # remove datadir & memlist
   clean.figure=clean,            # remove figdir
                                  # clean memlist cache - always safe but respect 'clean' param
@@ -312,6 +315,23 @@ init_mesr=
         cex=seq(1,0.5,len=n.mesr);
         cex=setNames(cex,mesr);
       }));
+    } else if (doc=='xperiment') {
+      mesr.dflt=cq(sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1);
+      mesr.plotdflt=mesr.ragdflt=cq(sig2,d1.c2,sigm,d2.c1);
+      mesr.heatdflt=mesr.rocdflt=grep('scp',mesr.dflt,invert=T,value=T);
+      mesr.order=mesr.dflt;
+      n.mesr=length(mesr.dflt);
+      col.mesr=c(colorRampPalette(RColorBrewer::brewer.pal(min(8,n.mesr-1),'Set1'))(n.mesr-1),
+                 'blue');
+      ## use line widths, point cex to further discriminate measures
+      ## sig2 is biggest. others gradually diminish. d2.scp1 is special - shouldn't be too small
+      lwd.mesr=c(2,seq(1.5,0.75,len=n.mesr-2),1);
+      cex.mesr=c(1,seq(0.9,0.5,len=n.mesr-2),0.75);
+      lty.mesr=rep('solid',n.mesr);
+      ## set names in all these lists
+      ## CAUTION: have to use loop (not sapply) for scoping to work
+      for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
+        assign(name,setNames(get(name),mesr.dflt));
     }
     ## at end, assign mesr parameters to global variables
     sapply(grep('mesr',ls(),value=T),function(what) assign(what,get(what),envir=.GlobalEnv));
