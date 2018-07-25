@@ -1,0 +1,12 @@
+Package: repwr
+Title: Replication Power
+Version: 1.00
+Authors@R: person("Nathan", "Goodman", email = "natg@shore.net", role = c("aut", "cre"))
+Description: A collection of R scripts and documents exploring the power of replication to detect bad science. Treat replication as a statistical test, simulates proposed replication methods across a wide range of conditions, and estimates error rates for conditions of interest. The main point is that replication is a poor statistical test with unacceptable error rates under most conditions. It works as a validation test only when the original and replica studies are sampling nearly identical populations. Methods for testing whether the populations are similar work poorly under all conditions analyzed.
+Depends: R (>= 3.4.3)
+Imports: RColorBrewer,akima,pryr
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/natgoodman/repwr
+BugReports: https://github.com/natgoodman/repwr/issues
