@@ -1,7 +1,7 @@
 ---
 title: "Replication Power"
 author: "Nathan (Nat) Goodman"
-date: "July 18, 2018"
+date: "July 25, 2018"
 output:
   github_document:
     html_preview: no
@@ -15,33 +15,33 @@ urlcolor: blue
 
 *A collection of R scripts and documents exploring the power of replication to detect bad science. I treat replication as a statistical test, simulate proposed replication methods across a wide range of conditions, and estimate error rates for conditions of interest. The main point is that replication is a poor statistical test with unacceptable error rates under most conditions. It works as a validation test only when the original and replica studies are sampling nearly identical populations. Methods for testing whether the populations are similar work poorly under all conditions analyzed.*
 
-**THE SOFTWARE IS STILL ROUGH and SOFTWARE DOCUMENTATION NONEXISTANT. PLEASE GET IN TOUCH IF YOU NEED HELP**
+**THE SOFTWARE IS STILL ROUGH and SOFTWARE DOCUMENTATION NONEXISTENT. PLEASE GET IN TOUCH IF YOU NEED HELP**
 
 ## Overview
 
-The program explores the power of replication to detect bad science. The software simulates *studies* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes true and false positive and negative rates for measures and conditions of interest. The main conclusion is that replication is a poor statistical test with unacceptable error rates under most conditions. Significance testing of the replica works fine as a validation test for exact and near-exact replications, but error rates increase rapidly as the populations diverge. All other tests have excessive error rates under all conditions analyzed. All tests have unacceptable error rates when used to check whether the replications are similar.
+The program explores the power of replication to detect bad science. The software simulates *studies* across a range of conditions, combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes false positive and negative rates for measures and conditions of interest. The main conclusion is that replication is a poor statistical test with unacceptable error rates under most conditions. Significance testing of the replica works fine as a validation test for exact and near-exact replications, but error rates increase rapidly as the populations diverge. All other tests have excessive error rates under all conditions analyzed. All tests have unacceptable error rates when used to check whether the original and replica studies are similar.
 
 To calculate error rates, it's necessary to define explicit correctness criteria.  The ones I use are
 
 1. *non-zero* - a replication instance is *true* if the population effect size of the first study is non-zero
-2. *same-effect* - a replication instance is *true* if both studies have the same population effect size; with *tolerance* $\delta$ a replication instance is *true* if the two population effect sizes differ by at most $\delta$
+2. *same-effect* - a replication instance is *true* if both studies have the same population effect size; with *tolerance* $\delta$, a replication instance is *true* if the two population effect sizes differ by at most $\delta$
 
 The measures appearing in this README document are
 
-- *sig2* - the second study of the pair has a significant p-value
-- *sigm* - the fixed effect meta-analyis of the studies has a significant p-value
-- *d1.c2* (resp. *d2.c1*) - the standardized observed effect size (aka Cohen's d) of one study is in the confidence interval of the other 
-- *d1.p2* (resp. *d2.p1*) - the standardized observed effect size (aka Cohen's d) of one study is in the prediction interval of the other 
+- *sig2* - the replica study has a significant p-value
+- *sigm* - the fixed effect meta-analysis of the studies has a significant p-value
+- *d1.c2*, *d2.c1* - the standardized observed effect size (aka *Cohen's d*) of one study is in the confidence interval of the other 
+- *d1.p2*, *d2.p1* - *Cohen's d* of one study is in the prediction interval of the other 
 - *c1.c2* (resp. *p1.p2*) - the confidence (resp. prediction) intervals of the two studies overlap
 - *d2.scp1* - Uri Simonsohn's *small telescopes* method
 
-All measures assume that the first study is significant (*sig1* in my notation) and the observed effect sizes of the two studies have the same sign (both positive or both negative). *Small telescopes* also assumes that *sig2* holds and needs a separate analysis.
+All measures assume that the original study is significant (*sig1* in my notation) and the observed effect sizes of the two studies have the same sign. *Small telescopes* also assumes that *sig2* holds.
 
 ## Installation and Usage
 
 The software is **not a package** and cannot be installed by `devtools::install_github` or related. Sorry. The simplest way to get the software is to download or clone the entire repo.
 
-The code mostly uses base R capabilities but has a few dependencies: RColorBrewer, akima, and pryr. Since it's not a package, you have to manually install these packages if you don't already have them.
+The code mostly uses base R capabilities but has a few dependencies: `RColorBrewer`, `akima`, and `pryr`. Since it's not a package, you have to manually install these packages if you don't already have them.
 
 The recommended way to run the program is to `source` the file `R/repwr.R` into your R session; `R/repwr.R` will source the rest. Once loaded, you can run the program by executing the statement `run()`  as shown below.
 
@@ -52,7 +52,7 @@ source('R/repwr.R');
 run();
 ```
 
-This runs the program in a demo-like mode that quickly generates the simulated data and produces the figures that appear in this README document. The default computation simulates 625,000 replications and produces 16 figures. The simulation takes about 40 seconds on my small Linux server; the figures take about 45 seconds, much of which I think is spent rendering the plots over a remote X11 connection.  
+This runs the program in a demo-like mode that quickly generates the simulated data and produces the figures that appear in this README document. The default computation simulates 625,000 replications and produces 16 figures. The simulation takes about 40 seconds on my small Linux server; the figures take about 60 seconds, much of which I think is spent rendering the plots over a remote X11 connection.  
 
 You can run each part separately by running one of the statements below.
 
@@ -62,16 +62,18 @@ You can run each part separately by running one of the statements below.
 
 dodata();          # generate the simulated data
 dodoc();           # generate the figures
+dodoc(figsave=F);  # generate the figures without saving them
+dodoc(fignew=F);   # generate and save the figures without plotting each in a new window
 ```
 
-The program can also generate the data and figures for the other documents associated with the project: a blog post and (soon) a technical note with more details.  To generate these, execute `run()` with a suitable `doc` argument as shown below.  **CAUTION: these take much longer to run**: about an hour each on my small Linux server
+The program can also generate the data and figures for the other documents associated with the project: a blog post and (soon) a technical note with more details. **CAUTION: these take much longer to run**: about an hour each on my small Linux server. To generate these, execute `run()` with a suitable `doc` argument as shown below; you also need to specify  `clean=T`, since by default the program reuses existing data for these large runs. 
 
 ``` {r eval=FALSE}
 ## This code block assumes your working directory is the root of the distribution.
 
 source('R/repwr.R');
-run(doc='repwr');  # generate data and figures for blog post
-run(doc='tech');   # generate data and figures for technical note
+run(doc='repwr',clean=T);  # generate data and figures for blog post
+run(doc='tech',clean=T);   # generate data and figures for technical note
 ```
 
 ## Figures
@@ -134,9 +136,9 @@ knitr::include_graphics('figure/readme/m=1e3/figure_016_small_telescopes_rag.png
 
 ## See Also
 
-A blog post discussing the approach and results is available in [html](https://natgoodman.github.io/repwr/repwr.html) and [pdf](https://natgoodman.github.io/repwr/repwr.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository and will soon be posted on a blog site TBD. It's also in the repository as files [repwr.html](repwr.html) and [repwr.pdf](repwr.pdf). (But note that GitHub, unlike GitHub Pages, renders html files as raw text).
+A blog post discussing the approach and results is available in [html](https://natgoodman.github.io/repwr/repwr.html) and [pdf](https://natgoodman.github.io/repwr/repwr.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository and will soon be posted on a blog site TBD. It's also in the repository as files [repwr.html](https://github.com/natgoodman/repwr/repwr.html) and [repwr.pdf](https://github.com/natgoodman/repwr/repwr.pdf). (But note that GitHub, unlike GitHub Pages, renders html files as raw text).
 
-A document with technical details will soon be available in [html](https://natgoodman.github.io/repwr/tech.html) and [pdf](https://natgoodman.github.io/repwr/tech.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) and in the repository as files [repwr.html](repwr.html) and [repwr.pdf](repwr.pdf).
+A document with technical details will soon be available in [html](https://natgoodman.github.io/repwr/tech.html) and [pdf](https://natgoodman.github.io/repwr/tech.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) and in the repository as files [repwr.html](https://github.com/natgoodman/repwr/repwr.html) and [repwr.pdf](https://github.com/natgoodman/repwr/repwr.pdf).
 
 ## Author
 
@@ -144,7 +146,7 @@ Nathan (Nat) Goodman, (natg at shore.net)
 
 ## Bugs and Caveats
 
-Please report any bugs, other problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/repwr/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistant.
+Please report any bugs, other problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/repwr/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistent.
 
 ## Copyright & License
 
