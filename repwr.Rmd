@@ -1,7 +1,7 @@
 ---
 title: "Replication Has Limited Power to Detect Bad Science"
 author: "Nathan (Nat) Goodman"
-date: "July 18, 2018"
+date: "July 25, 2018"
 output:
   pdf_document: default
   html_document:
@@ -22,15 +22,15 @@ I consider a basic replication scheme in which each original study is repeated o
 
 Various authors have proposed tests for deciding whether a replication succeeds or fails. These include significance testing of the replica study, seeing whether the observed effect size of one study falls in the confidence or prediction interval of the other, checking whether the confidence or prediction intervals of the two studies overlap, significance testing of the studies combined via meta-analysis, and comparing the observed effect size of the replica study with a "small telescope" threshold derived from the smallest true effect size the original study could have plausibly detected. 
 
-I simulate these rules (and more) across many replication conditions and compute false positive and false negative rates across a range of conditions. The simulations vary the samples size from 10 to 1000 and true effect size from 0 to 1; in total, I simulate 14,641 conditions each with $10^4$ simulated replications, for a grand total of almost 150 million simulated instances.
+I simulate these rules (and more) across many replication conditions and compute false positive and false negative rates across a range of conditions. The simulations vary the sample size from 10 to 1000 and true effect size from 0 to 1; in total, I simulate 14,641 conditions each with $10^4$ simulated replications, for a grand total of almost 150 million simulated instances.
 
 A replication is *exact* if the two studies are sampling the same population and *near-exact* if the populations differ slightly. This is an obvious replication scenario. You have a study that you think may be a false positive; to check it out, you repeat the study, typically with a larger sample size, taking care to ensure that the replica closely matches the original.
 
 A replication is *inexact* if the two studies are sampling very different populations. This scenario seems disconnected from the goal of validating an existing study. Since the populations are different, there's no reason to expect the studies to get similar answers and little basis for declaring a study invalid if the replication fails. What motivates this scenario, I think, is *generalizability* not validity. You have a study that demonstrates an interesting effect in a limited setting and want to know whether it generalizes to other settings.
 
-Significance testing of the replica works fine as a validation test for exact and near-exact replications, but error rates increase rapidly as the populations diverge. All other tests have excessive error rates under all conditions I analyzed. All tests have unacceptable error rates when used to check whether the replications are similar.
+Significance testing of the replica works fine as a validation test for exact and near-exact replications, but error rates increase rapidly as the populations diverge. All other tests have excessive error rates under all conditions I analyzed. All tests have unacceptable error rates when used to check whether the original and replica studies are similar.
 
-The software supporting this post is in my [repwr GitHub repository](https://github.com/natgoodman/repwr). A document with technical details will soon be available in  [html](https://natgoodman.github.io/repwr/tech.html) and [pdf](https://natgoodman.github.io/repwr/tech.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository.
+The software supporting this post is in my [repwr GitHub repository](https://github.com/natgoodman/repwr). A document with technical details will soon be available in  [html](https://natgoodman.github.io/repwr/tech.stable.html) and [pdf](https://natgoodman.github.io/repwr/tech.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository.
 
 ## Literature
 
@@ -50,7 +50,7 @@ Here are the main papers and blog posts that led to this work.
 
 The software first simulates *studies* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes true and false positive and negative rates for measures and conditions of interest.
 
-The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is standard normal with $mean=d_{pop} \ge0$. I then calculate basic statistics of interest, most notably the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups. The software simulates many studies (default $10^4$) for each combination of $n$ and $d_{pop}$. 
+The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is standard normal with $mean=d_{pop} \ge0$. I then calculate basic statistics of interest, most notably the *standardized observed effect size*, $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups. The software simulates many studies (default $10^4$) for each combination of $n$ and $d_{pop}$. 
 
 When I need to be pedantic, I use the terms *study instance* for each individual study and *study set* for the ensemble of study instances for a given combination of $n$ and $d_{pop}$.
 
@@ -65,8 +65,8 @@ After forming the pairwise replications, I apply *measures*, i.e., rules for dec
 This post focuses on eight measures that seem most important.
 
 - *sig2* - the second study of the pair has a significant p-value
-- *sigm* - the fixed effect meta-analyis of the studies has a significant p-value
-- *d1.c2* (resp. *d2.c1*) - $d1_{sdz}$ (resp. $d2_{sdz}$), the standardized observed effect size (aka Cohen's d) of the first (resp. second) study is in the confidence interval of the second (resp. first) study; my implementation of confidence intervals is based on Uri Simonsohn's [code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) supporting this [post](http://datacolada.org/20)
+- *sigm* - the fixed effect meta-analysis of the studies has a significant p-value
+- *d1.c2* (resp. *d2.c1*) - $d1_{sdz}$ (resp. $d2_{sdz}$), the standardized observed effect size (aka *Cohen's d*) of the first (resp. second) study is in the confidence interval of the second (resp. first) study; my implementation of confidence intervals is based on Uri Simonsohn's [code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) supporting this [post](http://datacolada.org/20)
 - *d1.p2* (resp. *d2.p1*) - $d1_{sdz}$ (resp. $d2_{sdz}$) is in the prediction interval of the second (resp. first) study; my implementation of prediction intervals adapts code from David Stanley's [predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval)
 - *c1.c2* (resp. *p1.p2*) - the confidence (resp. prediction) intervals of the two studies overlap
 
@@ -74,7 +74,7 @@ All measures assume that the first study is significant (*sig1* in my notation) 
 
 I briefly examine Uri Simonsohn's *small telescopes* method (*d2.scp1* in my notation) from his [paper](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) and [post](http://datacolada.org/42). My implementation is based on Uri's [code](http://urisohn.com/sohn_files/BlogAppendix/Colada42/%5b42%5d%20-%20Accepting%20the%20Null%20-%20R%20-%20Reproducibility%20project%20small%20telescope%20vs%20bayesian%202015%2010%2026.R) supporting that post. *Small telescopes*, unlike the others, assumes that *sig2* holds. For this reason, it needs a separate analysis.
 
-The software summarizes the results by counting the number of positive results for each measure, taking into account the assumptions in the preceding paragraph, and then converts the counts into pass rates. The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, which in turn requires an explicit statement as to which replication instances represent replications that should succeed vs. ones that should fail.
+The software summarizes the results by counting the number of positive results for each measure, taking into account the assumptions in the preceding paragraphs, and then converts the counts into pass rates. The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, which in turn requires an explicit statement as to which replication instances represent replications that should succeed vs. ones that should fail.
 
 ## Correctness Criteria
 
@@ -92,7 +92,7 @@ I'm tempted to ignore the second concern, but most proposed replication methods 
 Here are the precise technical definitions.
 
 1. *non-zero* - a replication instance is *true* if $d1_{pop}\ne0$, i.e., the population effect size of the first study is non-zero
-2. *same-effect* - a replication instance is *true* if $d1_{pop}=d2_{pop}$, i.e., both studies have the same population effect size; with *tolerance* $\delta$ a replication instance is *true* if $abs(d1_{pop}-d2_{pop})\le\delta$, i.e., the two population effect sizes differ by at most $\delta$
+2. *same-effect* - a replication instance is *true* if $d1_{pop}=d2_{pop}$, i.e., both studies have the same population effect size; with *tolerance* $\delta$, a replication instance is *true* if $abs(d1_{pop}-d2_{pop})\le\delta$, i.e., the two population effect sizes differ by at most $\delta$
 
 Note that these criteria depend only on the population effect sizes.  
 
@@ -105,24 +105,24 @@ _Studies_
 - *study instance* is a single simulated study
 - $n$ is the sample size
 - $d_{pop}$ is the population effect size
-- $d_{sdz}$ is the standardized observed effect size (aka Cohen’s $d$)
+- $d_{sdz}$ is the standardized observed effect size (aka *Cohen’s d*)
 - *study set* is the set of study instances for a given $n$ and $d_{pop}$
 
 _Pairwise replications_
 
 - *pairwise replication instance* (or simply *replication instance*) is an ordered pair of study instances
 - *s1* and *s2* refer to the first and second study of the pair
-- $n1$, $d1_{pop}$, $d1_{sdz}$ are the sample size, population effect size, and Cohen’s $d$ of the first study
-- $n2$, $d2_{pop}$, $d2_{sdz}$ are the sample size, population effect size, and Cohen’s $d$ of the second study
+- $n1$, $d1_{pop}$, $d1_{sdz}$ are the sample size, population effect size, and *Cohen’s d* of the first study
+- $n2$, $d2_{pop}$, $d2_{sdz}$ are the sample size, population effect size, and *Cohen’s d* of the second study
 - *pairwise replication set* (or simply *replication set*) is the set of replication instances for a given $n1$, $n2$, $d1_{pop}$, and $d2_{pop}$
 - a replication instance or set is *exact* if $d1_{pop}=d2_{pop}$
 - *true* and *false* refer to the answers given by correctness criteria when applied to replication instances: *true instance* is an instance for which the criterion returns true; *false instance* is one for which the criterion returns  false
 - *positive* and *negative* refer to the results of applying measures to replication instances:  *positive instance* is an instance for which the measure returns true; *negative instance* is one for which the measure returns false
 - *true positive*, *false positive*, *true negative*, and *false negative* combine the notions of true vs. false and positive vs. negative instance. For a given correctness criterion and measure
     - *true positive instance* is a replication instance for which the correctness criterion and measure both return true
-    - *false positive instance* is an instance for which the correctness criterion is false but the measure returns true
+    - *false positive instance* is an instance for which the correctness criterion is false, but the measure returns true
     - *true negative instance* is an instance for which the correctness criterion and measure both return false 
-    - *false negative instance* is an instance for which the correctness criterion is true but the measure returns false
+    - *false negative instance* is an instance for which the correctness criterion is true, but the measure returns false
 
 _Correctness criteria_
 
@@ -131,6 +131,7 @@ _Correctness criteria_
 - for *non-zero*
     - *false positive* occurs when $d1_{pop}=0$, but the measure returns true
     - *false negative* occurs when $d1_{pop}\neq0$, but the measure returns false
+    
 -for *same-effect* with tolerance $\delta$
     - *false positive* occurs when $abs(d1_{pop}-d2_{pop})>\delta$, but the measure returns true
     - *false negative* occurs when $abs(d1_{pop}-d2_{pop})\le\delta$, but the measure returns false
@@ -179,9 +180,9 @@ knitr::include_graphics('figure/repwr/m=1e4/figure_006_nonzro_exact_fnr_n1=40_he
 
 As one would expect, performance improves as sample and effect sizes grow. The heatmaps for the larger sizes show a lot of red, telling us that many measures have acceptable false negative rates under these conditions.
 
-For a measure to be usable, both error rates must be acceptable.  Let's compare the heatmaps for false positive and false negatives - figures 3-4 and 5-6. The only measure that is mostly red across all four figures is *sig2*; *d1.c2*, which looked good for false positives, is consistently bad for false negatives.
+For a measure to be usable, both error rates must be acceptable.  Let's compare the heatmaps for false positives and false negatives - figures 3-4 and 5-6. The only measure that is mostly red across all four figures is *sig2*; *d1.c2*, which looked good for false positives, is consistently bad for false negatives.
 
-So far so good, but I've only shown data for a few values of $n1$. To see more conditions, I use a *rate-vs-rate* graph, inspired by *receiver operating characteristic (ROC)* curves, to  plot false negative vs. false positive rates for a large range of conditions.  See figure 7. The data in this figure extends the cases shown above: $n1$ varies from 20-160 in steps of 20, $n2$ is $2.5\ or\ 5 \times n1$, $d1_{pop}$ and $d2_{pop}$ range from 0 to 1 in steps of 0.1 with the constraint $d1_{pop}=d2_{pop}$. Each point shows the mean false negative vs. mean false positive rate for these conditions grouped by $n1,n2$. The rationale for grouping by $n1,n2$ is they are the only observable parameters. The dashed lines demark the conventionally acceptable error rates: 0.05 for false positives and 0.2 for false negatives; the bottom left hand corner is the region where both error rates are acceptable. 
+So far so good, but I've only shown data for a few values of $n1$. To see more conditions, I use a *rate-vs-rate* plot, inspired by *receiver operating characteristic (ROC)* curves, to  plot false negative vs. false positive rates for a large range of conditions.  See figure 7. The data in this figure extends the cases shown above: $n1$ varies from 20-160 in steps of 20, $n2$ is $2.5\ or\ 5 \times n1$, $d1_{pop}$ and $d2_{pop}$ range from 0 to 1 in steps of 0.1 with the constraint $d1_{pop}=d2_{pop}$. Each point shows the mean false negative vs. mean false positive rate for these conditions grouped by $n1,n2$. The rationale for grouping by $n1,n2$ is they are the only observable parameters. The dashed lines demark the conventionally acceptable error rates: 0.05 for false positives and 0.2 for false negatives; the bottom left hand corner is the region where both error rates are acceptable. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/repwr/m=1e4/figure_007_nonzro_exact_roc.png');
@@ -205,7 +206,7 @@ with(drat.t,cor(sig2,power))
 
 #### Inexact replications
 
-For inexact replications there are more cases to consider since $d1_{pop}$ and $d2_{pop}$ can vary independently. I'll jump straight to rate-vs-rate graphs to cover the ground succinctly using the same values of $n1$ and $n2$ as above, namely, $n1$ varies from 20-160 in steps of 20, and $n2$ is $2.5\ or\ 5 \times n1$.
+For inexact replications there are more cases to consider since $d1_{pop}$ and $d2_{pop}$ can vary independently. I'll jump straight to rate-vs-rate plots to cover the ground succinctly using the same values of $n1$ and $n2$ as above, namely, $n1$ varies from 20-160 in steps of 20, and $n2$ is $2.5\ or\ 5 \times n1$.
 
 Figures 8 shows the results: error rates are dreary in all conditions.
 
@@ -215,11 +216,11 @@ knitr::include_graphics('figure/repwr/m=1e4/figure_008_nonzro_inexact_roc.png');
 
 #### Near exact replications
 
-It seems odd that *sig2* works fine for *non-zero* in exact replications but so poorly in inexact ones.  What if we try *near exact replications*, ones where $d1_{pop}$ and $d2_{pop}$ differ slightly? Figure 9 shows the results for nearness ranging from *exact* to fully *inexact* with steps in between. The figure is a rate-vs-rate graph that shows a single measure (*sig2*) across the various nearness values.
+It may seem odd that *sig2* works fine for *non-zero* in exact replications but so poorly in inexact ones.  What if we try *near exact replications*, ones where $d1_{pop}$ and $d2_{pop}$ differ slightly? Figure 9 shows the results for nearness ranging from *exact* to fully *inexact* with steps in between. The figure is a rate-vs-rate plot that shows a single measure (*sig2*) across the various nearness values.
 
 The results are discouraging. It doesn't take much separation to exceed acceptable error rates. When $d1_{pop}$ and $d2_{pop}$ differ by as little as 0.05, about half the points lie beyond the acceptable 0.05 false positive rate; by time we get to 0.2, all points are bad.
 
-What's going on is a consequence of power. The data in the rate-vs-rate graphs vary $n2$ from 50 to 800. With $d2_{pop}=0.05$, *sig2* has 12% power at $n2=500$ and 17% at $n2=800$.  This is anemic from the usual power standpoint but is plenty to drive *sig2*'s false positive rate beyond 0.05. Figure 11 illustrates the point by graphing *sig2*'s mean false positive rate grouped by $n2$ vs. $n2$. False positive rate is fine across the whole graph for *exact*  and until $n2>400$ or so for $nearness=0.05$, but quickly exceeds the acceptable error threshold for larger separations.
+What's going on is a consequence of power. The data in the rate-vs-rate plots vary $n2$ from 50 to 800. With $d2_{pop}=0.05$, *sig2* has 12% power at $n2=500$ and 17% at $n2=800$.  This is anemic from the usual power standpoint but is plenty to drive *sig2*'s false positive rate beyond 0.05. Figure 11 illustrates the point by graphing *sig2*'s mean false positive rate grouped by $n2$ vs. $n2$. False positive rate is fine across the whole graph for *exact*  and until $n2>400$ or so for $nearness=0.05$, but quickly exceeds the acceptable error threshold for larger separations.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/repwr/m=1e4/figure_009_nonzro_nearexact_rocm.png');
@@ -228,7 +229,7 @@ knitr::include_graphics('figure/repwr/m=1e4/figure_010_nonzro_nearexact_ragm.png
 
 ### Replication used to check effect size
 
-I now turn to the second correctness criterion, *same-effect*, which tests whether the population effect sizes of the replica and original studies are similar. Figures 11-14 show rate-vs-rate graphs for two values of $\delta$ (0.1 or 0.5), and for fully inexact replications (figures 11-12) and assuming $d2_{pop} \le d1_{pop}$ (figures 13-14). The rationale for showing $\delta=0.1$ is that this is the largest nearness value with any acceptable points in the *non-zero* analysis; the rationale for $\delta=0.5$ is this is the difference between *small* and *large* effect sizes in *Cohen's d* terminology. The assumption $d2_{pop} \le d1_{pop}$ reflects the view that investigators, consciously or not, tend to do original studies with populations that best exhibit the phenomenon of interest  
+I now turn to the second correctness criterion, *same-effect*, which tests whether the population effect sizes of the replica and original studies are similar. Figures 11-14 show rate-vs-rate plots for two values of $\delta$ (0.1 or 0.5), and for fully inexact replications (figures 11-12) and assuming $d2_{pop} \le d1_{pop}$ (figures 13-14). The rationale for showing $\delta=0.1$ is this is the largest nearness value with any acceptable points in the *non-zero* analysis; the rationale for $\delta=0.5$ is this is the difference between *small* and *large* effect sizes in *Cohen's d* terminology. The assumption $d2_{pop} \le d1_{pop}$ reflects the view that investigators, consciously or not, tend to do original studies with populations that best exhibit the phenomenon of interest  
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/repwr/m=1e4/figure_011_sameff_nearexact_unconstrained_delta=0.1.png');
@@ -237,7 +238,7 @@ knitr::include_graphics('figure/repwr/m=1e4/figure_013_sameff_nearexact_d2<=d1_d
 knitr::include_graphics('figure/repwr/m=1e4/figure_014_sameff_nearexact_d2<=d1_delta=0.5.png');
 ```
 
-The results are bad in all cases. Error rates are better for $\delta=0.5$ and with $d2_{pop} \le d1_{pop}$, but not enough.
+The results are bad in all cases. Error rates are better for $\delta=0.5$ and with $d2_{pop} \le d1_{pop}$ but not enough.
 
 ### Small telescopes
 
@@ -246,7 +247,7 @@ Uri Simonsohn's *small telescopes* method combines both correctness criteria in 
 1. *sig2* is positive (presumably to test *non-zero*) and 
 2. $d2_{sdz}$, the replica's observed effect size, exceeds a threshold deemed to be the smallest effect size likely to be observed if *same-effect* is true.
 
-Figures 15-18 compare *sig2* and *d2.scp1* for the two correctness criteria.  The figures reuse conditions from previous sections: for *non-zero*, I use nearness of 0.1; for *same-effect*, I use $\delta=0.5$ and with $d2_{pop} \le d1_{pop}$. Figures 15 and 17 are rate-vs-rate graphs; figures 16 and 18 show the same data as aggregate line graphs. 
+Figures 15-18 compare *sig2* and *d2.scp1* for the two correctness criteria.  The figures reuse conditions from previous sections: for *non-zero*, I use nearness of 0.1; for *same-effect*, I use $\delta=0.5$ and with $d2_{pop} \le d1_{pop}$. Figures 15 and 17 are rate-vs-rate plots; figures 16 and 18 show the same data as aggregate line graphs. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/repwr/m=1e4/figure_015_small_telescopes_nonzro_roc.png');
@@ -261,9 +262,9 @@ The differences are very small: *small telescopes* has almost no effect over and
 
 Replication is a poor statistical test. It works as a validation test only when the original and replica studies are sampling nearly identical populations. Methods for testing whether the populations are similar work poorly under all conditions analyzed.
 
-These dismal results are really not surprising once we examine replication in a statistical testing framework. When used for validation, we're drawing inferences about the original study from properties of the replica; it stands to reason this will only work if the two studies are very similar. When used to compare the two populations, we're trying to accurately estimate the two population effect sizes, a problem known to require very large samples - $n>3000$ by [Uri Simonsohn's calculations](http://datacolada.org/20). 
+These dismal results are not surprising once we examine replication in a statistical testing framework. When used for validation, we're drawing inferences about the original study from properties of the replica; it stands to reason this will only work if the two studies are very similar. When used to compare the two populations, we're trying to accurately estimate the difference between two population effect sizes, a problem known to require very large samples - $n>3000$ by [Uri Simonsohn's calculations](http://datacolada.org/20). 
 
-I see several ways my results might be wrong.  Perhaps I defined the wrong correctness criteria, or set the error thresholds too low, or analyzed the wrong conditions. I assumed throughout that all population effect sizes were equally likely within the range studied; perhaps a more nuanced distribution would improve the results.  The ever-present danger of software bugs also lurks. If you see a mistake, please let me know and I'll try to fix.
+I see several ways my results might be wrong.  Perhaps I defined the wrong correctness criteria, or set the error thresholds too low, or analyzed the wrong conditions. I assumed throughout that all population effect sizes were equally likely within the range studied; in particular, I didn't consider *publication bias* which may make smaller effect sizes more likely. Perhaps a more nuanced distribution would improve the results.  The ever-present danger of software bugs also lurks. If you see a mistake, please let me know and I'll try to fix.
 
 If correct, these results suggest that the replication movement needs to change goals or methods.  If the goal remains validation, it's essential that each replica closely match its original study.  This bodes ill for large, systematic replication efforts, which typically prioritize uniformity over fidelity to run lots of studies at reasonable cost. 
 
