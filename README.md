@@ -108,9 +108,9 @@ The final two figures (figures 15-16) compare *sig2* and *d2.scp1* (Uri Simonsoh
 See Also
 --------
 
-A blog post discussing the approach and results is available in [html](https://natgoodman.github.io/repwr/repwr.html) and [pdf](https://natgoodman.github.io/repwr/repwr.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository and will soon be posted on a blog site TBD. It's also in the repository as files [repwr.html](https://github.com/natgoodman/repwr/repwr.html) and [repwr.pdf](https://github.com/natgoodman/repwr/repwr.pdf). (But note that GitHub, unlike GitHub Pages, renders html files as raw text).
+A blog post discussing the approach and results is available in [html](https://natgoodman.github.io/repwr/repwr.stable.html) and [pdf](https://natgoodman.github.io/repwr/repwr.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository and will soon be posted on a blog site TBD. It's also in the repository as files [repwr.stable.html](https://github.com/natgoodman/repwr/repwr.stable.html) and [repwr.stable.pdf](https://github.com/natgoodman/repwr/repwr.stable.pdf). (But note that GitHub, unlike GitHub Pages, renders html files as raw text).
 
-A document with technical details will soon be available in [html](https://natgoodman.github.io/repwr/tech.html) and [pdf](https://natgoodman.github.io/repwr/tech.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) and in the repository as files [repwr.html](https://github.com/natgoodman/repwr/repwr.html) and [repwr.pdf](https://github.com/natgoodman/repwr/repwr.pdf).
+A document with technical details will soon be available in [html](https://natgoodman.github.io/repwr/tech.stable.html) and [pdf](https://natgoodman.github.io/repwr/tech.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) and in the repository as files [tech.stable.html](https://github.com/natgoodman/repwr/tech.stable.html) and [tech.stable.pdf](https://github.com/natgoodman/repwr/tech.stable.pdf).
 
 Author
 ------

@@ -3,10 +3,10 @@ title: "Replication Power"
 author: "Nathan (Nat) Goodman"
 date: "July 25, 2018"
 output:
+  pdf_document: default
+  html_document: default
   github_document:
     html_preview: no
-  html_document: default
-  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
@@ -136,9 +136,9 @@ knitr::include_graphics('figure/readme/m=1e3/figure_016_small_telescopes_rag.png
 
 ## See Also
 
-A blog post discussing the approach and results is available in [html](https://natgoodman.github.io/repwr/repwr.stable.html) and [pdf](https://natgoodman.github.io/repwr/repwr.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository and will soon be posted on a blog site TBD. It's also in the repository as files [repwr.html](https://github.com/natgoodman/repwr/repwr.stable.html) and [repwr.pdf](https://github.com/natgoodman/repwr/repwr.stable.pdf). (But note that GitHub, unlike GitHub Pages, renders html files as raw text).
+A blog post discussing the approach and results is available in [html](https://natgoodman.github.io/repwr/repwr.stable.html) and [pdf](https://natgoodman.github.io/repwr/repwr.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository and will soon be posted on a blog site TBD. It's also in the repository as files [repwr.stable.html](https://github.com/natgoodman/repwr/repwr.stable.html) and [repwr.stable.pdf](https://github.com/natgoodman/repwr/repwr.stable.pdf). (But note that GitHub, unlike GitHub Pages, renders html files as raw text).
 
-A document with technical details will soon be available in [html](https://natgoodman.github.io/repwr/tech.stable.html) and [pdf](https://natgoodman.github.io/repwr/tech.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) and in the repository as files [repwr.html](https://github.com/natgoodman/repwr/repwr.stable.html) and [repwr.pdf](https://github.com/natgoodman/repwr/repwr.stable.pdf).
+A document with technical details will soon be available in [html](https://natgoodman.github.io/repwr/tech.stable.html) and [pdf](https://natgoodman.github.io/repwr/tech.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) and in the repository as files [tech.stable.html](https://github.com/natgoodman/repwr/tech.stable.html) and [tech.stable.pdf](https://github.com/natgoodman/repwr/tech.stable.pdf).
 
 ## Author
 
