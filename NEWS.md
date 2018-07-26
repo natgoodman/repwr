@@ -1,16 +1,18 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-May 3, 2018
+July 25, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
-Release 0.93 2018-05-dd
+Release 1.00 2018-07-25
 -----------------------
 
+Supports the draft blog post, "Replication Has Limited Power to Detect Bad Science", sent to external readers for feedback.
+
+This version is nearly a complete rewrite of the previous version. Some highlights are
+
 -   Removed obsolete scripts including scope.R and distr.R
--   Added current script: repwr.R
--   Split repwr.R into separate files
--   Removed other obsolete files
+-   Added repwr.R and many other scripts
 -   For data, added current top-level files needed for analysis and plotting. Did not add data subdirectories as these are huge (261MB for m=1e3, 980MB for m=1e4) and not needed once the simulation is done
 
 Release 0.92 2018-01-01

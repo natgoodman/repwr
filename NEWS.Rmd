@@ -3,12 +3,12 @@ title: "Revision history for repwr repository"
 author: "Nathan (Nat) Goodman"
 date: "July 25, 2018"
 output:
-  github_document:
-    html_preview: no
+  pdf_document: default
   html_document:
     css: css/html_document.css
     highlight: kate
-  pdf_document: default
+  github_document:
+    html_preview: no
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
