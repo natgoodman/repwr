@@ -1,13 +1,18 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-July 25, 2018
+July 27, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
-Release 1.00 2018-07-25
+Release 1.00 2018-07-27
 -----------------------
 
 Supports the draft blog post, "Replication Has Limited Power to Detect Bad Science", sent to external readers for feedback.
+
+Release 0.93 2018-07-25
+-----------------------
+
+Release candidate
 
 This version is nearly a complete rewrite of the previous version. Some highlights are
 
