@@ -160,11 +160,9 @@ load_smry=function(file=NULL,n1,n2,d1,d2,id=NULL)
 get_smry=function(n1,n2,d1,d2,id=NULL,load=load.smry,keep=keep.smry,must.exist=T)
   get_nndd(n1,n2,d1,d2,id,what='smry',load,keep,must.exist);
 ##### posr - positive rate results
-save_posr=function(posr,
-                   from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
-                   id=NULL,file=NULL,
+save_posr=function(posr,id='std',file=NULL,
                    save=save.posr,save.txt=save.txt.posr,keep=keep.posr) {
-  if (missing(file)) base=basename_posr(from.type,relto.type,id)
+  if (missing(file)) base=basename_posr(id)
   else base=desuffix(file);
   file=filename(base=base,suffix='RData');
   if ((is.na(save)&!file.exists(file))|(!is.na(save)&save)) {
@@ -172,26 +170,24 @@ save_posr=function(posr,
     if (save.txt)
       write.table(posr,file=filename(base=base,suffix='txt'),sep='\t',quote=F,row.names=F);
   }
-  if (keep) keep_posr(posr,from.type,relto.type,id);
+  if (keep) keep_posr(posr,id);
   invisible(data);
 } 
 load_posr=
-  function(file=NULL,from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
-           id=NULL) {
-    if (is.null(file)) file=filename_posr(from.type,relto.type,id);
+  function(file=NULL,id='std') {
+    if (is.null(file)) file=filename_posr(id);
     what=load(file=file);               # what is name of saved data
     get(what);                          # return it
   }
 get_posr=
-  function(from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
-           id=NULL,load=load.posr,keep=keep.posr,must.exist=T) {
+  function(id='std',load=load.posr,keep=keep.posr,must.exist=T) {
     check_m();                            # check 'm' and 'datadir' consistent
     what='posr';
-    case=casename_posr(from.type,relto.type,id);
+    case=casename_posr(id);
     if (is.na(load)|load) {
       data=posr.list[[case]];
       if (is.null(data)) {
-        file=filename_posr(from.type,relto.type,id);
+        file=filename_posr(id);
         if (file.exists(file)) data=load_posr(file=file)
         else {
           if (must.exist)
@@ -199,7 +195,7 @@ get_posr=
                        'not in memory and file',file,'does not exist'));
           data=NULL;
         }
-        if (keep) keep_posr(data,from.type,relto.type,id);
+        if (keep) keep_posr(data,id);
       }}
     else {
       if (must.exist)
@@ -208,8 +204,8 @@ get_posr=
     }
     invisible(data);
   }
-keep_posr=function(data,from.type,relto.type,id=NULL) {
-  case=casename_posr(from.type,relto.type,id);
+keep_posr=function(data,id='std') {
+  case=casename_posr(id);
   what=paste(sep='.','posr',case);
   assign(what,data,envir=.GlobalEnv); # assign globally
   posr.list[[case]]<<-data;             # assign to global list
@@ -348,12 +344,11 @@ filename_smry=function(n1,n2,d1,d2,id=NULL,suffix='RData')
 basename_smry=function(n1,n2,d1,d2,id=NULL) basename_nndd(n1,n2,d1,d2,id,what='smry');
 casename_smry=casename_nndd;
 ##### posr
-filename_posr=function(from.type,relto.type,id=NULL,suffix='RData')
-  filename(base=basename_posr(from.type,relto.type,id),suffix=suffix);
-basename_posr=function(from.type,relto.type,id=NULL)
-  filename(posrdir,base='posr',tail=casename_posr(from.type,relto.type,id));
-casename_posr=function(from.type,relto.type,id=NULL) 
-  if (is.null(id)) paste(sep='_',from.type[1],relto.type[1]) else id;
+filename_posr=function(id='std',suffix='RData')
+  filename(base=basename_posr(id),suffix=suffix);
+basename_posr=function(id='std')
+  filename(posrdir,base='posr',tail=casename_posr(id));
+casename_posr=function(id='std') id;
 ##### data - arbitrary objects saved in datadir
 filename_data=function(what,id=NULL,suffix='RData')
   filename(basename_data(what,id),suffix=suffix);

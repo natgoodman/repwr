@@ -61,13 +61,10 @@
 ## plot.points tell whether to plot points on top of lines
 ## cex.points is cex for those extra points
 ## cex.single is cex for points drawn when there's only one x value
-## from.type, relto.type are smry types. single values or vectors keyed by mesr
 ## vline,hline are vectors of x or y positions for extra vertical or horizontal lines
 ##   quick hack to implement 'panels' in doc_repwr nonzro_exact_fnr section
 plotrate=
-  function(drat=NULL,posr=NULL,
-           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           posr.id='std',
+  function(drat=NULL,posr=NULL,posr.id='std',
            rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
            rate.type=cq(error,pos,neg,correct),rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,xdata=NULL,mesr=mesr.plotdflt,
@@ -161,9 +158,7 @@ plotrate=
     dev.cur();
   }
 heatrate=
-  function(drat=NULL,posr=NULL,
-           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           posr.id='std',
+  function(drat=NULL,posr=NULL,posr.id='std',
            rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
            rate.type=cq(error,pos,neg,correct),rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,xdata=NULL,mesr=mesr.heatdflt,
@@ -253,12 +248,9 @@ heatrate=
 ## title.desc is additional text added to title
 ## plot.points tells whether to plot points
 ## plot.lines tells whether to plot lines
-## from.type, relto.type are smry types. single values or vectors keyed by mesr
 ## mesr is vector of mesrs for plotroc, single measure for plotrocm
 plotroc=
-  function(drat=NULL,posr=NULL,
-           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           posr.id='std',
+  function(drat=NULL,posr=NULL,posr.id='std',
            rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
            rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.rocdflt,
@@ -305,9 +297,7 @@ plotroc=
     dev.cur();
   }
 plotrocm=
-  function(posr=NULL,
-           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           posr.id='std',
+  function(posr=NULL,posr.id='std',
            rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
            rate.tol=0,mesr='sig2',
            xdata,
@@ -376,12 +366,9 @@ plotrocm=
 ## title.desc is additional text added to title
 ## plot.points tells whether to plot points
 ## plot.lines tells whether to plot lines
-## from.type, relto.type are smry types. single values or vectors keyed by mesr
 ## mesr is vector of mesrs for plotroc, single measure for plotrocm
 plotrag=
-  function(drat=NULL,posr=NULL,
-           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           posr.id='std',
+  function(drat=NULL,posr=NULL,posr.id='std',
            rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
            rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.ragdflt,
@@ -456,9 +443,7 @@ plotrag=
     dev.cur();
   }
 plotragm=
-  function(posr=NULL,
-           from.type=parent(mesr.fromtype,'bsln'),relto.type=parent(mesr.reltotype,'sig1'),
-           posr.id='std',
+  function(posr=NULL,posr.id='std',
            rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
            rate.tol=0,mesr='sig2',
            xdata,

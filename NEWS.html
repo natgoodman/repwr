@@ -111,6 +111,17 @@ $(document).ready(function () {
 
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+<div id="release-1.01-2018-08-dd" class="section level2">
+<h2>Release 1.01 2018-08-DD</h2>
+<p>Bug fixes and code cleanup</p>
+<ul>
+<li>Setting <code>from.type</code>, <code>relto.type</code> in plot functions does not select desired posr
+<ul>
+<li>Bug caused by conflicting parameter defaults. plot and related functions provide defaults for <code>from.type</code>, <code>relto.type</code>, <code>posr.id</code> and pass the default values to called functions. By the time the values make it to <code>get_posr</code> which does the work, it looks like all three parameters were set by the original caller. <code>get_posr</code> calls <code>casename_posr</code> which lets <code>id</code> supersede the others</li>
+<li>Opted for simplest solution. Always use <code>posr.id</code> to identify <code>posr</code>. Give up trying to use <code>from.type</code>, <code>relto.type</code>.</li>
+</ul></li>
+</ul>
+</div>
 <div id="release-1.00-2018-07-27" class="section level2">
 <h2>Release 1.00 2018-07-27</h2>
 <p>Supports the draft blog post, “Replication Has Limited Power to Detect Bad Science”, sent to external readers for feedback.</p>

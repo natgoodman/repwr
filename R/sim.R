@@ -306,15 +306,16 @@ doposr=function(smry=NULL) {
 
 ## get or contruct one positive rate objects and optionally save & keep
 ## from, relto are smry types. should be single valued unless id set
-## id used to create file and saved object. if missing, set from from.type, relto.type 
+## posr.id used to create file and saved object. if missing, set from from.type, relto.type 
 do_posr=
   function(smry,from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
-           id=NULL,mesr=mesr.all) {
+           posr.id=NULL,mesr=mesr.all) {
+    if (is.null(posr.id)) posr.id=paste(sep='_',from.type[1],relto.type[1]);
     ## use saved posr if exists and args permit
-    posr=get_posr(from.type,relto.type,id,must.exist=F);
+    posr=get_posr(posr.id,must.exist=F);
     if (!is.null(posr)) return(invisible(posr));
     ## no saved posr or args say not to use it. construct posr
-    if (verbose) print(paste(sep=' ','+++ doposr',casename_posr(from.type,relto.type,id)));
+    if (verbose) print(paste(sep=' ','+++ doposr',casename_posr(posr.id)));
     ## make sure measures & types legal and limit to type we need
     from.type=check_type(from.type,mesr,multiok=T);
     relto.type=check_type(relto.type,mesr,multiok=T);
@@ -336,7 +337,7 @@ do_posr=
     xdata=smry.bytype[[1]][,cq(n1,n2,d1,d2)];
     posr=data.frame(xdata,posr);
     ## optionally save posr and add to in-memory list. usually do
-    save_posr(posr,from.type,relto.type,id);
+    save_posr(posr,posr.id);
     invisible(posr);
   }
 

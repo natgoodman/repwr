@@ -39,9 +39,7 @@
 ##   'false.first','true.first' means move false (resp. true) cases first if x='auto'
 ## x tells which x variable drives the plot, or use x vars as given, or select automatically
 data_rate=
-  function(posr=NULL,
-           from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
-           posr.id=parent(posr.id,'std'),
+  function(posr=NULL,posr.id=parent(posr.id,'std'),
            rate.rule=parent(rate.rule,'raw'),
            rate.type=parent(rate.type,'pos'),rate.tol=parent(rate.tol,0),
            truedd.multi=parent(truedd.multi,'false.first'),
@@ -50,7 +48,7 @@ data_rate=
            xdata=parent(xdata,NULL),mesr=parent(mesr)) {
     ## init(must.exist=T);            # make sure environment initialized
     check_mesr();                  # make sure measures legal
-    if (is.null(posr)) posr=get_posr(from.type,relto.type,posr.id);
+    if (is.null(posr)) posr=get_posr(posr.id);
     posr=posr_select();
     if (is.function(rate.rule)) true.dd=rate.rule(posr,rate.tol)
     else true.dd=true_dd(posr,rate.rule,rate.tol);
