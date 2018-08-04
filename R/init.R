@@ -32,12 +32,13 @@ init=function(
            readme=20*2^(0:4),               # 20,40,80,160,320 (5 values)
            repwr=c(10,20,50*1.454215^(0:8)),# 10,20,50,...,1000 (10 values)
            tech=10*2^(0:9),                 # 10,20,40,...,5120 (10 values)
-           xperiment=20*2^(0:4)),           # 20,40,80,160,320 (5 values)
+           xperiment=NA),                   # xperiment must supply values
   d=switch(docx,                            # population effect sizes
            readme=c(0,0.2,0.5,0.8,1),repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1),
-           xperiment=c(0,0.2,0.5,0.8,1)),
+           xperiment=NA),                   # xperiment must supply values
   m=switch(docx,                            # instances per study (ie, population)
-           readme=1e3,repwr=1e4,tech=1e4,xperiment=1e3),
+           readme=1e3,repwr=1e4,tech=1e4,
+           xperiment=NA),                   # xperiment must supply values
   ## analysis parameters
   sig.level=0.05,                   # for conventional significance
   conf.level=0.95,                  # for confidence intervals
@@ -86,7 +87,7 @@ init=function(
   save.smry=save,                # save analysis summary files (RData)
   save.posr=save,                # save positive rate files (RData)
   save.data=save,                # save top level results (RData & txt formats)
-  save.fig=save,                 # save figures (when called via dofig)
+  save.fig=T,                    # save figures (when called via dofig)
   save.txt=NA,                   # save results in txt format as well as RData
                                  #   NA means use default rule for type:
                                  #   F for all but top level data
@@ -112,7 +113,7 @@ init=function(
   clean=switch(docx,             # remove everything and start fresh
                readme=T,repwr=F,tech=F,xperiment=F),
   clean.data=clean,              # remove datadir & memlist
-  clean.figure=clean,            # remove figdir
+  clean.fig=clean,               # remove figdir
                                  # clean memlist cache - always safe but respect 'clean' param
   clean.memlist=(missing(clean)&missing(clean.data))|(clean&clean.data),
   clean.sim=F,                   # clean simulations. default F
@@ -124,10 +125,12 @@ init=function(
   clean.toplevel=F,              # clean top-level data. default F
   end=NULL                       # placeholder for last parameter
   ) {
-  ## round d, dsdz.grid to avoid imprecise decimals
-   ## round n since 1.454215^(0:8) generates fractions
-  d=round(d,digits=5); dsdz.grid=round(dsdz.grid,digits=5); n=round(n);
   doc=docx;                      # to avoid confusion later
+  if (doc=='xperiment'&any(is.na(c(n,d,m))))
+    stop('doc=xperiment but no value provided for n, d, or m');
+  ## round d, dsdz.grid to avoid imprecise decimals
+  ## round n since 1.454215^(0:8) generates fractions
+  d=round(d,digits=5); dsdz.grid=round(dsdz.grid,digits=5); n=round(n);
   ## assign parameters to global variables
   ## do it before calling any functions that rely on globals
   assign_global();
@@ -135,7 +138,7 @@ init=function(
   outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir,figdir);
   memlist=cq(sim.list,simr.list,si.list,detl.list,smry.list,posr.list,data.list);
   if (clean.data) unlink(datadir,recursive=T);
-  if (clean.figure) unlink(figdir,recursive=T);
+  if (clean.fig) unlink(figdir,recursive=T);
   if (clean.memlist) suppressWarnings(rm(list=memlist,envir=.GlobalEnv));
   ## clear init_smry & init_mesr flags so these will be rerun
   suppressWarnings(rm(list=cq(init.smry,init.mesr),envir=.GlobalEnv));
