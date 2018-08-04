@@ -7,8 +7,8 @@
 *.sav*
 foo*
 Untitled*
+data.Dropbox/
 data.local/
-xperiment/
 .DS_Store
 .fuse*
 .RData*
