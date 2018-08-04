@@ -21,8 +21,10 @@
 #################################################################################
 
 ## --- Generate Data ---
-dodata=function(...) {
-  init(...);               # process parameters & other initialization
+dodata=function(need.init=F,doc=parent(doc,'readme'),...) {
+  if (need.init)
+    ## for sandbox runs, use doc-specific init
+    if (doc=='xperiment') init_xperiment(doc=doc,...) else init(doc=doc,...);
   dopre();                 # precalculate or load global data
   dosim();                 # load saved simulations or do new ones
   dopost();                # post-simulation pipeline
@@ -295,7 +297,7 @@ doposr=function(smry=NULL) {
   ## 2) from sig1 relto sig1
   ## 3) from sig2 relto sig1
   ## 4) from sig2 relto sig2
-  do_posr(smry,from.type=mesr.fromtype,relto.type=mesr.reltotype,id='std')
+  do_posr(smry,from.type=mesr.fromtype,relto.type=mesr.reltotype,posr.id='std')
   do_posr(smry,from.type='sig1',relto.type='sig1');
   do_posr(smry,from.type='bsln',relto.type='sig1');
   do_posr(smry,from.type='sig2',relto.type='sig1');
