@@ -36,30 +36,28 @@ init_xperiment=init_uri_answer01=
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 doc_xperiment=doc_uri_answer01=
-  function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),fignew=parent(fignew,T),figsave=parent(figsave,F)) {
-    if (missing(fignew)) fignew=!figsave else if (missing(figsave)) figsave=!fignew;
+  function(sect=parent(sect,NULL),fignum=parent(fignum,1),fignew=parent(fignew,!save.fig)) {
     sect.all=c('20-50','20-500');
     if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
     mesr=cq(sig2,d2.scp1);
 ##### 20-50: n1=20, n2=50
     if ((figsect='20-50') %in% sect) {
-      n1=20; n2=50; d2=seq(0,1,0.1);
+      n1=20; n2=50; d1=d_sig(n1,0.05); d2=seq(0,1,0.1);
       d.33=uniroot(function(d0) p_d2t(n1,d=d1,d0,lower.tail=F)-0.33,interval=c(0,10))$root;
       d.scp=uniroot(function(d) p_d2t(n2,d,d0=d.33)-0.05,c(-10,10))$root;
       dofig(plotrate,'20-50_fpr',rate.rule='nonzro',,rate.type='error',mesr=mesr,
             d1=0,d2=d2,n1=n1,n2=n2,vline=c(d.scp,d.33),vhlty='dashed',legend='topright');
-     dofig(plotrate,'20-50_fnr',rate.rule='nonzro',rate.type='error',mesr=mesr,
+      dofig(plotrate,'20-50_fnr',rate.rule='nonzro',rate.type='error',mesr=mesr,
             d1=0.5,d2=d2,n1=n1,n2=n2,vline=c(d.scp,d.33),vhlty='dashed',legend='topright');
    }
 ##### 20-500: n1=20, n2=500
     if ((figsect='20-500') %in% sect) {
-      n1=20; n2=500; d2=seq(0,1,0.1);
+      n1=20; n2=500; d1=d_sig(n1,0.05); d2=seq(0,1,0.1);
       d.33=uniroot(function(d0) p_d2t(n1,d=d1,d0,lower.tail=F)-0.33,interval=c(0,10))$root;
       d.scp=uniroot(function(d) p_d2t(n2,d,d0=d.33)-0.05,c(-10,10))$root;
       dofig(plotrate,'20-50_fpr',rate.rule='nonzro',,rate.type='error',mesr=mesr,
             d1=0,d2=d2,n1=n1,n2=n2,vline=c(d.scp,d.33),vhlty='dashed',legend='topright');
-     dofig(plotrate,'20-50_fnr',rate.rule='nonzro',rate.type='error',mesr=mesr,
+      dofig(plotrate,'20-50_fnr',rate.rule='nonzro',rate.type='error',mesr=mesr,
             d1=0.5,d2=d2,n1=n1,n2=n2,vline=c(d.scp,d.33),vhlty='dashed',legend='topright');
     }
     sect;
