@@ -37,6 +37,7 @@ source('R/util.R');
 ## run the program
 ## parameters defined in init
 run=function(...) {
-  dodata(...);             # generate data - ie, run simulation
-  dodoc(...);              # generate figures for doc
+  init(...);
+  dodata(need.init=F,...);             # generate data - ie, run simulation
+  dodoc(need.init=F,...);              # generate figures for doc
 }
