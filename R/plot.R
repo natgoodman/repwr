@@ -62,6 +62,7 @@
 ## cex.points is cex for those extra points
 ## cex.single is cex for points drawn when there's only one x value
 ## vline,hline are vectors of x or y positions for extra vertical or horizontal lines
+## vhlty is lty for these extra lines
 ##   quick hack to implement 'panels' in doc_repwr nonzro_exact_fnr section
 plotrate=
   function(drat=NULL,posr=NULL,posr.id='std',
@@ -75,7 +76,7 @@ plotrate=
            xaxt=cq(auto,n,r,s,R),xaxt.max=11,
            smooth=c(cq(aspline,loess,none),TRUE,FALSE),
            plot.points=F,cex.points=0.75,cex.single=1,
-           vline=NULL,hline=NULL,
+           vline=NULL,hline=NULL,vhlty='solid',
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            legend.where='bottomright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
@@ -153,8 +154,8 @@ plotrate=
     ## mesr_legend(ydata,where=legend.where,x=x.legend,y=y.legend);
     mesr_legend(mesr,where=legend.where,x=x.legend,y=y.legend);
     if (plot.cutoff) abline(h=cutoff,lty='dashed',lwd=0.5);
-    ## plot extra lines if desired. nop if vlinr, hline NULL
-    abline(v=vline,h=hline); 
+    ## plot extra lines if desired. nop if vline, hline NULL
+    abline(v=vline,h=hline,lty=vhlty); 
     dev.cur();
   }
 heatrate=
@@ -168,7 +169,7 @@ heatrate=
            fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),cutoff=0.05,
            smooth=c(cq(auto,none),0,1,FALSE),
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
-           vline=NULL,hline=NULL,
+           vline=NULL,hline=NULL,vhlty='solid',
            legend.where='farright',x.legend=NULL,y.legend=NULL,cex.legend=0.75) {
     ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
@@ -222,8 +223,8 @@ heatrate=
     abline(h=y+0.5,lty='dotted',col='lightgray',lwd=0.75);
     abline(v=x+0.5,lty='dotted',col='lightgray',lwd=0.75);
     heat_legend(legend.coord);
-    ## plot extra lines if desired. nop if vlinr, hline NULL
-    abline(v=vline,h=hline); 
+    ## plot extra lines if desired. nop if vline, hline NULL
+    abline(v=vline,h=hline,lty=vhlty); 
     dev.cur();
   }
 ## 
