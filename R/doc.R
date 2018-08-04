@@ -27,13 +27,13 @@
 ##   if only one of fignew, figsave set, other is set to complement
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
-  function(sect=NULL,clean=F,fignum=1,doc=parent(doc,'readme'),
-           fignew=if (doc=='readme') T else F,figsave=T,clean.figure=figsave,
+  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=1,
+           fignew=if (doc=='readme') T else F,
            docfun=get(paste(sep='_','doc',doc)),...) {
-    if (missing(fignew)&!missing(figsave)) fignew=!figsave;
-    if (!missing(fignew)&missing(figsave)) figsave=!fignew;
-    if (missing(clean.figure)) clean.figure=figsave;
-    init(doc=doc,clean=clean,clean.figure=clean.figure,...);
+    if (need.init) {
+      ## for sandbox runs, use doc-specific init
+      if (doc=='xperiment') init_xperiment(doc=doc,...) else init(doc=doc,...);
+    }
     docfun();
 }
 ## --- Document Functions ---
@@ -44,8 +44,7 @@ dodoc=
 ##   works only because no plot-function arg matches it
 dofig=
   function(figfun,figname=NULL,figsect=parent(figsect,NULL),fignum=parent(fignum,1),
-           fignew=parent(fignew,F),figsave=parent(figsave,save.fig),
-           id=parent(id,NULL),
+           fignew=parent(fignew,F),id=parent(id,NULL),
            ...) {
     figname=paste(collapse='_',c(figsect,figname));
     if (fignew) dev.new();
@@ -56,7 +55,7 @@ dofig=
       if (length(dev)==1) filename_fig(figname,fignum,id)
       else sapply(seq_along(dev), function(i) filename_fig(figname,fignum,id));
     for (i in seq_along(dev)) {
-      if ((is.na(figsave)&!file.exists(file[i]))|(!is.na(figsave)&figsave))
+      if ((is.na(save.fig)&!file.exists(file[i]))|(!is.na(save.fig)&save.fig))
         savePlot(file[i],device=dev[i]);
     }
     assign_parent(fignum,fignum+length(dev));
@@ -64,14 +63,14 @@ dofig=
   }
 ## NOT YET PORTED
 ## run data-making function, save if required, store result in global workspace
-dodata=function(what) {
-  what=as.character(pryr::subs(what));
-  f=get(what,envir=parent.frame(n=1),mode='function');
-  data=f();
-  what=sub('^do_','',what);
-  if (save.data) save_data(data,what);
-  ## fiddle with name to get the form we want
-  assign(what,data,envir=.GlobalEnv);
-  invisible(data);
-}
+## dodata=function(what) {
+##   what=as.character(pryr::subs(what));
+##   f=get(what,envir=parent.frame(n=1),mode='function');
+##   data=f();
+##   what=sub('^do_','',what);
+##   if (save.data) save_data(data,what);
+##   ## fiddle with name to get the form we want
+##   assign(what,data,envir=.GlobalEnv);
+##   invisible(data);
+## }
 
