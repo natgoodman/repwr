@@ -25,12 +25,12 @@ run=function(save.fig=T,clean.fig=save.fig,...) {
 }
 ## init for this sandbox
 init_xperiment=init_hack_proptrue=
-  function(doc='xperiment',clean=F,clean.fig=F,...) {
+  function(doc='xperiment',...) {
     subdoc='hack_proptrue';
     init(doc='xperiment',
          n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=1e3,mdir=paste_nv(m,m_pretty(m)),
-         datadir=filename('data',docx,subdoc,mdir),figdir=filename('figure',docx,subdoc,mdir),
-         clean=clean,clean.fig=clean.fig,...);
+         datadir=filename('data','xperiment',subdoc,'m=1e3'),
+         figdir=filename('figure','xperiment',subdoc,'m=1e3'),...);
   }
 ## NG 18-07-21: quick hack to look at increasing number of false positives
 ##   for n=20,40 and d=0, runs dosim1 repeatedly to get 90% positives (default 900 out of 1000)
@@ -61,20 +61,19 @@ dosim=function() {
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 doc_xperiment=doc_hack_proptrue=
-  function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),fignew=parent(fignew,T),figsave=parent(figsave,F)) {
-    if (missing(fignew)) fignew=!figsave else if (missing(figsave)) figsave=!fignew;
-    sect.all=cq(plotrate,heatrate,roc,multi_sig2,small_telescopes);
-    if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+    function(sect=parent(sect,NULL),fignum=parent(fignum,1),fignew=parent(fignew,!save.fig)) {
+      sect.all=cq(plotrate,heatrate,roc,multi_sig2,small_telescopes);
+      if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+      xfigdir=figdir;
 #################### nonzro
 ##### plotrate
-    if ((figsect='plotrate') %in% sect) {
-      doc='readme'; init(doc=doc); 
+      if ((figsect='plotrate') %in% sect) {
+      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T); 
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,legend='topright')
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=40,n2=100,legend='topright')
-      doc='xperiment'; init(doc=doc); 
+      init_xperiment(clean=F,clean.memlist=T); 
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,legend='topright')
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
@@ -82,12 +81,12 @@ doc_xperiment=doc_hack_proptrue=
    }
 ##### heatrate
     if ((figsect='heatrate') %in% sect) {
-      doc='readme'; init(doc=doc); 
+      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T); 
       dofig(heatrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,smooth=F)
       dofig(heatrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=40,n2=100,smooth=F)
-      doc='xperiment'; init(doc=doc); 
+      init_xperiment(clean=F,clean.memlist=T); 
       dofig(heatrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,smooth=F)
       dofig(heatrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
@@ -96,17 +95,17 @@ doc_xperiment=doc_hack_proptrue=
 #####  plotroc
     if ((figsect='roc') %in% sect) {
       xdata=xdata_xperiment(near=0);
-      doc='readme'; init(doc=doc); 
+      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
       dofig(plotroc,'exact',title.desc=paste('exact',doc),rate.rule='nonzro',
             xdata=xdata);
-      doc='xperiment'; init(doc=doc); 
+      init_xperiment(clean=F,clean.memlist=T); 
       dofig(plotroc,'exact',title.desc=paste('exact',doc),,rate.rule='nonzro',
             xdata=xdata);
       xdata=xdata_xperiment(near=1);
-      doc='readme'; init(doc=doc); 
+      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
       dofig(plotroc,'inexact',title.desc=paste('inexact',doc),rate.rule='nonzro',
             xdata=xdata);
-      doc='xperiment'; init(doc=doc); 
+      init_xperiment(clean=F,clean.memlist=T);
       dofig(plotroc,'inexact',title.desc=paste('inexact',doc),,rate.rule='nonzro',
             xdata=xdata);
 
@@ -117,26 +116,26 @@ doc_xperiment=doc_hack_proptrue=
       near=round(c(0.01,0.05,0.1,0.2),digits=5);
       xdata=lapply(c(0,near,1),function(near) xdata=xdata_xperiment(near=near));
       names(xdata)=c('exact',paste(sep=' ','near',near),'inexact');
-      doc='readme'; init(doc=doc); 
+      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
       dofig(plotrocm,'rocm',rate.rule='nonzro',xdata=xdata,title.desc=paste('near',doc),
             mesr='sig2');
       dofig(plotragm,'ragm',rate.rule='nonzro',xdata=xdata,title.desc=paste('near',doc),
              smooth='aspline',mesr='sig2');
-      doc='xperiment'; init(doc=doc); 
+      init_xperiment(clean=F,clean.memlist=T);
       dofig(plotrocm,'rocm',rate.rule='nonzro',xdata=xdata,title.desc=paste('near',doc),
             mesr='sig2');
-       dofig(plotragm,'ragm',rate.rule='nonzro',xdata=xdata,title.desc=paste('near',doc),
-             smooth='aspline',mesr='sig2');
+      dofig(plotragm,'ragm',rate.rule='nonzro',xdata=xdata,title.desc=paste('near',doc),
+            smooth='aspline',mesr='sig2');
     }
 ##########
     if ((figsect='small_telescopes') %in% sect) {
       xdata=xdata_xperiment(near=0.1);
-      doc='readme'; init(doc=doc); 
+      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
       dofig(plotroc,'roc',rate.rule='nonzro',xdata=xdata,
             title.desc=paste('near=0.1',doc),mesr=cq(sig2,d2.scp1));
       dofig(plotrag,'rag',rate.rule='nonzro',xdata=xdata,
             title.desc=paste('near=0.1',doc),smooth='aspline',mesr=cq(sig2,d2.scp1));
-      doc='xperiment'; init(doc=doc); 
+      init_xperiment(clean=F,clean.memlist=T);
       dofig(plotroc,'roc',rate.rule='nonzro',xdata=xdata,
             title.desc=paste('near=0.1',doc),mesr=cq(sig2,d2.scp1));
       dofig(plotrag,'rag',rate.rule='nonzro',xdata=xdata,
