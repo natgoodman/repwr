@@ -33,7 +33,9 @@
 ##   error negates  'true' cases to get false negative rate
 ##                  'false' cases already are false positive rate
 ##   correct negates 'false' cases to get true negative rate
-##                   'true' cases already are true positive rate 
+##                   'true' cases already are true positive rate
+## rate.cvt tells whether to convert rate in data_rate or leave it to drat_order
+##   T or data_rate means do it here. set to F or drat_order for backwards compatibility
 ## truedd.multi tells what to do if rate implies mix of 'true' and 'false' cases
 ##   'error' means not allowed, 'asis' means ok but don't reorder,
 ##   'false.first','true.first' means move false (resp. true) cases first if x='auto'
@@ -42,24 +44,42 @@ data_rate=
   function(posr=NULL,posr.id=parent(posr.id,'std'),
            rate.rule=parent(rate.rule,'raw'),
            rate.type=parent(rate.type,'pos'),rate.tol=parent(rate.tol,0),
+           rate.cvt=c(cq(data_rate,drat_order),TRUE,FALSE),
            truedd.multi=parent(truedd.multi,'false.first'),
            x=parent(x,'auto'),
            n1=parent(n1),n2=parent(n2),d1=parent(d1),d2=parent(d2),
            xdata=parent(xdata,NULL),mesr=parent(mesr)) {
-    ## init(must.exist=T);            # make sure environment initialized
-    check_mesr();                  # make sure measures legal
     if (is.null(posr)) posr=get_posr(posr.id);
+    ## CAUTION: need cbind in case params have incompatible lengths. sigh...
+    if (is.null(xdata)) xdata=suppressWarnings(data.frame(cbind(n1,n2,d1,d2)));
+    check_mesr();                  # make sure measures legal
+    rate.cvt=if (is.logical(rate.cvt)) if (rate.cvt) 'data_rate' else 'drat_order'
+             else match.arg(rate.cvt);
     posr=posr_select();
     if (is.function(rate.rule)) true.dd=rate.rule(posr,rate.tol)
     else true.dd=true_dd(posr,rate.rule,rate.tol);
-    drat=data.frame(posr[,cq(i,n1,n2,d1,d2)],true.dd=true.dd,posr[,mesr,drop=F]);
+    if (rate.cvt=='data_rate') {
+      ## convert rate here instead of in drat_order
+      rate.type=match.arg(rate.type,cq(pos,neg,error,correct));
+      ydata=apply(posr[,mesr,drop=F],2,function(rate)
+        switch(rate.type,
+               pos=rate,                           # nothing to do
+               neg=1-rate,                         # negate everything
+               error=ifelse(true.dd,1-rate,rate),  # negate 'true' cases
+               correct=ifelse(true.dd,rate,1-rate) # negate 'false' cases
+               ));
+    } else ydata=posr[,mesr,drop=F];
+    drat=data.frame(posr[,cq(i,n1,n2,d1,d2)],true.dd=true.dd,ydata);
   }
 drat_order=
   function(drat,
            rate.rule=parent(rate.rule,'raw'),
            rate.type=parent(rate.type,'pos'),rate.tol=parent(rate.tol,0),
+           rate.cvt=c(cq(data_rate,drat_order),TRUE,FALSE),
            truedd.multi=parent(truedd.multi,'false.first'),x=parent(x,'auto'),
            mesr=parent(mesr)) {
+    rate.cvt=if (is.logical(rate.cvt)) if (rate.cvt) 'data_rate' else 'drat_order'
+             else match.arg(rate.cvt);
     ## sort based on x
     if (x=='auto') {
       ## set x to first var that can drive loop, else 'asis'
@@ -100,13 +120,15 @@ drat_order=
     rate.type=match.arg(rate.type,cq(pos,neg,error,correct));
     true.dd=drat$true.dd;
     xdata=drat[,cq(n1,n2,d1,d2)];
-    ydata=apply(drat[,mesr,drop=F],2,function(rate)
-      switch(rate.type,
-             pos=rate,                           # nothing to do
-             neg=1-rate,                         # negate everything
-             error=ifelse(true.dd,1-rate,rate),  # negate 'true' cases
-             correct=ifelse(true.dd,rate,1-rate) # negate 'false' cases
-      ));
+    if (rate.cvt=='drat_order') {
+      ydata=apply(drat[,mesr,drop=F],2,function(rate)
+        switch(rate.type,
+               pos=rate,                           # nothing to do
+               neg=1-rate,                         # negate everything
+               error=ifelse(true.dd,1-rate,rate),  # negate 'true' cases
+               correct=ifelse(true.dd,rate,1-rate) # negate 'false' cases
+               ));
+    } else ydata=drat[,mesr,drop=F];
     ## refine rate type if possible
     rate.type=rate_type();
     ## return everything that might be useful...
@@ -143,8 +165,10 @@ posr_select=
     posr=posr_prune();
     posr=posr_interp();
     ## filter posr and sort based on x. in database parlance, the merge is natural semijoin
+    ## BREAKPOINT()
     xdata$i=seq_len(nrow(xdata));
     posr=merge(posr,xdata);
+    ## BREAKPOINT()
     ## clamp pos.rate to [0,1]. interpolation can under- or over-shoot ;
     posr[,mesr]=apply(posr[,mesr,drop=F],c(1,2),function(y) max(min(y,1),0));
     invisible(posr);
