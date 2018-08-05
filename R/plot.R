@@ -88,7 +88,7 @@ plotrate=
     x=match.arg(x);
     xtitle=match.arg(xtitle);
     xaxt=match.arg(xaxt);
-    if (is.logical(smooth)) smooth=if (smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
+    smooth=if(is.logical(smooth)) if(smooth) 'aspline' else 'none' else match.arg(smooth);
     check_mesr();
     ## if (missing(xlim)) xlim=range(x);
     if (is.null(drat)) drat=drat_order(data_rate(posr));
@@ -167,7 +167,7 @@ heatrate=
            truedd.multi=c(cq(false.first,true.first,asis,error),FALSE),
            x=cq(auto,n1,n2,d1,d2,asis),xtitle=cq(none,auto,n,d,n1,n2,d1,d2),
            fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),cutoff=0.05,
-           smooth=c(cq(auto,none),0,1,FALSE),
+           smooth=c(cq(auto,none),0,1,TRUE,FALSE),
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            vline=NULL,hline=NULL,vhlty='solid',
            legend.where='farright',x.legend=NULL,y.legend=NULL,cex.legend=0.75) {
@@ -178,8 +178,8 @@ heatrate=
     truedd.multi=match.arg(truedd.multi); if (truedd.multi=='FALSE') truedd.multi='error';
     x=match.arg(x);
     xtitle=match.arg(xtitle);
-    smooth=as.character(smooth);
-    smooth=match.arg(smooth); if (smooth=='FALSE') smooth='none';
+    if (is.logical(smooth)) {smooth=if(smooth) 'auto' else 'none'}
+    else {smooth=as.character(smooth); smooth=match.arg(smooth);}
     check_mesr();
     if (is.null(drat)) drat=drat_order(data_rate(posr));
     xdata=drat$xdata; ydata=drat$ydata; true.dd=drat$true.dd; x=drat$x; rate.type=drat$rate.type;
@@ -203,6 +203,8 @@ heatrate=
     } else ycol=colnames(ydata);
     ## rownames(ydata)=x;
     ## log transform ydata so colors will work better
+    ## CAUTION: ydata must be matrix, not data.frame, else 'ifelse' produces list
+    ydata=as.matrix(ydata);
     ylog=ifelse(ydata<1e-2,2,-log10(ydata));
     x=seq_len(nrow(xdata));
     y=seq_len(ncol(ydata));
@@ -389,7 +391,7 @@ plotrag=
     ## x=match.arg(x);
     ## TODO: change to x=pmatch_arg(x);
     if (is.null(xlab)) xlab=NA;
-    if (is.logical(smooth)) smooth=if (smooth) 'loess' else 'none' else smooth=match.arg(smooth);
+    smooth=if(is.logical(smooth)) if(smooth) 'loess' else 'none' else smooth=match.arg(smooth);
     check_mesr();
     ## if (is.null(drat)) drat=data_rate(posr,rate.type='pos',truedd.multi='asis');
     ## true.dd=drat$true.dd; drat=drat$drat;
@@ -463,7 +465,7 @@ plotragm=
     rate.rule=match.arg(rate.rule);
     ## x=match.arg(x);
     if (is.null(xlab)) xlab=NA;
-    if (is.logical(smooth)) smooth=if (smooth) 'loess' else 'none' else smooth=match.arg(smooth);
+    smooth=if(is.logical(smooth)) if(smooth) 'loess' else 'none' else smooth=match.arg(smooth);
     check_mesr();
     if (length(mesr)>1)
       stop(paste(sep=' ','plotragm only plots a single measure, not',paste(collapse=', ',mesr)));
