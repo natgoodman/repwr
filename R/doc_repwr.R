@@ -36,7 +36,7 @@ doc_repwr=
       ## 2x2 panel for d=0
      dofig(plotrate,'n1=20_plot',rate.rule='nonzro',d=0,n1=20,n2=seq(50,by=50,len=10),
            legend='topright');
-      dofig(plotrate,'n1=40_plot',rate.rule='nonzro',d=0,n1=40,n2=seq(100,by=100,len=10),
+     dofig(plotrate,'n1=40_plot',rate.rule='nonzro',d=0,n1=40,n2=seq(100,by=100,len=10),
             legend='topright');
      dofig(heatrate,'n1=20_heat',rate.rule='nonzro',d=0,n1=20,n2=seq(50,by=50,len=10),
            smooth='none');
@@ -76,7 +76,7 @@ doc_repwr=
       names(xdata)=c('exact',paste(sep=' ','near',near),'inexact')
       dofig(plotrocm,'rocm',rate.rule='nonzro',xdata=xdata,title.desc='near exact',mesr='sig2');
       dofig(plotragm,'ragm',rate.rule='nonzro',xdata=xdata,title.desc='near exact',x='n2',
-            rate='fpr',mesr='sig2');
+            rate='fpr',smooth='loess',mesr='sig2');
     }
 ########## sameff
     if ((figsect='sameff_nearexact') %in% sect) {
@@ -98,13 +98,13 @@ doc_repwr=
       dofig(plotroc,'nonzro_roc',rate.rule='nonzro',xdata=xdata,
             title.desc='near=0.1',mesr=cq(sig2,d2.scp1));
       dofig(plotrag,'nonzro_rag',rate.rule='nonzro',xdata=xdata,
-            title.desc='near=0.1',mesr=cq(sig2,d2.scp1));
+            title.desc='near=0.1',smooth='none',mesr=cq(sig2,d2.scp1));
       xdata=xdata_repwr(near=1);
       xdata=subset(xdata,subset=d2<=d1);
       dofig(plotroc,'sameff_roc',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
             title.desc='d2 <= d1',mesr=cq(sig2,d2.scp1));
       dofig(plotrag,'sameff_rag',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
-            title.desc='d2 <= d1',mesr=cq(sig2,d2.scp1));
+            title.desc='d2 <= d1',smooth='none',mesr=cq(sig2,d2.scp1));
     }
     sect;
   }
