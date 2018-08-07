@@ -66,7 +66,7 @@
 ##   quick hack to implement 'panels' in doc_repwr nonzro_exact_fnr section
 plotrate=
   function(drat=NULL,posr=NULL,posr.id='std',
-           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.type=cq(error,pos,neg,correct),rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,xdata=NULL,mesr=mesr.plotdflt,
            truedd.multi=c(cq(false.first,true.first,asis,error),FALSE),
@@ -160,7 +160,7 @@ plotrate=
   }
 heatrate=
   function(drat=NULL,posr=NULL,posr.id='std',
-           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.type=cq(error,pos,neg,correct),rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,xdata=NULL,mesr=mesr.heatdflt,
            ## truedd.multi=cq(false.first,true.first,asis,error),
@@ -233,50 +233,54 @@ heatrate=
 ## plot ROC-like graph
 ## plotroc plots rate vs rate for multiple measures across one data swath
 ## plotrocm plots rate vs rate for single measure across multiple data swaths
+## plotrag draws line graphs of yaggregated rates for multiple measures across one data swath
+## plotragm draws line graphs of aggregated rates for single measure across multiple data swaths
 ## specify drat by explicit parameter or get it from posr
 ## specify posr by explicit parameter, or id or from, relto smry types
 ## xrate is rate to plot on x-axis. default 'fpr'
 ## yrate is rate to plot on y-axis. default 'fnr'
-## for plotroc, specify query (aka filter) by n1,n2,d1,d2 or xdata
+## for plotroc, plotrag - specify query (aka filter) by n1,n2,d1,d2 or xdata
 ##   n1,n2,d1,d2 - query is row-by-row combination
 ##   xdata - data.frame given desired combinations
 ##   nx is n multiplier: n2=nx*n1
 ##   d is synonym for d1, usually used when d1==d2
-## for plotrocm, specify query (aka filter) by xdata
+## for plotrocm, plotragm - specify query (aka filter) by xdata
 ##   xdata - list of data.frames given desired combinations
 ## xrate is rate plotted on x-axis. default 'fpr'
 ## yrate is rate plotted on y-axis. default 'fnr'
-## x tells which x variable to use for grouping when computing fpr,tpr points. default 'n2'
+## x tells which x variablse to use for grouping. default 'n1,n2'
+## x.empty, y.empty tell what to do if x or y rate empty
+##   usually means query fails to include both true and false cases
+##   error, warning - self explanatory
+##   nan - set to NaN - BAD IDEA in most cases
+##   number (typically 0,1) - convert to number
+## for plotrag, plotragm - smooth tells whether to smooth data to make plot prettier
+##   can be aspline, loess, none, T, F. default is aspline. T means aspline. F means none
+##   CAUTION: loess makes prettier plots but suppresses 'waviness' caused by jumps
+##            when n1 changes. to be safe, also try smooth='aspline' or plot.points
 ## fignum is figure number. if not NULL "Figure fignum" prepended to title
 ## title.desc is additional text added to title
 ## plot.points tells whether to plot points
 ## plot.lines tells whether to plot lines
-## mesr is vector of mesrs for plotroc, single measure for plotrocm
+## for plotroc, plotrag - mesr is vector of mesrs
+## for plotrocm, plotragm - mesr is single measure
 plotroc=
-  function(drat=NULL,posr=NULL,posr.id='std',
-           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+  function(drag=NULL,posr=NULL,posr.id='std',
+           rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.rocdflt,
            xdata=expand.grid(n1=n1,n2=n2,d1=d1,d2=d2),
-           ## x=cq(n2,n1,d1,d2),
            x=cq(n1,n2),
-           xrate='fpr',yrate='fnr',
+           xrate='fpr',yrate='fnr',x.empty='error',y.empty='error',
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
            plot.points=T,plot.lines=F,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=c(0,1),ylim=c(0,1)) {
-    ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
-    ## x=match.arg(x);
-    ## TODO: change to x=pmatch_arg(x);
     check_mesr();
-    ## if (is.null(drat)) drat=data_rate(posr,rate.type='pos',truedd.multi='asis');
-    ## true.dd=drat$true.dd; drat=drat$drat;
-    if (is.null(drat)) drat=data_rate(posr,rate.type='pos');
-    ## drat.byx=split(drat,drat[,x]);
-    drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
+    if (is.null(drag)) drag=data_agg(posr);
     if (is.null(title)) {
       if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
       title=paste(collapse="\n",c(fignum,title_rate(rate.type='roc'),title.desc));
@@ -285,7 +289,7 @@ plotroc=
          main=title,cex.main=cex.title,xlim=xlim,ylim=ylim);
     col=col.mesr[mesr];
     cex=cex.mesr[mesr];
-    x=rate2val(xrate); y=rate2val(yrate);
+    x=drag[[xrate]]; y=drag[[yrate]];
     if (plot.points) matpoints(x,y,col=col,cex=cex,pch=16);
     if (plot.lines) {
       lwd=lwd.mesr[mesr];
@@ -301,7 +305,7 @@ plotroc=
   }
 plotrocm=
   function(posr=NULL,posr.id='std',
-           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.tol=0,mesr='sig2',
            xdata,
            ## x=cq(n2,n1,d1,d2),
@@ -313,9 +317,7 @@ plotrocm=
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=c(0,1),ylim=c(0,1)) {
-    ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
-    ## x=match.arg(x);
     check_mesr();
     if (length(mesr)>1)
       stop(paste(sep=' ','plotrocm only plots a single measure, not',paste(collapse=', ',mesr)));
@@ -332,10 +334,8 @@ plotrocm=
     col=colorRampPalette(c('red',RColorBrewer::brewer.pal(min(8,n.xdata-1),'Dark2')))(n.xdata);
     sapply(seq_len(n.xdata),function(i) {
       xdata=xdata[[i]];
-      drat=data_rate(posr,rate.type='pos');
-      ## drat.byx=split(drat,drat[,x]);
-      drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
-      x=rate2val(xrate); y=rate2val(yrate);
+      drag=data_agg(posr);
+      x=drag[[xrate]]; y=drag[[yrate]];
       if (plot.points) matpoints(x,y,col=col[i],pch=16);
       if (plot.lines) matlines(x,y,col=col[i]);
     });
@@ -346,68 +346,32 @@ plotrocm=
     rocm_legend(names(xdata),col=col,where=legend.where,x=x.legend,y=y.legend,plot.points=T);
     dev.cur();
   }
-## 
-## plot aggregated rates. aggregation is same as in plotroc
-## plotrag plots aggregated rates for multiple measures across one data swath
-## plotragm plots aggregated rates for single measure across multiple data swaths
-## specify drat by explicit parameter or get it from posr
-## specify posr by explicit parameter, or id or from, relto smry types
-## x tells which x variable to use for grouping. default 'n2'
-## rate is rates to plot on y-axis. default 'fpr','fnr'
-## for plotrag, specify query (aka filter) by n1,n2,d1,d2 or xdata
-##   n1,n2,d1,d2 - query is row-by-row combination
-##   xdata - data.frame given desired combinations
-##   nx is n multiplier: n2=nx*n1
-##   d is synonym for d1, usually used when d1==d2
-## for plotragm, specify query (aka filter) by xdata
-##   xdata - list of data.frames giving desired combinations
-## smooth tells whether to smooth data to make plot prettier
-##   can be loess, aspline, none, T, F. default is loess. T means loess. F means none
-##   CAUTION: loess makes prettier plots but suppresses 'waviness' caused by jumps
-##            when n1 changes. to be safe, also try smooth='aspline' or plot.points
-## fignum is figure number. if not NULL "Figure fignum" prepended to title
-## title.desc is additional text added to title
-## plot.points tells whether to plot points
-## plot.lines tells whether to plot lines
-## mesr is vector of mesrs for plotroc, single measure for plotrocm
 plotrag=
-  function(drat=NULL,posr=NULL,posr.id='std',
-           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+  function(drag=NULL,posr=NULL,posr.id='std',
+           rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.tol=0,
            n1=n[1:5],n2=nx*n1,nx=2,d1=d,d2=d1,d=0.5,mesr=mesr.ragdflt,
            xdata=expand.grid(n1=n1,n2=n2,d1=d1,d2=d2),
-           ## x=cq(n2,n1,d1,d2),
            x=cq(n1,n2),
-           rate=cq(fpr,fnr),
+           rate=cq(fpr,fnr),rate.empty=rep('error',len=length(rate)),
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
-           smooth=c(cq(loess,aspline,none),TRUE,FALSE),
+           smooth=c(cq(aspline,loess,none),TRUE,FALSE),
            plot.points=F,plot.lines=T,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,ylab='rate',
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
-    ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
-    ## x=match.arg(x);
-    ## TODO: change to x=pmatch_arg(x);
-    if (is.null(xlab)) xlab=NA;
-    smooth=if(is.logical(smooth)) if(smooth) 'loess' else 'none' else smooth=match.arg(smooth);
     check_mesr();
-    ## if (is.null(drat)) drat=data_rate(posr,rate.type='pos',truedd.multi='asis');
-    ## true.dd=drat$true.dd; drat=drat$drat;
-    if (is.null(drat)) drat=data_rate(posr,rate.type='pos');
-    ## drat.byx=split(drat,drat[,x]);
-    drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
-    ## x=as.numeric(names(drat.byx));
-    labels=as.data.frame(apply(do.call(rbind,strsplit(names(drat.byx),' ')),2,as.numeric));
-    colnames(labels)=x;
+    if (is.null(drag)) drag=data_agg(posr);
+    if (is.null(xlab)) xlab=NA;
+    smooth=if(is.logical(smooth)) if(smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
+    labels=drag$byx;
+    ## sort by 'x' variables
     ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!
-    i=do.call(order,labels);
-    drat.byx=drat.byx[i];
-    labels=labels[i,];
-    ## x=seq_along(names(drat.byx));
-    x=seq_along(i);
-    y=sapply(rate,function(rate) rate2val(rate),simplify=F);
+    ix=do.call(order,labels);
+    labels=labels[ix,];
+    x=seq_along(ix);
     if (is.null(title)) {
       if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
       title=paste(collapse="\n",c(fignum,title_rate(rate.type='rag'),title.desc));
@@ -418,18 +382,18 @@ plotrag=
     xaxis(at=x,labels=labels,xlab=xlab);
     col=col.mesr[mesr];
     cex=cex.mesr[mesr];
-    lty=cq(solid,dashed,dotted,dotdash);
-    sapply(seq_along(rate),function(i) {
-      y=y[[i]];
+    lty=setNames(cq(solid,dashed,dotted,dotdash),rate);
+    sapply(rate,function(rate) {
+      y=drag[[rate]][ix,,drop=F];
       if (length(x)>1) {
         if (plot.lines) {
           lwd=lwd.mesr[mesr];
-          lty=lty[i];
+          lty=lty[rate];
           if (smooth=='none') {
             matlines(x,y,col=col,lwd=lwd,lty=lty);
           } else {
-          ## smooth ydata so the plot will look nicer
-          x.smooth=seq(min(x),max(x),len=100);
+            ## smooth ydata so the plot will look nicer
+            x.smooth=seq(min(x),max(x),len=100);
             if (smooth=='aspline') 
               y.smooth=asplinem(x,y,xout=x.smooth,method='improved')
             else y.smooth=loessm(x,y,xout=x.smooth);
@@ -447,26 +411,24 @@ plotrag=
   }
 plotragm=
   function(posr=NULL,posr.id='std',
-           rate.rule=cq(raw,nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni),
+           rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.tol=0,mesr='sig2',
            xdata,
-           ## x=cq(n2,n1,d1,d2),
            x=cq(n1,n2),
-           rate=cq(fpr,fnr),
+           rate=cq(fpr,fnr),rate.empty=rep('error',len=length(rate)),
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
-           smooth=c(cq(loess,aspline,none),TRUE,FALSE),
+           smooth=c(cq(aspline,loess,none),TRUE,FALSE),
            plot.points=F,plot.lines=T,lty=cq(solid,dotted,dotdash,longdash),lwd=2,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,
            ylab=if(length(rate)==1) rate2lab(rate) else 'rate',
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
-    ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
-    ## x=match.arg(x);
     if (is.null(xlab)) xlab=NA;
-    smooth=if(is.logical(smooth)) if(smooth) 'loess' else 'none' else smooth=match.arg(smooth);
+    smooth=if(is.logical(smooth)) if(smooth) 'aspline' else 'none' else smooth=match.arg(smooth);
     check_mesr();
+    if (is.null(posr)) posr=get_posr();
     if (length(mesr)>1)
       stop(paste(sep=' ','plotragm only plots a single measure, not',paste(collapse=', ',mesr)));
     if (is.data.frame(xdata))
@@ -484,33 +446,33 @@ plotragm=
       unique(apply(xdata[,x,drop=F],1,function(row) paste(collapse=' ',row))))));
     labels=as.data.frame(apply(do.call(rbind,strsplit(labels,' ')),2,as.numeric));
     colnames(labels)=x;
+    ## sort by 'x' variables
     ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!
-    i=do.call(order,labels);
-    labels=labels[i,,drop=F];
-    if (is.null(xlim)) xlim=range(i);
+    ix=do.call(order,labels);
+    labels=labels[ix,,drop=F];
+    if (is.null(xlim)) xlim=range(ix);
     plot(x=NULL,y=NULL,type='n',xlab=xlab,ylab=ylab,main=title,cex.main=cex.title,
          xlim=xlim,ylim=ylim,xaxt='n');
     xaxis(at=1:nrow(labels),labels=labels,xlab=xlab);
     n.xdata=length(xdata);
     col=colorRampPalette(c('red',RColorBrewer::brewer.pal(min(8,n.xdata-1),'Dark2')))(n.xdata);
+    lty=setNames(cq(solid,dashed,dotted,dotdash),rate);
     sapply(seq_len(n.xdata),function(i) {
       xdata=xdata[[i]];
       col=col[i];
-      drat=data_rate(posr,rate.type='pos');
-      ## drat.byx=split(drat,drat[,x]);
-      drat.byx=split(drat,apply(drat[,x,drop=F],1,function(row) paste(collapse=' ',row)));
-      labels=as.data.frame(apply(do.call(rbind,strsplit(names(drat.byx),' ')),2,as.numeric));
-      colnames(labels)=x;
+      drag=data_agg(posr);
+      ## CAUTION: don't set x before data_agg. assumes 'x' are grouping variables
+      x=seq_along(ix);
+      ## have to sort drag separately from labels above. order can be different!
+      labels=drag$byx;
       ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!
-      i=do.call(order,labels);
-      drat.byx=drat.byx[i];
-      x=1:length(i);
-      y=sapply(rate,function(rate) rate2val(rate),simplify=F);
-      sapply(seq_along(rate),function(i) {
-        y=y[[i]];
+      ix=do.call(order,labels);
+      sapply(rate,function(rate) {
+        ## sort by 'x' variables
+        y=drag[[rate]][ix,,drop=F];
         if (length(x)>1) {
           if (plot.lines) {
-            lty=lty[i];
+            lty=lty[rate];
             if (smooth=='none') {
               matlines(x,y,col=col,lty=lty,lwd=lwd);
             } else {
@@ -647,23 +609,6 @@ rate2lab=function(rate)
          stop(paste(sep='','Unknown rate ',rate,'. Should be one of ',
                     paste(collapse=', ',cq(fpr,fnr,tpr,tnr)))));
 
-rate2val=function(rate,drat.byx=parent(drat.byx),mesr=parent(mesr))
-  switch(rate,
-         fpr=do.call(rbind,
-                     lapply(drat.byx,
-                            function(drat) colMeans(drat[!drat$true.dd,mesr,drop=F],na.rm=T))),
-         tnr=do.call(rbind,
-                     lapply(drat.byx,
-                            function(drat) colMeans(1-drat[!drat$true.dd,mesr,drop=F],na.rm=T))),
-         tpr=do.call(rbind,
-                     lapply(drat.byx,
-                            function(drat) colMeans(drat[drat$true.dd,mesr,drop=F],na.rm=T))),
-         fnr=do.call(rbind,
-                     lapply(drat.byx,
-                            function(drat) colMeans(1-drat[drat$true.dd,mesr,drop=F],na.rm=T))),
-         stop(paste(sep='','Unknown rate ',rate,'. Should be one of ',
-                    paste(collapse=', ',cq(fpr,fnr,tpr,tnr)))));
- 
 ## get line properties for measures in matrix
 mesr2col=function(matrix) col.mesr[colnames(matrix)];
 mesr2lwd=function(matrix) lwd.mesr[colnames(matrix)];
