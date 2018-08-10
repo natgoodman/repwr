@@ -21,7 +21,7 @@
 #################################################################################
 
 ## --- Generate Data ---
-dodata=function(need.init=F,doc=parent(doc,'readme'),...) {
+dodata=function(need.init=T,doc=parent(doc,'readme'),...) {
   if (need.init)
     ## for sandbox runs, use doc-specific init
     if (doc=='xperiment') init_xperiment(doc=doc,...) else init(doc=doc,...);
