@@ -26,7 +26,7 @@
 ##   uses prefix matching and all matches run
 doc_readme=
   function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),fignew=parent(fignew,F),figsave=parent(figsave,T)) {
+           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,F)) {
     sect.all=cq(plotrate,heatrate,roc,rag,multi_sig2,small_telescopes);
     if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
 #################### nonzro

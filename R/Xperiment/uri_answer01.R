@@ -36,7 +36,8 @@ init_xperiment=init_uri_answer01=
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 doc_xperiment=doc_uri_answer01=
-  function(sect=parent(sect,NULL),fignum=parent(fignum,1),fignew=parent(fignew,!save.fig)) {
+  function(sect=parent(sect,NULL),
+           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,F)) {
     sect.all=c('20-50','20-500');
     if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
     mesr=cq(sig2,d2.scp1);

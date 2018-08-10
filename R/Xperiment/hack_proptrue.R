@@ -61,13 +61,14 @@ dosim=function() {
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 doc_xperiment=doc_hack_proptrue=
-    function(sect=parent(sect,NULL),fignum=parent(fignum,1),fignew=parent(fignew,!save.fig)) {
-      sect.all=cq(plotrate,heatrate,roc,multi_sig2,small_telescopes);
-      if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
-      xfigdir=figdir;
+  function(sect=parent(sect,NULL),
+           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,F)) {
+    sect.all=cq(plotrate,heatrate,roc,multi_sig2,small_telescopes);
+    if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+    xfigdir=figdir;
 #################### nonzro
 ##### plotrate
-      if ((figsect='plotrate') %in% sect) {
+    if ((figsect='plotrate') %in% sect) {
       init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T); 
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,legend='topright')
@@ -140,7 +141,7 @@ doc_xperiment=doc_hack_proptrue=
             title.desc=paste('near=0.1',doc),mesr=cq(sig2,d2.scp1));
       dofig(plotrag,'rag',rate.rule='nonzro',xdata=xdata,
             title.desc=paste('near=0.1',doc),smooth='aspline',mesr=cq(sig2,d2.scp1));
-   }
+    }
     sect;
   }
 ## generate standard xdata for aggregated plots
