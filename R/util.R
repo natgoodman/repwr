@@ -132,6 +132,6 @@ between=function(x,lo,hi) x>=lo&x<hi
 near=function(x,target,tol=.01) between(x,target-tol,target+tol)
 
 ## debugging functions
-## TODO: make this more flexible
-BREAKPOINT= browser;
+## TODO: BREAKPOINT is sooo feeble :(
+BREAKPOINT=browser;
 devs.close=function() for (dev in dev.list()) dev.off(dev)
