@@ -399,7 +399,7 @@ dirname=filebasename;
 ## clean specific data type. deletes directory, any top level files and in-memory list
 cleanq=function(what,cleandir=T) {
   what=as.character(pryr::subs(what));
-  ## delete top level files if exist, inclusing ones with ids
+  ## delete top level files if exist, including ones with ids
   ## unlink(sapply(cq(RData,txt), function(suffix) filename_data(what,suffix=suffix)));
   unlink(filename(datadir,list.files(datadir,pattern=paste(sep='','^',what,'\\.'))));
   ## delete in-memory list
@@ -407,8 +407,10 @@ cleanq=function(what,cleandir=T) {
   if (exists(whatlist,envir=.GlobalEnv)) rm(list=whatlist,envir=.GlobalEnv);
   ## delete from top level data.list
   ## CAUTION: have to use loop (not sapply) for scoping to work
-  pat=paste(sep='','^',what,'(\\.|$)');
-  for (name in grep(pat,names(data.list),value=T)) data.list[[name]]<<-NULL;
+  if (exists('data.list',envir=.GlobalEnv)) {
+    pat=paste(sep='','^',what,'(\\.|$)');
+    for (name in grep(pat,names(data.list),value=T)) data.list[[name]]<<-NULL;
+  }
   if (cleandir) {
     whatdir=paste(sep='',what,'dir');
     ## delete directory if exists
