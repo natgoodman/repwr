@@ -55,14 +55,14 @@ init=function(
   ## program parameters, eg, for output files, error messages, etc.
   scriptname='repwr',                      #
   mdir=paste_nv(m,m_pretty(m)),            # m subdirectory
-  datadir=filename('data',docx,mdir),      # directory for data files. default eg, data/repwr/m=1e4
+  datadir=file.path('data',docx,mdir),     # directory for data files. default eg, data/repwr/m=1e4
   simdir=file.path(datadir,'sim'),         # directory for sim files
   simrdir=file.path(datadir,'simr'),       # directory for simr files
   sidir=file.path(datadir,'si'),           # directory for study permutation index files
   detldir=file.path(datadir,'detl'),       # directory for detailed results files
   smrydir=file.path(datadir,'smry'),       # directory for summary results files
   posrdir=file.path(datadir,'posr'),       # directory for positive rate files
-  figdir=filename('figure',docx,mdir),     # directory for figures. default eg, figure/repwr/m=1e4
+  figdir=file.path('figure',docx,mdir),    # directory for figures. default eg, figure/repwr/m=1e4
   id=NULL,                                 # info tacked onto filenames. not used much
   verbose=F,                               # print progress messages
   ## program control
@@ -110,12 +110,10 @@ init=function(
   keep.posr=is.na(keep)|keep,    # keep positive rate data. default T
   keep.data=is.na(keep)|keep,    # keep top-level data. default T
                                  #    
-  clean=switch(docx,             # remove everything and start fresh
-               readme=T,repwr=F,tech=F,xperiment=F),
+  clean=F,                       # remove everything and start fresh
   clean.data=clean,              # remove datadir & memlist
   clean.fig=clean,               # remove figdir
-                                 # clean memlist cache - always safe but respect 'clean' param
-  clean.memlist=(missing(clean)&missing(clean.data))|(clean&clean.data),
+  clean.memlist=T,               # clean memlist cache - always safe
   clean.sim=F,                   # clean simulations. default F
   clean.simr=F,                  # clean simr data. default F
   clean.si=F,                    # clean study permutation indexes. default F
