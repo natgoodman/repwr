@@ -28,7 +28,7 @@
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
   function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=1,
-           fignew=if (doc=='readme') T else F,
+           figscreen=if (doc=='readme') T else F,fignew=figscreen,
            docfun=get(paste(sep='_','doc',doc)),...) {
     if (need.init) {
       ## for sandbox runs, use doc-specific init
@@ -44,22 +44,48 @@ dodoc=
 ##   works only because no plot-function arg matches it
 dofig=
   function(figfun,figname=NULL,figsect=parent(figsect,NULL),fignum=parent(fignum,1),
-           fignew=parent(fignew,F),id=parent(id,NULL),
+           figscreen=parent(figscreen,T),fignew=parent(fignew,T),id=parent(id,NULL),
            ...) {
     figname=paste(collapse='_',c(figsect,figname));
-    if (fignew) dev.new();
-    
-    dev=figfun(...,fignum=fignum);
-    ## function may return multiple plots
-    file=
-      if (length(dev)==1) filename_fig(figname,fignum,id)
-      else sapply(seq_along(dev), function(i) filename_fig(figname,fignum,id));
-    for (i in seq_along(dev)) {
-      if ((is.na(save.fig)&!file.exists(file[i]))|(!is.na(save.fig)&save.fig))
-        savePlot(file[i],device=dev[i]);
+    file=filename_fig(figname,fignum,id);
+    plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
+    plot.to.screen=figscreen;           # for stylistic consistency
+    ## NG 18-08-10: new scheme for plotting to file
+    ##   plot to screen and file: dev.new here, dev.copy later
+    ##   plot to screen only: dev.new here, no dev.copy later
+    ##   plot to file only: png here, dev.off later
+    ## plot.to.file only doesn't work if figfun returns multiple figures
+    ##   trash multi-figure capability. we don't use it now
+    if (!(plot.to.file||plot.to.screen)) {
+      msg=paste(sep=' ',paste_nv(figscreen),'and',paste_nv(save.fig));
+      if (is.na(save.fig)) msg=paste(sep=' ',msg,'and figure file',file,'exists');
+      msg=paste(sep=' ',msg,'which means there is no where to plot the figure');
+      stop(msg);
     }
-    assign_parent(fignum,fignum+length(dev));
-    setNames(dev,figname);
+    ##   bg='white' needed else image copied with transparent bg; renders as grey
+    if (plot.to.screen) {
+      dev=dev.new(bg='white');
+      dev=dev.cur();
+    }
+    if (plot.to.file&!plot.to.screen) {
+      ## png parameters found by trial and error. look reasonable
+      ## TODO: learn the right way to do this!
+      png(filename=file,height=8,width=8,units='in',res=200,pointsize=12);
+      dev.png=dev.cur();
+      }
+    ## draw the figure!
+    figfun(...,fignum=fignum);
+    if (plot.to.file&plot.to.screen) 
+      ## png parameters found by trial and error. look reasonable
+      ## TODO: learn the right way to do this!
+      dev.png=dev.copy(png,filename=file,height=8,width=8,units='in',res=200,pointsize=12);
+    ## always close plot.to.file device
+    if (plot.to.file)  dev.off(dev.png);
+    ## close plot.to.screen device unless user wants each figure in new window
+    if (plot.to.screen&&!fignew) dev.off(dev);
+
+    assign_parent(fignum,fignum+1);
+    figname;
   }
 ## NOT YET PORTED
 ## run data-making function, save if required, store result in global workspace
