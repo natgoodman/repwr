@@ -20,7 +20,7 @@ source('R/repwr.R');
 ## run for this sandbox
 run=function(save.fig=T,clean.fig=save.fig,...) {
   init_xperiment(save.fig=T,clean.fig=save.fig,...);
-  dodata(need.init=F,...); # generate data - ie, run simulation
+  dodata(need.init=F,...);                      # generate data - ie, run simulation
   dodoc(need.init=F,docfun=doc_xperiment,...);  # generate figures for doc
 }
 ## init for this sandbox
