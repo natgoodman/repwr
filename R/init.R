@@ -121,6 +121,10 @@ init=function(
   clean.smry=F,                  # clean case-by-case summaries. default F
   clean.posr=F,                  # clean positive rate files. default F
   clean.toplevel=F,              # clean top-level data. default F
+  ## plot control
+  figscreen=if (docx=='readme') T else F, # plot figures on screen
+  fignew=figscreen,              # plot each figure in new window
+  ##
   end=NULL                       # placeholder for last parameter
   ) {
   doc=docx;                      # to avoid confusion later

@@ -22,18 +22,24 @@
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 ## fignum is initial figure number
-## fignew controls whether each figure drawn in new window
-## figsave controls whether figures are saved
-##   if only one of fignew, figsave set, other is set to complement
+## typical args passed to init:
+##   save.fig - are figures saved to files
+##   figscreen - are figure plotted on screen
+##   fignew - is each figure plotted in new window
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
   function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=1,
-           figscreen=if (doc=='readme') T else F,fignew=figscreen,
-           docfun=get(paste(sep='_','doc',doc)),...) {
+           ## args passed to init. not spec'ed here else screws up init defaults
+           ## save.fig=T,figscreen=if(doc=='readme') T else F,fignew=figscreen,
+           ## docfun set later after init processes doc
+           docfun=NULL,
+           ...) {
     if (need.init) {
       ## for sandbox runs, use doc-specific init
-      if (doc=='xperiment') init_xperiment(doc=doc,...) else init(doc=doc,...);
+      if (is.na(pmatch(doc,'xperiment'))) init(doc=doc,...) else init_xperiment(doc=doc,...);
     }
+    ## set docfun after init sets doc
+    if (missing(docfun)) docfun=get(paste(sep='_','doc',doc));
     docfun();
 }
 ## --- Document Functions ---

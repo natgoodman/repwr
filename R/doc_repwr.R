@@ -25,7 +25,7 @@
 ##   uses prefix matching and all matches run
 doc_repwr=
   function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,F)) {
+           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
     sect.all=cq(nonzro_exact_fpr,nonzro_exact_fnr,nonzro_exact_roc,
                 nonzro_inexact_roc,nonzro_nearexact,sameff_nearexact,small_telescopes);
     if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
