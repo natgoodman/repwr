@@ -31,7 +31,8 @@ source('R/repwr.R');
 run=function(save.fig=T,clean.fig=save.fig,...) {
   init_xperiment(save.fig=T,clean.fig=save.fig,...);
   dodata(need.init=F,...);                  # generate data - ie, run simulation
-  dodoc(need.init=F,docfun=doc_readme,...);  # generate figures for doc
+  dodoc(need.init=F,docfun=doc_readme,...); # generate figures for doc
+  cmp_detl();                               # run test
 }
 ## init for this sandbox. same parameters as readme
 init_xperiment=init_hack_proptrue=
@@ -52,7 +53,7 @@ init_xperiment=init_hack_proptrue=
 ##    doc needs:   sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1
 ##    code needs: sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,big2
 dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
-  mesr.need=cq(sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,big2);
+  mesr.need=cq(sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1,big2);
   ## use saved detl if exists and args permit
   detl=get_detl(n1,n2,d1,d2,id,must.exist=F);
   if (!is.null(detl)) return(invisible(detl));
@@ -168,7 +169,7 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
 ## compare sandbox and real detls
 ## cmp_detl same for detl_conditional and detl_handcrafted
 cmp_detl=function(verbose=F) {
-  mesr.need=cq(sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,big2);
+  mesr.need=cq(sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1,big2);
   mdir=paste_nv(m,m_pretty(m));
   xdir=detldir;
   rdir=file.path('data/readme',mdir,'detl');

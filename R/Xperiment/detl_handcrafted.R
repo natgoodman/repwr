@@ -31,7 +31,8 @@ source('R/repwr.R');
 run=function(save.fig=T,clean.fig=save.fig,...) {
   init_xperiment(save.fig=T,clean.fig=save.fig,...);
   dodata(need.init=F,...);                  # generate data - ie, run simulation
-  dodoc(need.init=F,docfun=doc_readme,...);  # generate figures for doc
+  dodoc(need.init=F,docfun=doc_readme,...); # generate figures for doc
+  cmp_detl();                               # run test
 }
 ## init for this sandbox. same parameters as readme
 init_xperiment=init_hack_proptrue=
@@ -79,7 +80,7 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
   p1=pi(s1,predvl[predvl$n1==n1&predvl$n2==n2,]);
   p2=pi(s2,predvl[predvl$n1==n2&predvl$n2==n1,]);
   ## small telescope thresholds
-  ## scp1=scope[as.character(n1),as.character(n2)];
+  scp1=scope[as.character(n1),as.character(n2)];
   ## scp2=scope[as.character(n2),as.character(n1)];
   ## ## my 'misinterpretation' of small telescopes that considers d.sdz
   ## scpd1=scpd(s1,scopd[scopd$n1==n1&scopd$n2==n2,]);
@@ -128,7 +129,7 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
   ## d >= small telescope boundary
   ## NG 18-02-14: to handle negative values, use d.abs instead of d.sdz
   ## d1.scp2=(s1$d.abs>=scp2)&sdir;
-  ## d2.scp1=(s2$d.abs>=scp1)&sdir;
+  d2.scp1=(s2$d.abs>=scp1)&sdir;
   ## dm.scp2=(meta.abs>=scp2)&sdir;
   ## dm.scp1=(meta.abs>=scp1)&sdir;
   ## ## d >= my 'misinterpretation' of small telescope boundary
@@ -146,7 +147,7 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
   ##   d1.scp2,d2.scp1,dm.scp2,dm.scp1,d1.scpd2,d2.scpd1,dm.scpd2,dm.scpd1,
   ##   big1,big2);
   detl=data.frame(sig1,sig2,sigm,sdir,
-    d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,
+    d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1,
     big2);
   ## optionally save detl and add to in-memory list. usually don't keep -- too big
   save_detl(detl,n1,n2,d1,d2,id);
@@ -155,7 +156,7 @@ dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
 ## compare sandbox and real detls
 ## cmp_detl same for detl_conditional and detl_handcrafted
 cmp_detl=function(verbose=F) {
-  mesr.need=cq(sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,big2);
+  mesr.need=cq(sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1,big2);
   mdir=paste_nv(m,m_pretty(m));
   xdir=detldir;
   rdir=file.path('data/readme',mdir,'detl');
