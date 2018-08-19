@@ -24,7 +24,7 @@
 ## fignum is initial figure number
 ## typical args passed to init:
 ##   save.fig - are figures saved to files
-##   figscreen - are figure plotted on screen
+##   figscreen - are figures plotted on screen
 ##   fignew - is each figure plotted in new window
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
