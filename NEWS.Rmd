@@ -1,13 +1,13 @@
 ---
 title: "Revision history for repwr repository"
 author: "Nathan (Nat) Goodman"
-date: "July 27, 2018"
+date: "August 22, 2018"
 output:
-  github_document:
-    html_preview: no
   html_document:
     css: css/html_document.css
     highlight: kate
+  github_document:
+    html_preview: no
   pdf_document: default
 linkcolor: cyan
 citecolor: green
@@ -15,17 +15,66 @@ urlcolor: blue
 ---
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
-## Release 1.01 2018-08-DD
+## Release 1.10 2018-08-22
 
-Bug fixes and code cleanup
+Supports second draft blog post, "Systematic Replication Has Limited Power to Detect Bad Science".
+
+Document changes
+
+- Blog post (repwr)
+    - Changed title and added words in the Abstract, Introduction, and Discussion to clarify that the post is about *systematic* replications
+    - Added references suggested by readers
+    - Added more emphasis to David Colquhoun's point about taking into account the prior probability that studies are true 
+    - Added terms suggested by readers: *direct replication*, *conceptual replication*, *study heterogeneity*
+    - Added sentence noting that "measures answer different questions, but all appear in papers or posts as tests to accept or reject replications" as suggested by reader
+
+- README
+    - Reflect changes to `dodata` and `dodoc` interfaces and `clean` default
+    - Removed mention of technical notes document - no point making promises I may not keep
+    - Added mention of previous version (1.00) of blog post
+
+Design changes
+
+- Refactored data aggregation code into `data_agg` function and `drag` data type
+- Added support for experimental sandbox code, mainly to document sandbox projects
+- Improved `dodata`, `dodoc` interfaces. These are top-level functions called by `run`. May also be called directly
+    - Moved processing of default values to `init`
+    - Moved `figscreen`, `fignew` parameters from `dodoc` to `init` because they depend on `doc` which is not fully set until `init`
+    - In `dodoc`, set default for `docfun` after `init` for same reason
+    - In `dodoc`, prefix match xperiment `doc` for same reason
+    - Added `need.init` parameter to avoid rerunning `init` when called from run
+    - Set default for `need.init` to `TRUE` so top-level calls will run `init` 
+- Moved `rate.type` conversion from `drat_order` to `data_rate`; this is the natural place where I expect it to be
+- Added ability to save figures to files without first plotting to screen; much faster!
+
+Changes to directory and repo organization
+
+- Added version-specific copies of blog post documents
+- Removed data files from repo. I was only storing files needed to draw figures which seemed like good idea but interacts poorly with caching scheme. With the data files gone, user has to generate data before drawing figures
+- Generated figures for non-default values of `m`; just for completeness
+
+Bug fixes 
 
 - Setting `from.type`, `relto.type` in plot functions does not select desired posr
-    - Bug caused by conflicting parameter defaults. plot and related functions provide defaults for `from.type`, `relto.type`, `posr.id` and pass the default values to called functions. By the time the values make it to `get_posr` which does the work, it looks like all three parameters were set by the original caller. `get_posr` calls `casename_posr` which lets `id` supersede the others
-    - Opted for simplest solution. Always use `posr.id` to identify `posr`. Give up trying to use `from.type`, `relto.type`.
+    - Caused by conflicting parameter defaults. `plotrate` and related functions provide default values for `from.type`, `relto.type`, `posr.id` and pass the values to called functions. By the time the values make it to `get_posr` which does the work, it looks like all three parameters were set by the original caller. `get_posr` calls `casename_posr` which lets `id` supersede the others
+    - Opted for simplest solution. Always use `posr.id` to identify `posr`. Give up trying to use `from.type`, `relto.type`
+- Make sure `data.list` exists before trying to delete elements
+
+Code cleanup
+
+- Added `vhlty` parameter to plot functions to set line type for extra vertical and horizontal lines; quick hack, not very general
+- Consolidated documentation (still just in comments, sorry) for all aggregate plot functions
+- Changed default for 'smooth' in aggregate plots to `aspline`
+- Required xperiment (experimental sandbox) `doc` types to explicitly set `n`, `d`, `m` to support multiple experimental sandboxes
+- Changed `clean.figure` to `clean.fig` for stylistic consistency in `init`
+- Changed calls to `filename` function to `file.path` for stylistic consistency
+- Set default for `clean` to `FALSE` for all `doc` types; setting it `TRUE` for `doc=readme` simplified README document but complicated interactive use
+- Set default for `clean.memlist` to `TRUE`; setting it based on `clean` led to hard-to-find bugs caused by stale data in memlist cache
+- Removed ability for a single `figfun` call to draw multiple figures; doesn't work with new scheme for saving figures and I no longer use this feature
 
 ## Release 1.00 2018-07-27
 
-Supports the draft blog post, "Replication Has Limited Power to Detect Bad Science", sent to external readers for feedback.
+Supports first draft blog post, "Replication Has Limited Power to Detect Bad Science", sent to external readers for feedback.
 
 ## Release 0.93 2018-07-25
 
@@ -33,22 +82,22 @@ Release candidate
 
 This version is nearly a complete rewrite of the previous version.  Some highlights are
 
-- Removed obsolete scripts including scope.R and distr.R
-- Added repwr.R and many other scripts
+- Removed obsolete scripts including `scope.R` and `distr.R`
+- Added `repwr.R` and many other scripts
 - For data, added current top-level files needed for analysis and plotting. Did not add data subdirectories as these are huge (261MB for m=1e3, 980MB for m=1e4) and not needed once the simulation is done
 
 ## Release 0.92 2018-01-01
 
 ### scope.R
 
-- Added plot_cross, plot_pclose1
-- Integrated d2t probability functions from distr.R
-- Systematically precomputed useful data tables: d1, d33, dcross, dsig, dclose, dcrit
+- Added `plot_cross`, `plot_pclose1`
+- Integrated `d2t` probability functions from `distr.R`
+- Systematically precomputed useful data tables: `d1`, `d33`, `dcross`, `dsig`, `dclose`, `dcrit`
 
 ### distr.R
 
-- Added pval2t, pval2d functions
-- Corrected usage of lower.tail parameter in d2t probability functions
+- Added `pval2t`, `pval2d` functions
+- Corrected usage of `lower.tail` parameter in `d2t` probability functions
 
 ## Release 0.91 2017-12-19
 

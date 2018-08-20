@@ -11,7 +11,7 @@
 
 <meta name="author" content="Nathan (Nat) Goodman" />
 
-<meta name="date" content="2018-07-27" />
+<meta name="date" content="2018-08-22" />
 
 <title>Revision history for repwr repository</title>
 
@@ -105,34 +105,87 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Revision history for repwr repository</h1>
 <h4 class="author"><em>Nathan (Nat) Goodman</em></h4>
-<h4 class="date"><em>July 27, 2018</em></h4>
+<h4 class="date"><em>August 22, 2018</em></h4>
 
 </div>
 
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
-<div id="release-1.01-2018-08-dd" class="section level2">
-<h2>Release 1.01 2018-08-DD</h2>
-<p>Bug fixes and code cleanup</p>
+<div id="release-1.10-2018-08-22" class="section level2">
+<h2>Release 1.10 2018-08-22</h2>
+<p>Supports second draft blog post, “Systematic Replication Has Limited Power to Detect Bad Science”.</p>
+<p>Document changes</p>
+<ul>
+<li>Blog post (repwr)
+<ul>
+<li>Changed title and added words in the Abstract, Introduction, and Discussion to clarify that the post is about <em>systematic</em> replications</li>
+<li>Added references suggested by readers</li>
+<li>Added more emphasis to David Colquhoun’s point about taking into account the prior probability that studies are true</li>
+<li>Added terms suggested by readers: <em>direct replication</em>, <em>conceptual replication</em>, <em>study heterogeneity</em></li>
+<li>Added sentence noting that “measures answer different questions, but all appear in papers or posts as tests to accept or reject replications” as suggested by reader</li>
+</ul></li>
+<li>README
+<ul>
+<li>Reflect changes to <code>dodata</code> and <code>dodoc</code> interfaces and <code>clean</code> default</li>
+<li>Removed mention of technical notes document - no point making promises I may not keep</li>
+<li>Added mention of previous version (1.00) of blog post</li>
+</ul></li>
+</ul>
+<p>Design changes</p>
+<ul>
+<li>Refactored data aggregation code into <code>data_agg</code> function and <code>drag</code> data type</li>
+<li>Added support for experimental sandbox code, mainly to document sandbox projects</li>
+<li>Improved <code>dodata</code>, <code>dodoc</code> interfaces. These are top-level functions called by <code>run</code>. May also be called directly
+<ul>
+<li>Moved processing of default values to <code>init</code></li>
+<li>Moved <code>figscreen</code>, <code>fignew</code> parameters from <code>dodoc</code> to <code>init</code> because they depend on <code>doc</code> which is not fully set until <code>init</code></li>
+<li>In <code>dodoc</code>, set default for <code>docfun</code> after <code>init</code> for same reason</li>
+<li>In <code>dodoc</code>, prefix match xperiment <code>doc</code> for same reason</li>
+<li>Added <code>need.init</code> parameter to avoid rerunning <code>init</code> when called from run</li>
+<li>Set default for <code>need.init</code> to <code>TRUE</code> so top-level calls will run <code>init</code></li>
+</ul></li>
+<li>Moved <code>rate.type</code> conversion from <code>drat_order</code> to <code>data_rate</code>; this is the natural place where I expect it to be</li>
+<li>Added ability to save figures to files without first plotting to screen; much faster!</li>
+</ul>
+<p>Changes to directory and repo organization</p>
+<ul>
+<li>Added version-specific copies of blog post documents</li>
+<li>Removed data files from repo. I was only storing files needed to draw figures which seemed like good idea but interacts poorly with caching scheme. With the data files gone, user has to generate data before drawing figures</li>
+<li>Generated figures for non-default values of <code>m</code>; just for completeness</li>
+</ul>
+<p>Bug fixes</p>
 <ul>
 <li>Setting <code>from.type</code>, <code>relto.type</code> in plot functions does not select desired posr
 <ul>
-<li>Bug caused by conflicting parameter defaults. plot and related functions provide defaults for <code>from.type</code>, <code>relto.type</code>, <code>posr.id</code> and pass the default values to called functions. By the time the values make it to <code>get_posr</code> which does the work, it looks like all three parameters were set by the original caller. <code>get_posr</code> calls <code>casename_posr</code> which lets <code>id</code> supersede the others</li>
-<li>Opted for simplest solution. Always use <code>posr.id</code> to identify <code>posr</code>. Give up trying to use <code>from.type</code>, <code>relto.type</code>.</li>
+<li>Caused by conflicting parameter defaults. <code>plotrate</code> and related functions provide default values for <code>from.type</code>, <code>relto.type</code>, <code>posr.id</code> and pass the values to called functions. By the time the values make it to <code>get_posr</code> which does the work, it looks like all three parameters were set by the original caller. <code>get_posr</code> calls <code>casename_posr</code> which lets <code>id</code> supersede the others</li>
+<li>Opted for simplest solution. Always use <code>posr.id</code> to identify <code>posr</code>. Give up trying to use <code>from.type</code>, <code>relto.type</code></li>
 </ul></li>
+<li>Make sure <code>data.list</code> exists before trying to delete elements</li>
+</ul>
+<p>Code cleanup</p>
+<ul>
+<li>Added <code>vhlty</code> parameter to plot functions to set line type for extra vertical and horizontal lines; quick hack, not very general</li>
+<li>Consolidated documentation (still just in comments, sorry) for all aggregate plot functions</li>
+<li>Changed default for ‘smooth’ in aggregate plots to <code>aspline</code></li>
+<li>Required xperiment (experimental sandbox) <code>doc</code> types to explicitly set <code>n</code>, <code>d</code>, <code>m</code> to support multiple experimental sandboxes</li>
+<li>Changed <code>clean.figure</code> to <code>clean.fig</code> for stylistic consistency in <code>init</code></li>
+<li>Changed calls to <code>filename</code> function to <code>file.path</code> for stylistic consistency</li>
+<li>Set default for <code>clean</code> to <code>FALSE</code> for all <code>doc</code> types; setting it <code>TRUE</code> for <code>doc=readme</code> simplified README document but complicated interactive use</li>
+<li>Set default for <code>clean.memlist</code> to <code>TRUE</code>; setting it based on <code>clean</code> led to hard-to-find bugs caused by stale data in memlist cache</li>
+<li>Removed ability for a single <code>figfun</code> call to draw multiple figures; doesn’t work with new scheme for saving figures and I no longer use this feature</li>
 </ul>
 </div>
 <div id="release-1.00-2018-07-27" class="section level2">
 <h2>Release 1.00 2018-07-27</h2>
-<p>Supports the draft blog post, “Replication Has Limited Power to Detect Bad Science”, sent to external readers for feedback.</p>
+<p>Supports first draft blog post, “Replication Has Limited Power to Detect Bad Science”, sent to external readers for feedback.</p>
 </div>
 <div id="release-0.93-2018-07-25" class="section level2">
 <h2>Release 0.93 2018-07-25</h2>
 <p>Release candidate</p>
 <p>This version is nearly a complete rewrite of the previous version. Some highlights are</p>
 <ul>
-<li>Removed obsolete scripts including scope.R and distr.R</li>
-<li>Added repwr.R and many other scripts</li>
+<li>Removed obsolete scripts including <code>scope.R</code> and <code>distr.R</code></li>
+<li>Added <code>repwr.R</code> and many other scripts</li>
 <li>For data, added current top-level files needed for analysis and plotting. Did not add data subdirectories as these are huge (261MB for m=1e3, 980MB for m=1e4) and not needed once the simulation is done</li>
 </ul>
 </div>
@@ -141,16 +194,16 @@ $(document).ready(function () {
 <div id="scope.r" class="section level3">
 <h3>scope.R</h3>
 <ul>
-<li>Added plot_cross, plot_pclose1</li>
-<li>Integrated d2t probability functions from distr.R</li>
-<li>Systematically precomputed useful data tables: d1, d33, dcross, dsig, dclose, dcrit</li>
+<li>Added <code>plot_cross</code>, <code>plot_pclose1</code></li>
+<li>Integrated <code>d2t</code> probability functions from <code>distr.R</code></li>
+<li>Systematically precomputed useful data tables: <code>d1</code>, <code>d33</code>, <code>dcross</code>, <code>dsig</code>, <code>dclose</code>, <code>dcrit</code></li>
 </ul>
 </div>
 <div id="distr.r" class="section level3">
 <h3>distr.R</h3>
 <ul>
-<li>Added pval2t, pval2d functions</li>
-<li>Corrected usage of lower.tail parameter in d2t probability functions</li>
+<li>Added <code>pval2t</code>, <code>pval2d</code> functions</li>
+<li>Corrected usage of <code>lower.tail</code> parameter in <code>d2t</code> probability functions</li>
 </ul>
 </div>
 </div>
