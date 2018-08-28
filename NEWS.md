@@ -12,7 +12,6 @@ Supports third draft blog post, "Systematic Replication Has Limited Power to Det
 Document changes
 
 -   Blog post (repwr)
-    -   Added references references to Bob Reed's work
     -   Added reference to new systematic replication study just published in Nature Human Behavior
     -   Deleted final paragraph with Oprah Winfrey quote: not really on-target
 
