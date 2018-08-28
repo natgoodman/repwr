@@ -1,9 +1,21 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-August 22, 2018
+August 28, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.11 2018-MM-DD
+-----------------------
+
+Supports third draft blog post, "Systematic Replication Has Limited Power to Detect Bad Science".
+
+Document changes
+
+-   Blog post (repwr)
+    -   Added references references to Bob Reed's work
+    -   Added reference to new systematic replication study just published in Nature Human Behavior
+    -   Deleted final paragraph with Oprah Winfrey quote: not really on-target
+
 Release 1.10 2018-08-22
 -----------------------
 

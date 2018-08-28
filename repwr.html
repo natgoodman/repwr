@@ -11,7 +11,7 @@
 
 <meta name="author" content="Nathan (Nat) Goodman" />
 
-<meta name="date" content="2018-08-22" />
+<meta name="date" content="2018-08-28" />
 
 <title>Systematic Replication Has Limited Power to Detect Bad Science</title>
 
@@ -105,7 +105,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Systematic Replication Has Limited Power to Detect Bad Science</h1>
 <h4 class="author"><em>Nathan (Nat) Goodman</em></h4>
-<h4 class="date"><em>August 22, 2018</em></h4>
+<h4 class="date"><em>August 28, 2018</em></h4>
 
 </div>
 
@@ -146,6 +146,8 @@ $(document).ready(function () {
 <li>Fanelli’s preprint presenting <a href="https://peerj.com/preprints/1968/">a theoretical model of knowledge content</a></li>
 </ul>
 <p>David Colquhoun reminded me that it’s important to take into account the prior probability that studies are true, a topic I explored in a <a href="http://daniellakens.blogspot.nl/2017/10/science-wise-false-discovery-rate-does.html">previous post</a>. Relevant papers by Colquhoun include his recent proposal to <a href="https://arxiv.org/abs/1802.04888">supplement p-values with false positive risk</a> and <a href="http://rsos.royalsocietypublishing.org/content/1/3/140216">2014</a> and <a href="http://rsos.royalsocietypublishing.org/content/4/12/171085">2017</a> papers discussing why p-values don’t tell you the probability that a result is a false positive.</p>
+<p>Bob Reed drew my attention to his post on <a href="https://replicationnetwork.com/2018/01/05/reed-a-single-replication-can-make-a-big-difference/">how the prior probability that studies are true affects replication success</a>. From here I got to his paper <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/1467-8462.12262">presenting his model</a> and a related post on <a href="https://replicationnetwork.com/2017/12/15/reed-why-lowering-alpha-to-0-005-is-unlikely-to-help/">why lowering alpha won’t help</a>.</p>
+<p>As I prepared to post this article, a <a href="http://www.nature.com/articles/s41562-018-0399-z">new systematic replication study</a> “Evaluating the replicability of social science experiments in Nature and Science between 2010 and 2015” appeared in Nature Human Behavior.</p>
 </div>
 <div id="the-simulation" class="section level2">
 <h2>The Simulation</h2>
@@ -304,10 +306,6 @@ $(document).ready(function () {
 <p>I see several ways my results might be wrong. Perhaps I defined the wrong correctness criteria, or set the error thresholds too low, or analyzed the wrong conditions. I assumed throughout that all population effect sizes were equally likely within the range studied; in particular, I didn’t consider <em>publication bias</em> which may make smaller effect sizes more likely. Nor did I take into account the prior probability that studies are true which may cause p-values to underestimate the probability of false positives. Perhaps a more nuanced distribution would improve the results. The ever-present danger of software bugs also lurks. If you see a mistake, please let me know and I’ll try to fix.</p>
 <p>If correct, my results suggest that systematic replication projects need to change goals or methods. If the goal remains validation, it’s essential that each replica closely match its original study. This bodes ill for large, systematic replication efforts, which typically prioritize uniformity over fidelity to run lots of studies at reasonable cost.</p>
 <p>An alternative is to switch gears and focus on generalizability. This would change the mindset of replication researchers more than the actual work. Instead of trying to refute a study, you would assume the study is correct within the limited setting of the original investigation and try to extend it to other settings. The scientific challenge becomes defining good “other settings” - presumably there are many sensible choices – and selecting studies that are a good fit for each. This seems a worthy problem in its own right that will move the field forward no matter how many original studies successfully generalize.</p>
-<p>I concluded a <a href="http://daniellakens.blogspot.nl/2017/10/science-wise-false-discovery-rate-does.html">previous post</a> with a paragraph that remains germane:</p>
-<blockquote>
-<p>Good science drives the field forward; bad science is ephemeral. I know it’s aggravating to see so much dreck get published, but it’s even more aggravating to see good statisticians and data scientists agonizing over the ordure and spending so much effort trying to root out bad science. We will do more good by helping good scientists do good science than by trying to slow down the bad ones. Quoting the sage Oprah Winfrey (<a href="https://www.brainyquote.com/quotes/quotes/o/oprahwinfr163087.html">from BrainyQuote</a>), “Be thankful for what you have; you’ll end up having more. If you concentrate on what you don’t have, you will never, ever have enough.”</p>
-</blockquote>
 </div>
 
 
