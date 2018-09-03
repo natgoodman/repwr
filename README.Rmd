@@ -1,9 +1,8 @@
 ---
 title: "Replication Power"
 author: "Nathan (Nat) Goodman"
-date: "August 22, 2018"
+date: "September 3, 2018"
 output:
-  html_document: default
   github_document:
     html_preview: no
   pdf_document: default

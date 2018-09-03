@@ -1,13 +1,12 @@
 ---
 title: "Systematic Replication Has Limited Power to Detect Bad Science"
 author: "Nathan (Nat) Goodman"
-date: "August 28, 2018"
+date: "September 3, 2018"
 output:
   html_document:
     css: css/html_document.css
     highlight: kate
   pdf_document: default
-  word_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue

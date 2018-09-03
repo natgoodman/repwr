@@ -1,7 +1,7 @@
 Replication Power
 ================
 Nathan (Nat) Goodman
-August 22, 2018
+September 3, 2018
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 *A collection of R scripts and documents exploring the power of replication to detect bad science. I treat replication as a statistical test, simulate proposed replication methods across a wide range of conditions, and estimate error rates for conditions of interest. The main point is that replication is a poor statistical test with unacceptable error rates under most conditions. It works as a validation test only when the original and replica studies are sampling nearly identical populations. Methods for testing whether the populations are similar work poorly under all conditions analyzed.*
