@@ -23,7 +23,7 @@
 
 ## plot rate or draw heat map vs. any of n1, n2, d1, d2
 ## plotrate draws line graphs of rates for multiple measures across multiple parameters
-## heatrate draws hearmap of rates for one or more measures acrpss multiple parameters
+## heatrate draws heatmap of rates for one or more measures acrpss multiple parameters
 ## plotratm draws line graphs of rates for one measure across multiple parameters with one or more
 ##   parameters represented by different lines
 ## CAVEAT: plotratm implementation minimal - support doc_resig only!!
