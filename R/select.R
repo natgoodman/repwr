@@ -68,6 +68,8 @@ data_rate=
                error=ifelse(true.dd,1-rate,rate),  # negate 'true' cases
                correct=ifelse(true.dd,rate,1-rate) # negate 'false' cases
                ));
+      ## CAUTION: apply converts single row matrix into vector. sigh...
+      if (nrow(posr)==1) ydata=as.matrix(t(ydata));
     } else ydata=posr[,mesr,drop=F];
     drat=data.frame(posr[,cq(i,n1,n2,d1,d2)],true.dd=true.dd,ydata);
   }
@@ -128,6 +130,8 @@ drat_order=
                error=ifelse(true.dd,1-rate,rate),  # negate 'true' cases
                correct=ifelse(true.dd,rate,1-rate) # negate 'false' cases
                ));
+      ## CAUTION: apply converts single row matrix into vector. sigh...
+      if (nrow(posr)==1) ydata=as.matrix(t(ydata));
     } else ydata=drat[,mesr,drop=F];
     ## refine rate type if possible
     rate.type=rate_type();
@@ -188,7 +192,8 @@ data_agg=
     else true.dd=true_dd(posr,rate.rule,rate.tol);
     posr$true.dd=true.dd;
     posr.byx=split(posr,apply(posr[,x,drop=F],1,function(row) paste(collapse=' ',row)));
-    byx=apply(do.call(rbind,strsplit(names(posr.byx),' ')),2,as.numeric); colnames(byx)=x;
+    ## CAUTION: apply needs 1:2 else converts single row matrix into vector. sigh...
+    byx=apply(do.call(rbind,strsplit(names(posr.byx),' ')),1:2,as.numeric); colnames(byx)=x;
     drag=sapply(rate,simplify=F,function(rate) {
       y=rate2val(rate);
       ## see if empty. note that empty results come through as NaN
@@ -241,7 +246,7 @@ posr_select=
     posr=merge(posr,xdata);
     ## BREAKPOINT()
     ## clamp pos.rate to [0,1]. interpolation can under- or over-shoot ;
-    posr[,mesr]=apply(posr[,mesr,drop=F],c(1,2),function(y) max(min(y,1),0));
+    posr[,mesr]=apply(posr[,mesr,drop=F],1:2,function(y) max(min(y,1),0));
     invisible(posr);
   }
 ## prune posr so interp will be faster
