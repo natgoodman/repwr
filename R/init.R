@@ -26,18 +26,20 @@
 init=function(
   ## doc parameters 
   doc='readme',                     # controls sim defaults, data, figure subdirs
-  docx=match.arg(doc,cq(readme,repwr,tech,xperiment)), 
+  docx=match.arg(doc,cq(readme,resig,repwr,tech,xperiment)), 
   ## simulation parameters 
   n=switch(docx,                            # sample sizes
            readme=20*2^(0:4),               # 20,40,80,160,320 (5 values)
-           repwr=c(10,20,50*1.454215^(0:8)),# 10,20,50,...,1000 (10 values)
+           resig=c(20,seq(50,500,by=50)),   # 20,50,100,...,1000 (11 values)
+           repwr=c(10,20,50*1.454215^(0:8)),# 10,20,50,...,1000 (11 values)
            tech=10*2^(0:9),                 # 10,20,40,...,5120 (10 values)
            xperiment=NA),                   # xperiment must supply values
   d=switch(docx,                            # population effect sizes
-           readme=c(0,0.2,0.5,0.8,1),repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1),
+           readme=c(0,0.2,0.5,0.8,1),
+           resig=seq(0,1,by=0.1),repwr=seq(0,1,by=0.1),tech=seq(0,1,by=0.1),
            xperiment=NA),                   # xperiment must supply values
   m=switch(docx,                            # instances per study (ie, population)
-           readme=1e3,repwr=1e4,tech=1e4,
+           readme=1e3,resig=1e4,repwr=1e4,tech=1e4,
            xperiment=NA),                   # xperiment must supply values
   ## analysis parameters
   sig.level=0.05,                   # for conventional significance
@@ -46,6 +48,7 @@ init=function(
   pwr.level=0.80,                   # default power
   fpr.cutoff=sig.level,             # false positive rate cutoff for plots
   fnr.cutoff=1-pwr.level,           # false negative rate cutoff for plots
+                                    # TODO: probably set fnr.cutoff to sig.level
                                     # grid for various precacluated data
   dsdz.grid=seq(min(d)-3,max(d)+3,by=.05),
   scope.power=0.33,                 # power for small telescope
@@ -244,7 +247,22 @@ init_mesr=
       ## CAUTION: have to use loop (not sapply) for scoping to work
       for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
         assign(name,setNames(get(name),mesr.dflt));
+   } else if (doc=='resig') {
+     mesr.dflt='sig2';
+     mesr.plotdflt=mesr.heatdflt=mesr.rocdflt=mesr.ragdflt=mesr.dflt;
+     mesr.order=mesr.dflt;
+     n.mesr=length(mesr.dflt);
+     col.mesr=colorRampPalette(RColorBrewer::brewer.pal(max(3,min(8,n.mesr)),'Set1'))(n.mesr);
+     lwd.mesr=2;
+     cex.mesr=1;
+      ## some docs use line types to further discriminate measures. repwr doesn't
+      lty.mesr=rep('solid',n.mesr);
+      ## set names in all these lists
+      ## CAUTION: have to use loop (not sapply) for scoping to work
+      for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
+        assign(name,setNames(get(name),mesr.dflt));
    } else if (doc=='repwr') {
+     ## TODO: expand to all measures
       mesr.dflt=cq(sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1);
       mesr.plotdflt=mesr.heatdflt=mesr.rocdflt=mesr.ragdflt=grep('scp',mesr.dflt,invert=T,value=T);
       mesr.order=mesr.dflt;
@@ -263,7 +281,7 @@ init_mesr=
       ## CAUTION: have to use loop (not sapply) for scoping to work
       for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
         assign(name,setNames(get(name),mesr.dflt));
-    } else if (doc=='tech') {
+  } else if (doc=='tech') {
       ## TODO: these are old. refine based on experience
       ## mesr.plotdflt=cq(sig2,sigm,d1.c2,d2.c1,d1.p2,d2.p1);
       mesr.plotdflt=c(mesr.sig,mesr.dcc,'d1.scp2','d2.scp1');
