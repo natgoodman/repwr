@@ -111,7 +111,7 @@ asplinem=function(x,y,xout,...) {
   if (length(xout)==1) yout=t(yout);
   yout;
 }
-## extend loess.smoth for matrix - probably only useful for plotting
+## extend loess.smooth for matrix - probably only useful for plotting
 loessm=function(x,y,xout,...) {
   if (is.vector(y)) y=data.frame(y=y);
   if (length(dim(y))!=2) stop('y must be vector or 2-dimensional matrix-like object');
@@ -125,6 +125,20 @@ loessm=function(x,y,xout,...) {
   colnames(yout)=colnames(y);
   yout;
 }
+## extend smooth.spline for matrix - probably only useful for plotting
+splinem=function(x,y,xout,...) {
+  if (is.vector(y)) y=data.frame(y=y);
+  if (length(dim(y))!=2) stop('y must be vector or 2-dimensional matrix-like object');
+  yout=apply(y,2,function(y) {
+    yout=predict(smooth.spline(x,y,spar=0.5),xout)$y    
+  });
+  ## if yout has single row (ie, xout has one element), R turns it into a vector...
+  ## if (length(xout)==1) yout=t(yout);
+  if (length(xout)==1) yout=t(yout);
+  colnames(yout)=colnames(y);
+  yout;
+}
+
 ## not in - based on example in RefMan - more intutive than !%in%
 "%notin%"=function(x,table) match(x,table,nomatch=0)==0
 ## between, near - to subset sim results
