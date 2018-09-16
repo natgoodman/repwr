@@ -3,10 +3,10 @@ title: "Systematic Replication May Make Many Mistakes"
 author: "Nathan (Nat) Goodman"
 date: "September 15, 2018"
 output:
-  pdf_document: default
   html_document:
     css: css/html_document.css
     highlight: kate
+  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
