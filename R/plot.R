@@ -434,6 +434,7 @@ plotrocm=
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           title.legend='replication type',
            xlim=c(0,1),ylim=c(0,1)) {
     rate.rule=match.arg(rate.rule);
     check_mesr();
@@ -463,7 +464,8 @@ plotrocm=
     if (plot.cutoff) abline(v=rate_cutoff(xrate),h=rate_cutoff(yrate),lty='dashed',lwd=0.5);
     ## abline(a=0,b=1,lty='dashed',lwd=0.5);
     if (!is.null(legend.where))
-      rocm_legend(names(xdata),col=col,where=legend.where,x=x.legend,y=y.legend,plot.points=T);
+      rocm_legend(names(xdata),col=col,where=legend.where,x=x.legend,y=y.legend,title=title.legend,
+                  plot.points=T);
     ## plot extra lines if desired. nop if vline, hline NULL
     abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
     dev.cur();
@@ -542,7 +544,7 @@ plotragm=
   function(posr=NULL,posr.id='std',
            rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.tol=0,
-           xdata,col=NULL,mesr='sig2',
+           xdata,mesr='sig2',col=NULL,
            x=cq(n1,n2),
            rate=cq(fpr,fnr),rate.empty=rep('error',len=length(rate)),
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
@@ -593,6 +595,9 @@ plotragm=
     else col=col[names(xdata)];
     lty=setNames(cq(solid,dashed,dotted,dotdash),rate);
     sapply(seq_len(n.xdata),function(i) {
+
+      ## print(paste(sep='=','label',names(xdata)[i]));
+      
       xdata=xdata[[i]];
       col=col[i];
       drag=data_agg(posr);
@@ -618,6 +623,7 @@ plotragm=
               else y.smooth=loessm(x,y,xout=x.smooth);
               ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
               y.smooth=apply(y.smooth,1:2,function(y) if (!is.na(y)) max(min(y,1),0) else y);
+              ## BREAKPOINT();
               matlines(x.smooth,y.smooth,col=col,lty=lty,lwd=lwd);
             }}}
       if (plot.points|length(x)==1) matpoints(x,y,col=col,cex=cex,pch=16);
@@ -739,12 +745,14 @@ title_rate=
 title_resig=
   function(title.desc=parent(title.desc,NULL),fignum=parent(fignum,NULL),
            rate.type=parent(rate.type,'error'),posr.id=parent(posr.id,'std')) {
-    rate.desc=switch(rate.type,
-                     pos='positive',neg='negative',error='error',correct='correct',
-                     fpr='false positive',fnr='false negative',
-                     tpr='true positive',tnr='true negative',
-                     roc='rate vs rate',rag='mean',ragm='mean');
-    if (rate.type %notin% cq(roc,ragm)) rate.desc=paste(sep=' ',rate.desc,'rate');
+    rate.desc=sapply(rate.type,function(rate.type) 
+      switch(rate.type,
+             pos='positive',neg='negative',error='error',correct='correct',
+             fpr='false positive',fnr='false negative',
+             tpr='true positive',tnr='true negative',
+             roc='rate vs rate',rag='mean',ragm='mean'));
+    rate.desc=paste(collapse=' and ',rate.desc);
+    if (all(rate.type %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
     posr.desc=if (posr.id=='std') NULL else paste_nv('posr',posr.id);
     if (!is.null(fignum)) fignum=paste(sep='','Figure ',fignum,'.');
     paste(collapse=' ',c(fignum,title.desc,rate.desc,posr.desc));
