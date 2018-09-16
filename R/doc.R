@@ -28,7 +28,7 @@
 ##   fignew - is each figure plotted in new window
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
-  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=1,
+  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=0,
            ## args passed to init. not spec'ed here else screws up init defaults
            ## save.fig=T,figscreen=if(doc=='readme') T else F,fignew=figscreen,
            ## docfun set later after init processes doc
@@ -49,10 +49,11 @@ dodoc=
 ##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
 ##   works only because no plot-function arg matches it
 dofig=
-  function(figfun,figname=NULL,figsect=parent(figsect,NULL),fignum=parent(fignum,1),
+  function(figfun,figname=NULL,figsect=parent(figsect,NULL),fignum=parent(fignum,0),
            figscreen=parent(figscreen,T),fignew=parent(fignew,T),id=parent(id,NULL),
            ...) {
     figname=paste(collapse='_',c(figsect,figname));
+    if (missing(fignum)) fignum=fignum+1;
     file=filename_fig(figname,fignum,id);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
@@ -89,20 +90,25 @@ dofig=
     if (plot.to.file)  dev.off(dev.png);
     ## close plot.to.screen device unless user wants each figure in new window
     if (plot.to.screen&&!fignew) dev.off(dev);
-
-    assign_parent(fignum,fignum+1);
+    assign_parent(fignum,fignum);
     figname;
   }
-## NOT YET PORTED
-## run data-making function, save if required, store result in global workspace
-## dodata=function(what) {
-##   what=as.character(pryr::subs(what));
-##   f=get(what,envir=parent.frame(n=1),mode='function');
-##   data=f();
-##   what=sub('^do_','',what);
-##   if (save.data) save_data(data,what);
-##   ## fiddle with name to get the form we want
-##   assign(what,data,envir=.GlobalEnv);
-##   invisible(data);
-## }
-
+## save one or more tables.
+dotbl=
+  function(...,sect=parent(figsect,NULL),tblnum=parent(tblnum,NULL),id=parent(id,NULL)) {
+    tbl=list(...);                           # evaluates dots
+    dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
+    sapply(seq_along(tbl),function(i) {
+      name=names(tbl)[i];
+      ## test for empty name. CAUTION: do it carefully lest R complains when name is empty list
+      empty.name=if(length(name)==0) T else if(nchar(name)==0) T else F;
+      if (empty.name) {
+        name=as.character(dots[[i]]);
+        data=get(name,envir=parent.frame(n=4)); # n=4 empirically determined
+      } else data=tbl[[i]]
+      tblname=paste(sep='_',sect,name);
+      file=filename_tbl(tblname,tblnum,id);
+      save_tbl(name,data,file=file);
+      ## write.table(tbl[[name]],file=file,sep='\t',quote=F,row.names=F);
+      tblname;})
+  }
