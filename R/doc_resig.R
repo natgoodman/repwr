@@ -24,11 +24,14 @@
 ## make figures and tables for blog post
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
+## CAUTION: doesn't work to pass version via dodoc. knonw bug. see Outliner
 doc_resig=
-  function(sect=parent(sect,NULL),
+  function(sect=parent(sect,NULL),version=cq(original,shorter),
            fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen),
            tblnum=parent(tblnum,NULL)) {
-    sect.all=cq(exact,inexact,nearexact,repwise);
+    version=match.arg(version);
+    sect.all=if(version=='original') cq(exact,inexact,nearexact,repwise)
+             else cq(exact,nearexact,repwise);
     if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
     d.nonzro=d[d!=0];
     col=col_resig();                    # colors for plotratm, plotragm
