@@ -66,6 +66,7 @@ init=function(
   smrydir=file.path(datadir,'smry'),       # directory for summary results files
   posrdir=file.path(datadir,'posr'),       # directory for positive rate files
   figdir=file.path('figure',docx,mdir),    # directory for figures. default eg, figure/repwr/m=1e4
+  tbldir=file.path('table',docx,mdir),     # directory for tables. default eg, table/repwr/m=1e4
   id=NULL,                                 # info tacked onto filenames. not used much
   verbose=F,                               # print progress messages
   ## program control
@@ -91,6 +92,7 @@ init=function(
   save.posr=save,                # save positive rate files (RData)
   save.data=save,                # save top level results (RData & txt formats)
   save.fig=T,                    # save figures (when called via dofig)
+  save.tbl=T,                    # save tables
   save.txt=NA,                   # save results in txt format as well as RData
                                  #   NA means use default rule for type:
                                  #   F for all but top level data
@@ -101,6 +103,7 @@ init=function(
   save.txt.smry=!is.na(save.txt)&save.txt, # save txt case-by-case summaries. default F
   save.txt.posr=is.na(save.txt)|save.txt,  # save txt positive rate files. default T
   save.txt.data=is.na(save.txt)|save.txt,  # save txt top level results. default T
+  save.txt.tbl=T,                # save txt tables. default T
   keep=NA,                       # shorthand for other keep params 
                                  #   NA means use default keep rule for type:
                                  #   T for all but detl
@@ -116,6 +119,7 @@ init=function(
   clean=F,                       # remove everything and start fresh
   clean.data=clean,              # remove datadir & memlist
   clean.fig=clean,               # remove figdir
+  clean.tbl=clean,               # remove tbldir
   clean.memlist=T,               # clean memlist cache - always safe
   clean.sim=F,                   # clean simulations. default F
   clean.simr=F,                  # clean simr data. default F
@@ -140,10 +144,11 @@ init=function(
   ## do it before calling any functions that rely on globals
   assign_global();
   ## clean and create output directories and internal memory values as needed
-  outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir,figdir);
+  outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir,figdir,tbldir);
   memlist=cq(sim.list,simr.list,si.list,detl.list,smry.list,posr.list,data.list);
   if (clean.data) unlink(datadir,recursive=T);
   if (clean.fig) unlink(figdir,recursive=T);
+  if (clean.tbl) unlink(tbldir,recursive=T);
   if (clean.memlist) suppressWarnings(rm(list=memlist,envir=.GlobalEnv));
   ## clear init_smry & init_mesr flags so these will be rerun
   suppressWarnings(rm(list=cq(init.smry,init.mesr),envir=.GlobalEnv));
