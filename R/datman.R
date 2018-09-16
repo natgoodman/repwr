@@ -280,7 +280,7 @@ keep_data=function(what,id=NULL,data=NULL,name=NULL) {
 }
 
 ##### plot - save one or more plots - NOT USED - saving done in dofig
-save_plot=function(dev,file=NULL,what=NULL,id=NULL) {
+save_plot=function(dev,file=NULL,what=NULL,id=NULL,i=NULL) {
   if (is.null(file)&is.null(what)) stop('Cannot save plot unless file or what is set');
   if (is.null(file)) {
     file=
@@ -288,6 +288,28 @@ save_plot=function(dev,file=NULL,what=NULL,id=NULL) {
         else sapply(seq_along(dev), function(i) filename_plot(what,id=id,i=i));
   } else file=filename(desuffix(file),suffix='png');
   for (i in seq_along(dev)) savePlot(file[i],device=dev[i]);
+}
+
+##### table - saved in tbldir
+save_tbl=function(what,file=NULL,data=NULL,
+                  sect=parent(figsect,NULL),tblnum=parent(tblnum,NULL),id=parent(id,NULL),i=NULL,
+                  save=save.tbl,save.txt=save.txt.tbl) {
+  what=as.character(pryr::subs(what));
+  if (missing(data) && exists(what,envir=parent.frame(n=1)))
+    data=get(what,envir=parent.frame(n=1));
+  if (is.null(data)) stop('Trying to save NULL object. Is "what" set correctly?');
+  if (is.null(file)) base=basename_tbl(what,sect=sect,tblnum=tblnum,id=id,i=i)
+  else base=desuffix(file);
+  file=filename(base=base,suffix='RData');
+  if ((is.na(save)&!file.exists(file))|(!is.na(save)&save)) {
+    save(data,file=file);
+    if (save.txt) {
+      file=filename(base=base,suffix='txt');
+      if (length(dim(data))==2) write.table(data,file=file,sep='\t',quote=F,row.names=F)
+      else if (is.vector(data)) writeLines(as.character(data),file)
+      else stop('Trying to save object with more than 2 dimensions as text. Is "what" set correctly?');
+    }}
+  invisible(data);
 }
 
 ## ---- File Functions ----
@@ -362,6 +384,16 @@ basename_fig=function(figname,fignum=NULL,id=NULL,i=NULL) {
   if (!is.null(fignum)) fignum=c('figure',sprintf("%03i",fignum));
   base=paste(collapse='_',c(fignum,figname));
   basename=filename(figdir,base=base,tail=i);
+  paste_id(basename,id);
+}
+##### table - saved in tbldir. may have numeric tail
+filename_tbl=function(tblname,tblnum=NULL,id=NULL,i=NULL,suffix='txt')
+  filename(basename_tbl(tblname,tblnum,id,i),suffix=suffix);
+basename_tbl=function(tblname,tblnum=NULL,id=NULL,i=NULL) {
+  if (!is.null(i)) i=sprintf("%02i",i);
+  if (!is.null(tblnum)) tblnum=c('table',sprintf("%03i",tblnum));
+  base=paste(collapse='_',c(tblnum,tblname));
+  basename=filename(tbldir,base=base,tail=i);
   paste_id(basename,id);
 }
 
