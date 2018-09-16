@@ -1,4 +1,4 @@
-#################################################################################
+n#################################################################################
 ##
 ## Author:  Nat Goodman
 ## Created: 18-06-19
@@ -28,7 +28,7 @@
 ##   fignew - is each figure plotted in new window
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
-  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=0,
+  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=1,
            ## args passed to init. not spec'ed here else screws up init defaults
            ## save.fig=T,figscreen=if(doc=='readme') T else F,fignew=figscreen,
            ## docfun set later after init processes doc
@@ -49,11 +49,10 @@ dodoc=
 ##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
 ##   works only because no plot-function arg matches it
 dofig=
-  function(figfun,figname=NULL,figsect=parent(figsect,NULL),fignum=parent(fignum,0),
+  function(figfun,figname=NULL,figsect=parent(figsect,NULL),fignum=parent(fignum,1),
            figscreen=parent(figscreen,T),fignew=parent(fignew,T),id=parent(id,NULL),
            ...) {
     figname=paste(collapse='_',c(figsect,figname));
-    if (missing(fignum)) fignum=fignum+1;
     file=filename_fig(figname,fignum,id);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
@@ -90,7 +89,7 @@ dofig=
     if (plot.to.file)  dev.off(dev.png);
     ## close plot.to.screen device unless user wants each figure in new window
     if (plot.to.screen&&!fignew) dev.off(dev);
-    assign_parent(fignum,fignum);
+    assign_parent(fignum,fignum+1);
     figname;
   }
 ## save one or more tables.
