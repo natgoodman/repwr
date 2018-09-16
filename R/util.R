@@ -103,6 +103,9 @@ asplinem=function(x,y,xout,...) {
   if (is.vector(y)) y=data.frame(y=y);
   if (length(dim(y))!=2) stop('y must be vector or 2-dimensional matrix-like object');
   ## yout=apply(y,2,function(y) akima::aspline(x,y,xout,...)$y);
+  ## extend y to correct number of rows if necessary. not really necessary for aspline
+  ## CAUTION: perhaps this should be error...
+  if (nrow(y)<length(x)) y=repr(y,length=length(x));
   yout=apply(y,2,function(y) {
     if (all(is.na(y))) rep(NA,length(xout))
     else if (length(which(!is.na(y)))==1) rep(y[which(!is.na(y))],length(xout))
@@ -115,6 +118,9 @@ asplinem=function(x,y,xout,...) {
 loessm=function(x,y,xout,...) {
   if (is.vector(y)) y=data.frame(y=y);
   if (length(dim(y))!=2) stop('y must be vector or 2-dimensional matrix-like object');
+  ## extend y to correct number of rows if necessary
+  ## CAUTION: perhaps this should be error...
+  if (nrow(y)<length(x)) y=repr(y,length=length(x));
   data=data.frame(x=x,y);
   yout=do.call(data.frame,lapply(colnames(y),function(name) {
     fmla=as.formula(paste(name,'~ x'));
@@ -129,6 +135,9 @@ loessm=function(x,y,xout,...) {
 splinem=function(x,y,xout,...) {
   if (is.vector(y)) y=data.frame(y=y);
   if (length(dim(y))!=2) stop('y must be vector or 2-dimensional matrix-like object');
+  ## extend y to correct number of rows if necessary
+  ## CAUTION: perhaps this should be error...
+  if (nrow(y)<length(x)) y=repr(y,length=length(x));
   yout=apply(y,2,function(y) {
     yout=predict(smooth.spline(x,y,spar=0.5),xout)$y    
   });
@@ -138,7 +147,21 @@ splinem=function(x,y,xout,...) {
   colnames(yout)=colnames(y);
   yout;
 }
-
+## repeat rows or columns of 2-dimensional matrix-like object. like rep
+## like rep, ... can be times, length.out, or each
+## based on StackOverflow https://stackoverflow.com/questions/11121385/repeat-rows-of-a-data-frame
+repr=function(x,...) {
+  i=rep(seq_len(nrow(x)),...);
+  x=x[i,,drop=F];
+  rownames(x)=NULL;
+  x;
+}
+repc=function(x,...) {
+  j=rep(seq_len(ncol(x)),...);
+  x=x[,j,drop=F];
+  colnames(x)=NULL;
+  x;
+}
 ## not in - based on example in RefMan - more intutive than !%in%
 "%notin%"=function(x,table) match(x,table,nomatch=0)==0
 ## between, near - to subset sim results
@@ -149,3 +172,4 @@ near=function(x,target,tol=.01) between(x,target-tol,target+tol)
 ## TODO: BREAKPOINT is sooo feeble :(
 BREAKPOINT=browser;
 devs.close=function() for (dev in dev.list()) dev.off(dev)
+
