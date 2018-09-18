@@ -40,29 +40,25 @@ Significance testing of the replica (more precisely, the statistical significanc
 
 The software supporting this post is open source and freely available in [GitHub](https://github.com/natgoodman/repwr).
 
-## Scenario and Nomenclature
+## Scenario
 
-The software simulates *studies* across a range of conditions then combines pairs of studies into *pairwise replications*. The first study of each pair is the *original* and the second the *replica*. Four variables parameterize each pairwise replication: $n1$, $n2$, $d1_{pop}$, $d2_{pop}$. These are the sample and population effect sizes for the two studies.
+The software simulates *studies* across a range of conditions, combines pairs of studies into *pairwise replications*, calculates which replications pass the test, and finally computes false positive and false negative rates for conditions of interest.
 
-The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of $n$ random numbers. One group comes from a standard normal distribution with $mean=0$; the other is standard normal with $mean=d_{pop}$. I then calculate basic statistics, most notably the *standardized observed effect size*, $d_{sdz}$, aka *Cohen’s d*, and the p-value from a t-test, *pval*.
+The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of $n$ random numbers. One group comes from a standard normal distribution with $mean=0$; the other is standard normal with $mean=d_{pop}$. I then calculate basic statistics, most notably the *standardized observed effect size*, $d_{sdz}$, aka *Cohen’s d*, and the p-value from a t-test. When I need to be pedantic, I use the term *study set* for the ensemble of studies for a given combination of $n$ and $d_{pop}$. 
 
-I simulate 14,641 conditions each with $10^4$ simulated replications, for a total of almost 150 million simulated instances.  When analyzing results, I interpolate to get values not simulated directly.
+The program varies $n$ from 20 to 500 and $d_{pop}$ from 0 to 1 with 11 discrete values each (a total of $11^2=121$ combinations). It simulates $10^4$ studies for each combination yielding about 1.2 million simulated studies.  An important limitation is that all population effect sizes are equally likely within the range studied. I don't consider *publication bias* which may make smaller effect sizes more likely, or any prior knowledge of expected effect sizes. 
 
-An important limitation is that I assume that all population effect sizes are equally likely within the range studied. I don't consider *publication bias* which may make smaller effect sizes more likely, or any prior knowledge of expected effect sizes.
+To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the studies of each set, then combines the studies row-by-row. This multiplies out to $121^2=14,641$ pairs of study sets and almost 150 million simulated replications. The first study of the pair is the *original* and the second the *replica*. I consistently use the suffixes $1$ and $2$ to denote the original and replica respectively.
 
-To reduce confusion, I try to use consistent terminology.
+Four variables parameterize each pairwise replication: $n1$, $n2$, $d1_{pop}$, and $d2_{pop}$. These are the sample and population effect sizes for the two studies.
 
-- *true* and *false* refer to the correct answers. A *true replication* is one where the original study is valid, i.e.,  $d1_{pop}\ne0$; a *false replication* is one where $d1_{pop}=0$
-- *positive* and *negative* refer to the results of the replication test. A *positive replication* is one for which the replica has a significant p-value and effect size in the same direction as the original; a *negative instance* is the opposite. Obviously the distinction between positive and negative depends on the chosen significance level. To keep things simple, I always use the conventionally accepted significance threshold of $0.05$
-- a *false positive replication* is one where the original study is invalid, yet the replica passes the test
-- a *false negative replication* is one where the original study is valid, yet the replica fails the test
+After forming the pairwise replications, the program discards replications for which the original study isn't significant. This reflects the standard practice that non-significant findings aren't published and thus aren't candidates for systematic replication.
 
-I calculate *false positive* and *false negative rates* (abbr. *FPR* and *FNR*) relative to the number of replications in which the original study is significant. 
+Next the program determines which replications should pass the replication test and which do pass the test. The ones that *should pass* are ones where the original study is a true positive, i.e., $d1_{pop}\ne0$. The ones that *do pass* are ones where the replica has a significant p-value and effect size in the same direction as the original.
 
-To get "mistake rates" I need one more parameter: $prop.true$, the proportion of replications that are true. This is the issue raised in  Ioannidis’s famous paper, [“Why most published research findings are false”](http://dx.plos.org/10.1371/journal.pmed.0020124) and many other papers and blog posts including [one by me](http://daniellakens.blogspot.nl/2017/10/science-wise-false-discovery-rate-does.html). The terminology for "mistake rates" varies by author. I use terminology adapted from [Jager and Leek's  paper](http://doi.org/10.1093/biostatistics/kxt007).
+A *false positive replication* is one where the original study is a false positive ($d1_{pop}=0$) yet the replication passes the test. A *false negative replication* is one where the original study is a true positive ($d1_{pop}\ne0$), yet the replication fails the test. The program calculates *false positive* and *false negative rates* (abbr. *FPR* and *FNR*) relative to the number of replications in which the original study is significant
 
-- *replication-wise false positive rate* (RWFPR) is the fraction of positive results that are false positives
-- *replication-wise false negative rate* (RWFNR) is the fraction of negative results that are false negatives
+To get "mistake rates" I need one more parameter: $prop.true$, the proportion of replications that are true. This is the issue raised in  Ioannidis’s famous paper, [“Why most published research findings are false”](http://dx.plos.org/10.1371/journal.pmed.0020124) and many other papers and blog posts including [one by me](http://daniellakens.blogspot.nl/2017/10/science-wise-false-discovery-rate-does.html). The terminology for "mistake rates" varies by author. I use terminology adapted from [Jager and Leek](http://doi.org/10.1093/biostatistics/kxt007). The *replication-wise false positive rate* (*RWFPR*) is the fraction of positive results that are false positives; the *replication-wise false negative rate* (*RWFNR*) is the fraction of negative results that are false negatives.
 
 ## Results
 
@@ -72,7 +68,7 @@ A replication is *exact* if the two studies are sampling the same population; th
 
 Figure 1 shows FPR for $n1=20$ and $n2$ varying from 50 to 500. The x-axis shows all four parameters using $d1$, $d2$ as shorthand for $d1_{pop}$, $d2_{pop}$. $d1_{pop}=d2_{pop}=0$ throughout because this is the only way to get false positives with exact replications. Figure 2 shows FNR for the same values of $n1$ and $n2$ but with $d1_{pop}=d2_{pop}$ ranging from 0.1 to 1. 
 
-I mark the conventionally accepted thresholds for false positive and negative error rates (0.05 and 0.2, resp.) as known landmarks to help interpret the results. I do **not** claim that these are the right thresholds for replications.
+I mark the conventionally accepted thresholds for false positive and negative error rates (0.05 and 0.2, resp.) as known landmarks to help interpret the results. I do **not** claim these are the right thresholds for replications.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/resig/m=1e4/figure_001_exact_fpr.png');
@@ -87,10 +83,9 @@ As one would expect, if the population effect size is small, $n2$ must be large 
 
 A replication is *near-exact* if the populations differ slightly, which means $d1_{pop}$ and $d2_{pop}$ differ by a small amount, $near$; technically $abs(d1_{pop}-d2_{pop})\le near$.
 
-I don't know what value of $near$ is reasonable for a systematic replication project. I imagine it varies by research area depending on the technical difficulty of the experiments and the variability of the phenomena. The range 0.1-0.3 feels reasonable. The figures extend the range by 0.1 on each end just to be safe.
+I don't know what value of $near$ is reasonable for a systematic replication project. I imagine it varies by research area depending on the technical difficulty of the experiments and the variability of the phenomena. The range 0.1-0.3 feels reasonable. I extend the range by 0.1 on each end just to be safe.
 
-Figure 3 uses the same values of $n1$, $n2$, and $d1_{pop}$ as in Figure 1. Figure 4 has the same parameters but fixes $d1_{pop}=0.5$, a medium effect size. Both include $near$ ranging from 0 to 0.4. In these figures, $d2_{pop}$ ranges from $d1_{pop}-near$ to $d1_{pop}+near$ with values $<0$ or $>1$ discarded.
-
+Figure 3 uses the same values of $n1$, $n2$, and $d1_{pop}$ as Figure 1, namely $n1=20$, $n2$ varies from 50 to 500, and $d1_{pop}=0$. Figure 4 uses the same values of $n1$ and $n2$ as Figure 2 but fixes $d1_{pop}=0.5$, a medium effect size. In both figures, $d2_{pop}$ ranges from $d1_{pop}-near$ to $d1_{pop}+near$ with values less than 0 or greater than 1 discarded. I restrict values to the interval $[0,1]$ because that's the range of $d$ in the simulation.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/resig/m=1e4/figure_003_nearexact_fpr.png');
@@ -107,7 +102,7 @@ knitr::include_graphics('figure/resig/m=1e4/figure_005_nearexact_fpr+fnr.png');
 
 For $near=0.1$, $n2=150$ is a sweet spot with both error rates about 0.05. For $near=0.3$, the crossover point is $n2=137$ with error rates of about 0.15. 
 
-FNR also depends on $d1_{pop}$, getting worse when $d1_{pop}$ is smaller and better when $d1_{pop}$ is bigger. The table below shows the error rates for a few values of $n2$, $near$, and $d1_{pop}$. Note that FPR only depends on $n2$ and $near$, while FNR depends on all three parameters. The FNR columns are for different values of $d1_{pop}$.
+FNR also depends on $d1_{pop}$ for "true" cases, i.e., when the original study is a true positive, getting worse when $d1_{pop}$ is smaller and better when $d1_{pop}$ is bigger. The table below shows the error rates for a few values of $n2$, $near$, and $d1_{pop}$. Note that FPR only depends on $n2$ and $near$, while FNR depends on all three parameters. The FNR columns are for different values of $d1_{pop}$ in true cases.
 
 | n2    | near  | FPR   | FNR 0.2 | FNR 0.5 | FNR 0.8 |
 | :---: | :---: | :---: | :----: | :---: | :---: |
@@ -122,11 +117,11 @@ FNR is great for $d1_{pop}=0.8$, mostly fine for $d1_{pop}=0.5$, and bad for $d1
 
 ### Replication-wise error rates
 
-The error rates reported so far depend on the truth status of the replication: *true* for FPR. *false* for FNR. The next step is to convert these into replication-wise error rates: RWFPR and RWFNR. To do so, we need one more parameter: $prop.true$, the proportion of replications that are true. 
+The error rates reported so far depend on whether the original study is a false or true positive: FPR assumes the original study is a false positive, FNR assumes it's a true positive. The next step is to convert these into replication-wise error rates: RWFPR and RWFNR. To do so, we need one more parameter: $prop.true$, the proportion of replications that are true. 
 
-Of course, we don't know the value of $prop.true$; arguably it's the most important parameter that systematic replication projects are trying to estimate. Like $near$, it probably varies by research field and may also depend on the quality of the investigator. Some authors assume $prop.true=0.5$, but I see little evidence to support any particular value.  It's easy enough to run a range of values and see how $prop.true$ affects the error rates.
+Of course, we don't know the value of $prop.true$; arguably it's the most important parameter that systematic replication is trying to estimate. Like $near$, it probably varies by research field and may also depend on the quality of the investigator. Some authors assume $prop.true=0.5$, but I see little evidence to support any particular value. It's easy enough to run a range of values and see how $prop.true$ affects the error rates.
 
-The table below shows the results for $n2=150$, $near=0.1,0.3$ as above, and $prop.true$ ranging from 0.1 to 0.9. The RWFPR and RWFNR columns are for different values of $d1_{pop}$.
+The table below shows the results for $n2=150$, $near=0.1,0.3$ as above, and $prop.true$ ranging from 0.1 to 0.9. The RWFPR and RWFNR columns are for different values of $d1_{pop}$ in "true" cases, i.e., when the original study is a true positive.
 
 | n2    | near  | prop.true | RWFPR 0.2 | RWFPR 0.5 | RWFPR 0.8 | RWFNR 0.2 | RWFNR 0.5 | RWFNR 0.8 |
 | :---: | :---: | :-------: | :------: | :------: | :------: | :------: | :------: | :------: |
