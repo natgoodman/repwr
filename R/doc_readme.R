@@ -27,7 +27,7 @@
 doc_readme=
   function(sect=parent(sect,NULL),
            fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
-    sect.all=cq(plotrate,heatrate,roc,rag,multi_sig2,small_telescopes);
+    sect.all=cq(plotrate,plotratm,heatrate,roc,rag,multi_sig2,small_telescopes);
     if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
 #################### nonzro
 ##### plotrate
@@ -37,6 +37,33 @@ doc_readme=
       dofig(plotrate,'sameff_fpr',rate.rule='sameff',d1=0.5,d2=d[d!=0.5],n1=20,n2=50,
             legend='bottomright');
       dofig(plotrate,'sameff_fnr',rate.rule='sameff',d=d,n1=20,n2=50,legend='topright');
+    }
+##### plotratm
+    if ((figsect='plotratm') %in% sect) {
+      d2=d[d!=0&d!=1];
+      xdata=lapply(d2,function(d2)
+        xdata=expand.grid(n1=20,n2=n,d1=0,d2=d2));
+      names(xdata)=as.character(d2);
+      dofig(plotratm,'nonzro_fpr',xdata=xdata,rate.rule='nonzro',x=cq(n1,n2,d1),
+            title=title_ratm('nonzro','fpr'),title.legend='d2',legend='topright');
+      xdata=lapply(n,function(n2)
+        xdata=expand.grid(n1=20,n2=n2,d1=0.5,d2=d));
+      names(xdata)=as.character(n);
+      dofig(plotratm,'nonzro_fnr',xdata=xdata,rate.rule='nonzro',x=cq(n1,d1,d2),
+            title=title_ratm('nonzro','fnr'),title.legend='n2',legend='topright');
+      d2=d[d!=0.5];
+      xdata=lapply(d2,function(d2)
+        xdata=expand.grid(n1=20,n2=n,d1=0.5,d2=d2));
+      names(xdata)=as.character(d2);
+      dofig(plotratm,'sameff_fpr',xdata=xdata,rate.rule='sameff',x=cq(n1,n2,d1),
+            title=title_ratm('sameff','fpr'),title.legend='d2',legend='right');
+      xdata=lapply(n,function(n2) {
+        xdata=expand.grid(n1=20,n2=n2,d1=d,d2=d);
+        xdata=subset(xdata,subset=(d1==d2));
+      });
+      names(xdata)=as.character(n);
+      dofig(plotratm,'sameff_fnr',xdata=xdata,rate.rule='sameff',x=cq(n1,d1,d2),
+            title=title_ratm('sameff','fnr'),title.legend='d2',legend='topright');
     }
 ##### heatrate
     if ((figsect='heatrate') %in% sect) {
@@ -96,3 +123,13 @@ xdata_readme=function(near=0,nx=2.5,n2.num=2,n1=c(20,40,60)) {
     ## TODO: I don't thing the 1e-4 tolerance still needed
     subset(xdata,subset=(abs(d1-d2)<=(near+1e-4)));}))
 }
+## generate title for plotratm cases. workaround for bug in plotratm title code
+title_ratm=
+  function(rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
+           rate.type=cq(error,pos,neg,correct),rate.tol=0,mesr='sig2',
+           title.desc=NULL,
+           fignum=parent(fignum,NULL),posr.id=parent(posr.id,'std')) {
+    if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+    title.desc=paste(collapse='. ',title.desc,mesr);
+    paste(collapse="\n",c(fignum,title_rate(),title.desc));
+  }
