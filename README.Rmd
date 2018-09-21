@@ -1,7 +1,7 @@
 ---
 title: "Replication Power"
 author: "Nathan (Nat) Goodman"
-date: "September 3, 2018"
+date: "September 21, 2018"
 output:
   github_document:
     html_preview: no
@@ -12,13 +12,13 @@ urlcolor: blue
 ---
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-*A collection of R scripts and documents exploring the power of replication to detect bad science. I treat replication as a statistical test, simulate proposed replication methods across a wide range of conditions, and estimate error rates for conditions of interest. The main point is that replication is a poor statistical test with unacceptable error rates under most conditions. It works as a validation test only when the original and replica studies are sampling nearly identical populations. Methods for testing whether the populations are similar work poorly under all conditions analyzed.*
+*A collection of R scripts and documents exploring the power of replication to detect bad science. I treat replication as a statistical test, simulate proposed replication methods across a wide range of conditions, and estimate error rates for conditions of interest. The main point is that replication is a poor statistical test with high error rates under most conditions. It works as a validation test only when the original and replica studies are sampling nearly identical populations. Methods for testing whether the populations are similar work poorly under all conditions analyzed.*
 
 **THE SOFTWARE IS STILL ROUGH and SOFTWARE DOCUMENTATION NONEXISTENT. PLEASE GET IN TOUCH IF YOU NEED HELP**
 
 ## Overview
 
-The program explores the power of replication to detect bad science. The software simulates *studies* across a range of conditions, combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes false positive and negative rates for measures and conditions of interest. The main conclusion is that replication is a poor statistical test with unacceptable error rates under most conditions. Significance testing of the replica works fine as a validation test for exact and near-exact replications, but error rates increase rapidly as the populations diverge. All other tests have excessive error rates under all conditions analyzed. All tests have unacceptable error rates when used to check whether the original and replica studies are similar.
+The program explores the power of replication to detect bad science. The software simulates *studies* across a range of conditions, combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes false positive and negative rates for measures and conditions of interest. The main conclusion is that replication is a poor statistical test with high error rates under most conditions. Significance testing of the replica works fine as a validation test for exact and near-exact replications, but error rates increase rapidly as the populations diverge. All other tests have excessive error rates under all conditions analyzed. All tests have unacceptable error rates when used to check whether the original and replica studies are similar.
 
 To calculate error rates, it's necessary to define explicit correctness criteria.  The ones I use are
 
@@ -88,9 +88,10 @@ run(doc='repwr');    # generate data and figures for blog post
 The default mode produces figures that illustrate the kinds of graphs the program can produce.
 
 1. line graphs showing error rates for a set of measures across chosen conditions: simple and intuitive but poor at showing data for too many measures and parameters
-2. heatmaps showing the same kind of data: still reasonably intuitive and somewhat better at depicting more measures and parameters
-3. rate-vs-rate scatter plots: able to display error rates across large swaths of parameter space but with less parameter resolution and perhaps less intuitive clarity; inspired by *receiver operating characteristic (ROC)* curves
-4. aggregate line graphs: same data as rate-vs-rate scatter plots but for fewer measures and with better parameter resolution
+2. multi-line graphs showing error rates for a single measure across chosen conditions with one or more parameters represented by different lines
+3. heatmaps showing the same kind of data: still reasonably intuitive and somewhat better at depicting more measures and parameters
+4. rate-vs-rate scatter plots: able to display error rates across large swaths of parameter space but with less parameter resolution and perhaps less intuitive clarity; inspired by *receiver operating characteristic (ROC)* curves
+5. aggregate line graphs: same data as rate-vs-rate scatter plots but for fewer measures and with better parameter resolution
 
 The first group of figures are line graphs showing false positive and false negative rates for a few measures across a few conditions. The labels on the x-axis show the conditions: *n1*, *n2* are the sample sizes; *d1*, *d2* are the population effect sizes. The horizontal dashed lines demark the conventionally accepted thresholds of 0.05 for false positives and 0.20 for false negatives.
 
@@ -103,47 +104,60 @@ knitr::include_graphics('figure/readme/m=1e3/figure_003_plotrate_sameff_fpr.png'
 knitr::include_graphics('figure/readme/m=1e3/figure_004_plotrate_sameff_fnr.png');
 ```
 
-The next figures are heatmaps. Figures 5-6 show the same conditions as figures 1-2 but for more measures; figures 7-8 show more conditions. 
+The next figures are multi-line graphs showing more detail for *sig2*.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/readme/m=1e3/figure_005_plotratm_nonzro_fpr.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_006_plotratm_nonzro_fnr.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_007_plotratm_sameff_fpr.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_008_plotratm_sameff_fnr.png');
+```
+
+The next figures are heatmaps. Figures 9-10 show the same conditions as figures 1-2 but for more measures; figures 11-12 show more conditions. 
 The red-to-blue transition is set at the conventionally accepted thresholds of 0.05 for false positives and 0.20 for false negatives. The  dark vertical lines in figures 7-8 visually split each plot into separate "panels" for each value of *d2*.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/readme/m=1e3/figure_005_heatrate_nonzro_fpr.png');
-knitr::include_graphics('figure/readme/m=1e3/figure_006_heatrate_nonzro_fnr.png');
-knitr::include_graphics('figure/readme/m=1e3/figure_007_heatrate_nonzro_fpr_multi.png');
-knitr::include_graphics('figure/readme/m=1e3/figure_008_heatrate_nonzro_fnr_multi.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_009_heatrate_nonzro_fpr.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_010_heatrate_nonzro_fnr.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_011_heatrate_nonzro_fpr_multi.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_012_heatrate_nonzro_fnr_multi.png');
 ```
 
-The next two figures (figures 9-10) are rate-vs-rate graphs for *exact* and *inexact* replications. Each point shows the mean false negative vs. mean false positive rate for specific conditions grouped by $n1,n2$. The dashed lines demark the conventionally acceptable error rates; the bottom left hand corner is the region where both error rates are acceptable. You'll note that for *exact*, *sig2* is the only measure with points in or near the acceptable region; for *inexact*, no points are even close.
+The next two figures (figures 13-14) are rate-vs-rate graphs for *exact* and *inexact* replications. Each point shows the mean false negative vs. mean false positive rate for specific conditions grouped by $n1,n2$. The dashed lines demark the conventionally acceptable error rates; the bottom left hand corner is the region where both error rates are acceptable. You'll note that for *exact*, *sig2* is the only measure with points in or near the acceptable region; for *inexact*, no points are even close.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/readme/m=1e3/figure_009_roc_exact.png');
-knitr::include_graphics('figure/readme/m=1e3/figure_010_roc_inexact.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_013_roc_exact.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_014_roc_inexact.png');
 ```
 
-Figures 11-12 are aggregate line graphs showing the same data as the rate-vs-rate graphs above for fewer measures.
+Figures 15-16 are aggregate line graphs showing the same data as the rate-vs-rate graphs above for fewer measures.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/readme/m=1e3/figure_011_rag_exact.png');
-knitr::include_graphics('figure/readme/m=1e3/figure_012_rag_inexact.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_015_rag_exact.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_016_rag_inexact.png');
 ```
 
-Recall that *sig2* works pretty well in exact replications but poorly in inexact ones (see figures 9-10).  The next two figures (figures 13-14) show how *sig2* performs in  *near exact* replications, ones where the population effect sizes differ slightly. The first is a rate-vs-rate graph showing *sig2* across various nearness values; the second is an aggregate line graph showing the same data.
+Recall that *sig2* works pretty well in exact replications but poorly in inexact ones (see figures 13-14).  The next two figures (figures 17-18) show how *sig2* performs in  *near exact* replications, ones where the population effect sizes differ slightly. The first is a rate-vs-rate graph showing *sig2* across various nearness values; the second is an aggregate line graph showing the same data.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/readme/m=1e3/figure_013_multi_sig2_rocm.png');
-knitr::include_graphics('figure/readme/m=1e3/figure_014_multi_sig2_ragm.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_017_multi_sig2_rocm.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_018_multi_sig2_ragm.png');
 ```
 
-The final two figures (figures 15-16) compare *sig2* and *d2.scp1* (Uri Simonsohn's *small telescopes* method). The differences are quite small.
+The final two figures (figures 19-20) compare *sig2* and *d2.scp1* (Uri Simonsohn's *small telescopes* method). The differences are quite small.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/readme/m=1e3/figure_015_small_telescopes_roc.png');
-knitr::include_graphics('figure/readme/m=1e3/figure_016_small_telescopes_rag.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_019_small_telescopes_roc.png');
+knitr::include_graphics('figure/readme/m=1e3/figure_020_small_telescopes_rag.png');
 ```
 
 ## See Also
 
-A blog post discussing the approach and results is available in [html](https://natgoodman.github.io/repwr/repwr.stable.html) and [pdf](https://natgoodman.github.io/repwr/repwr.stable.pdf) on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository and will soon be posted on a blog site TBD. It's also in the repository as files [repwr.stable.html](https://github.com/natgoodman/repwr/repwr.stable.html) and [repwr.stable.pdf](https://github.com/natgoodman/repwr/repwr.stable.pdf). (But note that GitHub, unlike GitHub Pages, renders html files as raw text). The previous version of the post (version 1.00) are available as [html](https://natgoodman.github.io/repwr/repwr.1.00.html) and [pdf](https://natgoodman.github.io/repwr/repwr.1.00.pdf)
+Documents discussing the approach and results are available on the [GitHub Pages site](https://natgoodman.github.io/repwr) associated with this repository. You can also reach these documents and previous versions from my [incipient website](https://natgoodman.github.io/blog/)
+
+- working paper discussing the approach and results in some detail: [html](https://natgoodman.github.io/repwr/repwr.stable.html), [pdf](https://natgoodman.github.io/repwr/repwr.stable.pdf)
+
+- shorter blog post looking only at *sig2* and the *non-zero* correctness criterion: [html](https://natgoodman.github.io/repwr/resig.stable.html), [pdf](https://natgoodman.github.io/repwr/resig.stable.pdf)
 
 ## Author
 
