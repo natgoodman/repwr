@@ -111,12 +111,10 @@ plotrate=
       xaxt='n';
     } else x=xdata[,x];
     if (is.null(title)) {
-      if (doc!='resig') {
-        xdt=xdata_xtitle(xdata,xtitle);
-        xdata=xdt$xdata; xtitle=xdt$xtitle;
-        if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
-        title=paste(collapse="\n",c(fignum,title_rate(),title.desc,xtitle));
-      } else title=title_resig();
+      xdt=xdata_xtitle(xdata,xtitle);
+      xdata=xdt$xdata; xtitle=xdt$xtitle;
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      title=paste(collapse="\n",c(fignum,title_rate(),title.desc,xtitle));
     }
     if (xaxt=='auto') if (nrow(xdata)<=xaxt.max) xaxt='n' else xaxt='s';
     if (xaxt=='n') {
@@ -247,7 +245,7 @@ plotratm=
            rate.rule=cq(nonzro,nonz1,nonz1or2,nonz1and2,nonz2,sameff,farzro,nearff,uni,raw),
            rate.type=cq(error,pos,neg,correct),rate.tol=0,
            xdata=NULL,col=NULL,mesr='sig2',
-           x=cq(n1,n2),xtitle='none',
+           x=cq(n1,n2),xtitle=cq(none,auto,n,d,n1,n2,d1,d2),
            fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            plot.cutoff=T,
            xaxt=cq(auto,n,r,s,R),xaxt.max=11,
@@ -294,12 +292,10 @@ plotratm=
     rate.type=rate_type(true.dd=do.call(c,lapply(drat,function(drat) drat$true.dd)))
     if (is.null(ylab)) ylab=rate2lab(rate.type);
     if (is.null(title)) {
-      if (doc!='resig') {
-        xdt=xdata_xtitle(do.call(rbind,xdata),xtitle);
-        xdata=xdt$xdata; xtitle=xdt$xtitle;
-        if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
-        title=paste(collapse="\n",c(fignum,title_rate(),title.desc,xtitle));
-      } else title=title_resig();
+      xdt=xdata_xtitle(do.call(rbind,xdata),xtitle);
+      xdata=xdt$xdata; xtitle=xdt$xtitle;
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      title=paste(collapse="\n",c(fignum,title_rate(),title.desc,xtitle));
     }
    plot(x=NULL,y=NULL,type='n',xlab=xlab,ylab=ylab,main=title,cex.main=cex.title,
          xlim=xlim,ylim=ylim,xaxt='n');
@@ -569,12 +565,10 @@ plotragm=
       stop('plotragm needs a list of xdata data fromes, not a single data frame');
     if (length(rate)==1) rate.desc=rate2lab(rate);
     if (is.null(title)) {
-      if (doc!='resig') {
-        if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
-        if (length(rate)==1) title.rate=paste(sep=' ',title_rate(rate.type='ragm'),ylab)
-        else title.rate=paste(sep=' ',title_rate(rate.type='ragm'),'rate');
-        title=paste(collapse="\n",c(fignum,paste(sep=' ',title.rate,'for',mesr),title.desc));
-      } else title=title_resig(rate.type=rate);
+      if (!is.null(fignum)) fignum=paste(sep=' ','Figure',fignum);
+      if (length(rate)==1) title.rate=paste(sep=' ',title_rate(rate.type='ragm'),ylab)
+      else title.rate=paste(sep=' ',title_rate(rate.type='ragm'),'rate');
+      title=paste(collapse="\n",c(fignum,paste(sep=' ',title.rate,'for',mesr),title.desc));
     }
     ## collect all labels and arrange along x-axis
     labels=unique(do.call(c,lapply(xdata,function(xdata) 
@@ -595,9 +589,7 @@ plotragm=
     else col=col[names(xdata)];
     lty=setNames(cq(solid,dashed,dotted,dotdash),rate);
     sapply(seq_len(n.xdata),function(i) {
-
-      ## print(paste(sep='=','label',names(xdata)[i]));
-      
+      ## print(paste(sep='=','label',names(xdata)[i]));    
       xdata=xdata[[i]];
       col=col[i];
       drag=data_agg(posr);
@@ -741,23 +733,6 @@ title_rate=
     posr.desc=if (posr.id=='std') NULL else paste_nv('posr',posr.id);
     paste(collapse=' ',c(desc,rate.desc,posr.desc));
   }
-## generate titles for doc_resig. simpler and shorter than general case
-title_resig=
-  function(title.desc=parent(title.desc,NULL),fignum=parent(fignum,NULL),
-           rate.type=parent(rate.type,'error'),posr.id=parent(posr.id,'std')) {
-    rate.desc=sapply(rate.type,function(rate.type) 
-      switch(rate.type,
-             pos='positive',neg='negative',error='error',correct='correct',
-             fpr='false positive',fnr='false negative',
-             tpr='true positive',tnr='true negative',
-             roc='rate vs rate',rag='mean',ragm='mean'));
-    rate.desc=paste(collapse=' and ',rate.desc);
-    if (all(rate.type %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
-    posr.desc=if (posr.id=='std') NULL else paste_nv('posr',posr.id);
-    if (!is.null(fignum)) fignum=paste(sep='','Figure ',fignum,'.');
-    paste(collapse=' ',c(fignum,title.desc,rate.desc,posr.desc));
-  }
-
 ## generate 'rate' part of ylab for plots
 ylab_rate=function(rate.rule=parent(rate.rule),rate.type=parent(rate.type)) {
   if (is.function(rate.rule)) rate.rule='user-defined';
