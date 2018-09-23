@@ -1,7 +1,7 @@
 ---
 title: "Systematic Replication May Make Many Mistakes"
 author: "Nathan (Nat) Goodman"
-date: "September 15, 2018"
+date: "September 23, 2018"
 output:
   html_document:
     css: css/html_document.css
@@ -36,7 +36,9 @@ My test for replication success is the same as SSRP (what they call the *statist
 
 A replication is *exact* if the two studies are sampling the same population. This is an obvious replication scenario. You have a study you think may be wrong; to check it out, you repeat the study, taking care to ensure that the replica closely matches the original. Think [cold fusion](https://en.wikipedia.org/wiki/Cold_fusion). A replication is *near-exact* if the populations differ slightly. This is probably what systematic replication achieves, since the need for uniformity reduces precision.
 
-Significance testing of the replica (more precisely, the statistical significance criterion) works as expected for exact replications, but error rates increase rapidly as the populations diverge. Under conditions that may be typical in systematic replication projects, the rate of false positive mistakes ranges from 1-71% and false negative mistakes from 0-85%. This enormous range results from the cumulative effect of multiple unknown, hard-to-estimate parameters. My results suggest that we should adjust our expectations for systematic replication projects. These projects may make a lot of mistakes; we should take their replication failure rates with a grain of salt.
+Significance testing of the replica (more precisely, the statistical significance criterion) works as expected for exact replications, but error rates increase rapidly as the populations diverge. This isn't surprising when you think about it: we're using the replica to draw inferences about the original study; it stands to reason this will only work if the two studies are very similar. 
+
+Under conditions that may be typical in systematic replication projects, the rate of false positive mistakes calculated in this post ranges from 1-71% and false negative mistakes from 0-85%. This enormous range results from the cumulative effect of multiple unknown, hard-to-estimate parameters. My results suggest that we should adjust our expectations for systematic replication projects. These projects may make a lot of mistakes; we should take their replication failure rates with a grain of salt.
 
 The software supporting this post is open source and freely available in [GitHub](https://github.com/natgoodman/repwr).
 
@@ -57,6 +59,8 @@ After forming the pairwise replications, the program discards replications for w
 Next the program determines which replications should pass the replication test and which do pass the test. The ones that *should pass* are ones where the original study is a true positive, i.e., $d1_{pop}\ne0$. The ones that *do pass* are ones where the replica has a significant p-value and effect size in the same direction as the original.
 
 A *false positive replication* is one where the original study is a false positive ($d1_{pop}=0$) yet the replication passes the test. A *false negative replication* is one where the original study is a true positive ($d1_{pop}\ne0$), yet the replication fails the test. The program calculates *false positive* and *false negative rates* (abbr. *FPR* and *FNR*) relative to the number of replications in which the original study is significant
+
+My definition of which replications *should pass* depends only on the original study. A replication in which the original study is a false positive and the replica study a true positive counts as a false positive replication. This makes sense if the overarching goal is to validate the original *study*. If the goal were to test the *result* of the original study rather than the study itself, it would make sense to count this case as correct. 
 
 To get "mistake rates" I need one more parameter: $prop.true$, the proportion of replications that are true. This is the issue raised in  Ioannidis’s famous paper, [“Why most published research findings are false”](http://dx.plos.org/10.1371/journal.pmed.0020124) and many other papers and blog posts including [one by me](http://daniellakens.blogspot.nl/2017/10/science-wise-false-discovery-rate-does.html). The terminology for "mistake rates" varies by author. I use terminology adapted from [Jager and Leek](http://doi.org/10.1093/biostatistics/kxt007). The *replication-wise false positive rate* (*RWFPR*) is the fraction of positive results that are false positives; the *replication-wise false negative rate* (*RWFNR*) is the fraction of negative results that are false negatives.
 
@@ -92,7 +96,10 @@ knitr::include_graphics('figure/resig/m=1e4/figure_003_nearexact_fpr.png');
 knitr::include_graphics('figure/resig/m=1e4/figure_004_nearexact_fnr.png');
 ```
 
-FPR is fine when $n2$ is small, esp. when $near$ is also small, but gets worse as $n2$ (and $near$) increase. It may seem odd that the error rate increases as the sample size increases. What's going on is a consequence of power. More power is usually good, but in this setting every positive is a false positive, so more power is bad. FNR behaves in the opposite direction: bad when $n2$ is small and better as $n2$ increases. 
+FPR is fine when $n2$ is small, esp. when $near$ is also small, but gets worse as $n2$ (and $near$) increase. It may seem odd that the error rate increases as the sample size increases. What's going on is a consequence of power. More power is usually good, but in this setting every positive is a false positive, so more power is bad.
+This odd result is a consequence of how I define correctness. When the original study is a false positive ($d1_{pop}=0$) and the replica a true positive ($d2_{pop}\ne0$), I consider the replication to be a false positive. This makes sense if we're trying to validate the original *study*. If instead we're testing the *result* of the original study, it would make sense to count this case as correct. 
+
+FNR behaves in the opposite direction: bad when $n2$ is small and better as $n2$ increases. 
 
 To show the tradeoff between FPR and FNR, Figure 5 plots both error rates for $near=0.1$ and $near=0.3$. 
 
@@ -113,6 +120,7 @@ FNR also depends on $d1_{pop}$ for "true" cases, i.e., when the original study i
 | 450 | 0.1 | 0.10 | 0.26 | 0.00 | 0.00 |
 | 450 | 0.3 | 0.29 | 0.31 | 0.01 | 0.00 |
 
+<p/>
 FNR is great for $d1_{pop}=0.8$, mostly fine for $d1_{pop}=0.5$, and bad for $d1_{pop}=0.2$. Pushing up $n2$ helps but even when $n2=450$, FNR is probably unacceptable for $d1_{pop}=0.2$. Increasing $n2$ worsens FPR. It seems the crossover point above, $n2=137$, is about right. Rounding up to 150 seems a reasonable rule-of-thumb.
 
 ### Replication-wise error rates
@@ -136,17 +144,22 @@ The table below shows the results for $n2=150$, $near=0.1,0.3$ as above, and $pr
 | 150 | 0.3 | 0.75 | 0.10 | 0.06 | 0.05 | 0.64 | 0.32 | 0.04 |
 | 150 | 0.3 | 0.90 | 0.03 | 0.02 | 0.02 | 0.84 | 0.58 | 0.10 |
 
+<p/>
 Check out the top and bottom rows. The top row depicts a scenario where most replications are false ($prop.true=0.1$) and the replicas closely match the original studies ($near=0.1$); for this case, most positives are mistakes and most negatives are accurate. The bottom row is a case where most replications are true ($prop.true=0.9$) and the replicas diverge from the originals ($near=0.3$); here most positives are correct and, unless $d1_{pop}$ is large, most negatives are mistakes. 
 
 Which scenario is realistic? There are plenty of opinions but scant evidence. Your guess is as good as mine. 
 
 ## Discussion
 
-Systematic replication is a poor statistical test. Replication works well when care is taken to ensure the replica closely matches the original study. This is the norm in focused, one-off replication studies aiming to confirm or refute a single finding. It seems unrealistic in systematic replication projects, which typically prioritize uniformity over fidelity to run lots of studies at reasonable cost. If the studies differ as they almost certainly must in systematic projects, mistake rates grow and may be unacceptably high under many conditions.
+Systematic replication is a poor statistical test when used to validate published studies. Replication works well when care is taken to ensure the replica closely matches the original study. This is the norm in focused, one-off replication studies aiming to confirm or refute a single finding. It seems unrealistic in systematic replication projects, which typically prioritize uniformity over fidelity to run lots of studies at reasonable cost. If the studies differ, as they almost certainly must in systematic projects, mistake rates grow and may be unacceptably high under many conditions.
 
-My results suggest that systematic replication is unsuitable as a tool for validating existing studies. An alternative is to switch gears and focus on generalizability. This would change the mindset of replication researchers more than the actual work. Instead of trying to refute a study, you would assume the study is correct within the limited setting of the original investigation and try to extend it to other settings. The scientific challenge becomes defining good "other settings" - presumably there are many sensible choices -- and selecting studies that are a good fit for each. This seems a worthy problem in its own right that would move the field forward no matter how many original studies successfully generalize.
+My conclusions depend on the definition of replication correctness, i.e., which replications *should pass*. The definition I use in this post depends only on the original study: a replication should pass if the original study is a true positive; the replica study is just a proxy for the original one. This makes sense if the goal is to validate the original *study*. If the goal were to test the *result* of the original study rather than the study itself, it would make sense to let true positive replicas count as true positive replications. That would greatly reduce the false positive rates I report.
 
-I’ve seen plenty of bad science up close and personal, but in my experience statistics isn't the main culprit. The big problem I see is faulty research methods. Every scientific field has accepted standard research methods. If the methods are bad, even "good" results are likely to be wrong; the results may be highly replicable but wrong nonetheless.
+My conclusions also depend on details of the simulation.  An important caveat is that population effect sizes are uniformly distributed across the range studied. I don't consider *publication bias* which may make smaller effect sizes more likely, or any prior knowledge of expected effect sizes. Also, in the near exact case, I assume that replica effect sizes can be smaller or larger than the original effect sizes; many investigators believe that replica effect sizes are usually smaller.
+
+My results suggest that systematic replication is unsuitable for validating existing studies. An alternative is to switch gears and focus on generalizability. This would change the mindset of replication researchers more than the actual work. Instead of trying to refute a study, you would assume the study is correct within the limited setting of the original investigation and try to extend it to other settings. The scientific challenge would become defining good "other settings" - presumably there are many sensible choices -- and selecting studies that are a good fit for each. This seems a worthy problem in its own right that would move the field forward no matter how many original studies successfully generalize.
+
+I’ve seen plenty of bad science up close and personal, but in my experience statistics isn't the main culprit. The big problem I see is faulty research methods. Every scientific field has accepted standard research methods. If the methods are bad, even "good" results are likely to be wrong; the results may be highly replicable but wrong nonetheless. 
 
 The quest to root out bad science is noble but ultimately futile. "Quixotic" comes to mind. Powerful economic forces shape the size and make-up of research areas. Inevitably some scientists are better researchers than others. But "Publish or Perish" demands that all scientists publish research papers. Those who can, publish good science; those who can't, do the best they can.
 
