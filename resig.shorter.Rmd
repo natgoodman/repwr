@@ -60,7 +60,7 @@ After forming the pairwise replications, the program discards replications for w
 
 Next the program determines which replications should pass the replication test and which do pass the test. The ones that *should pass* are ones where the original study is a true positive, i.e., $d1_{pop}\ne0$. The ones that *do pass* are ones where the replica has a significant p-value and effect size in the same direction as the original.
 
-A *false positive replication* is one where the original study is a false positive ($d1_{pop}=0$) yet the replication passes the test. A *false negative replication* is one where the original study is a true positive ($d1_{pop}\ne0$), yet the replication fails the test. The program calculates *false positive* and *false negative rates* (abbr. *FPR* and *FNR*) relative to the number of replications in which the original study is significant
+A *false positive replication* is one where the original study is a false positive ($d1_{pop}=0$) yet the replication passes the test. A *false negative replication* is one where the original study is a true positive ($d1_{pop}\ne0$), yet the replication fails the test. The program calculates *false positive* and *false negative rates* (abbr. *FPR* and *FNR*) relative to the number of replications in which the original study is significant.
 
 My definition of which replications *should pass* depends only on the original study. A replication in which the original study is a false positive and the replica study a true positive counts as a false positive replication. This makes sense if the overarching goal is to validate the original *study*. If the goal were to test the *result* of the original study rather than the study itself, it would make sense to count this case as correct. 
 
