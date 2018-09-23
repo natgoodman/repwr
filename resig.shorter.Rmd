@@ -38,7 +38,9 @@ A replication is *exact* if the two studies are sampling the same population. Th
 
 Significance testing of the replica (more precisely, the statistical significance criterion) works as expected for exact replications, but error rates increase rapidly as the populations diverge. This isn't surprising when you think about it: we're using the replica to draw inferences about the original study; it stands to reason this will only work if the two studies are very similar. 
 
-Under conditions that may be typical in systematic replication projects, the rate of false positive mistakes calculated in this post ranges from 1-71% and false negative mistakes from 0-85%. This enormous range results from the cumulative effect of multiple unknown, hard-to-estimate parameters. My results suggest that we should adjust our expectations for systematic replication projects. These projects may make a lot of mistakes; we should take their replication failure rates with a grain of salt.
+Under conditions that may be typical in systematic replication projects, the rate of false positive mistakes calculated in this post ranges from 1-71% and false negative mistakes from 0-85%. This enormous range results from the cumulative effect of multiple unknown, hard-to-estimate parameters. 
+
+My results suggest that we should adjust our expectations for systematic replication projects. These projects may make a lot of mistakes; we should take their replication failure rates with a grain of salt.
 
 The software supporting this post is open source and freely available in [GitHub](https://github.com/natgoodman/repwr).
 
