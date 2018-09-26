@@ -26,16 +26,24 @@
 ##   uses prefix matching and all matches run
 doc_resig=
   function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
-    sect.all=cq(exact,inexact,nearexact);
+           figpfx=parent(figpfx,NULL),fignum=parent(fignum,1),
+           figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
+    sect.all=cq(blog_start,blog_exact,blog_nearexact,
+                exact,nearexact,        # synonyms for blog_exact, blog_nearexact
+                supp_start,supp_inexact);
     if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
     d.nonzro=d[d!=0];
     col=col_resig();                    # colors for plotratm, plotragm
-#################### nonzro
+##### blog_start - reset fignum to 1, set figpfx to NULL
+#####   not necessary. included for stylistic consistency with 'supp'
+    if ((figsect='blog_start') %in% sect) {
+      figpfx=NULL;
+      fignum=1;
+    }
 ##### exact
-    if ((figsect='exact') %in% sect) {
+    if (('exact' %in% sect)|('blog_exact' %in% sect)) {
+      figsect='exact';
       title.desc='Exact replication';
-
       dofig(plotrate,'fpr',d=0,n1=20,n2=seq(50,by=50,len=10),smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fpr'),legend=NULL);
@@ -49,24 +57,9 @@ doc_resig=
       tbl.d2byn2=cutoff_d2byn2(xdata);
       dotbl(fnr_n2byd2=tbl.n2byd2,fnr_d2byn2=tbl.d2byn2);
     }
-##### inexact
-    if ((figsect='inexact') %in% sect) {
-      title.desc='Inexact replication';
-      xdata=lapply(d,function(d)
-        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0,d2=d));
-      names(xdata)=as.character(d);
-      dofig(plotratm,'fpr',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fpr'),title.legend='d2',legend='topright');
-      xdata=lapply(d,function(d)
-        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0.5,d2=d));
-      names(xdata)=as.character(d);
-      dofig(plotratm,'fnr',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='d2',x.legend=8.45,y.legend=0.65);
-   }
 ##### near exact
-    if ((figsect='nearexact') %in% sect) {
+    if (('nearexact' %in% sect)|('blog_nearexact' %in% sect)) {
+      figsect='nearexact';
       title.desc='Near exact replication';
       ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
       near=round(seq(0,0.4,by=0.1),digits=5);
@@ -114,6 +107,28 @@ doc_resig=
       ## tbl.nearbyn2=cutoff_nearbyn2(xdata,rate='fnr');
       dotbl(fpr=tbl.fpr);
     }
+##### supp_start - reset fignum to 1, set figpfx to 'S'
+    if ((figsect='supp_start') %in% sect) {
+      figpfx='S';
+      fignum=1;
+    }
+##### supp_inexact
+    if ('supp_inexact' %in% sect) {
+      figsect='inexact';
+      title.desc='Inexact replication';
+      xdata=lapply(d,function(d)
+        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0,d2=d));
+      names(xdata)=as.character(d);
+      dofig(plotratm,'fpr',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+            title=title_resig('fpr'),title.legend='d2',legend='topright');
+      xdata=lapply(d,function(d)
+        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0.5,d2=d));
+      names(xdata)=as.character(d);
+      dofig(plotratm,'fnr',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+            title=title_resig('fnr'),title.legend='d2',x.legend=8.45,y.legend=0.65);
+   }
     if ((figsect='unused') %in% sect) {
       title.desc='Near exact replication';
       xdata=lapply(near,function(near) {
@@ -147,7 +162,8 @@ col_resig=
 ## generate title for doc_resig. simpler and shorter than general case
 title_resig=
   function(rate.type=parent(rate.type,'error'),title.desc=parent(title.desc,NULL),
-           fignum=parent(fignum,NULL),posr.id=parent(posr.id,'std')) {
+           fignum=parent(fignum,NULL),figpfx=parent(figpfx,NULL),
+           posr.id=parent(posr.id,'std')) {
     rate.desc=sapply(rate.type,function(rate.type) 
       switch(rate.type,
              pos='positive',neg='negative',error='error',correct='correct',
@@ -157,6 +173,7 @@ title_resig=
     rate.desc=paste(collapse=' and ',rate.desc);
     if (all(rate.type %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
     posr.desc=if (posr.id=='std') NULL else paste_nv('posr',posr.id);
+    fignum=paste(collapse='',c(figpfx,fignum));
     if (!is.null(fignum)) fignum=paste(sep='','Figure ',fignum,'.');
     paste(collapse=' ',c(fignum,title.desc,rate.desc,posr.desc));
   }
