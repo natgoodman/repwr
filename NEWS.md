@@ -4,14 +4,41 @@ Nathan (Nat) Goodman
 September 3, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.20 2018-09-26
+-----------------------
+
+Supports shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`).
+
+New files
+
+-   `R/doc_resig.R` generates figures and tables for resig blog post
+-   `R/sim_resig.R` like `R/sim.R` but only computes measures needed for resig blog post: `sig1`, `sig2`, `sdir`
+-   `R/resig.R` like `R/repwr.R` but loads resig-specific files
+
+Code changes
+
+-   Many changes to `R/plot.R` to support resig blog post:
+    -   Added 'plotratm' function to plot multiple rates for a single measure
+    -   Added 'spline' smoothing method
+    -   Added more line properties to 'extra' vertical and horizontal lines. Still a hack that will need further cleanup
+    -   Added specialized function for resig figure titles
+    -   Added ability to omit legend
+    -   Added `plot.cutoff` control consistently to all top level functions
+    -   Added `col` parameter to all `plotXXXm` functions to set colors for rate
+-   Added spline smoothing method to all line plotting functions. Uses R's `smooth.spline`
+
+Bug fixes
+
+-   Fixed bug due to `apply` converting single row matrix into vector. sigh... Bug was present in several functions
+
 Release 1.11 2018-08-31
 -----------------------
 
-Supports third draft blog post, "Systematic Replication Has Limited Power to Detect Bad Science".
+Supports third draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
 
 Document changes
 
--   Blog post (repwr)
+-   Blog post (`repwr.Rmd`)
     -   Added reference to new systematic replication study just published in Nature Human Behavior
     -   Deleted final paragraph with Oprah Winfrey quote: not really on-target
     -   Added words on posting comments using GitHub Issue Tracker
@@ -19,11 +46,11 @@ Document changes
 Release 1.10 2018-08-22
 -----------------------
 
-Supports second draft blog post, "Systematic Replication Has Limited Power to Detect Bad Science".
+Supports second draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
 
 Document changes
 
--   Blog post (repwr)
+-   Blog post (`repwr.Rmd`)
     -   Changed title and added words in the Abstract, Introduction, and Discussion to clarify that the post is about *systematic* replications
     -   Added references suggested by readers
     -   Added more emphasis to David Colquhoun's point about taking into account the prior probability that studies are true
@@ -76,7 +103,7 @@ Code cleanup
 Release 1.00 2018-07-27
 -----------------------
 
-Supports first draft blog post, "Replication Has Limited Power to Detect Bad Science", sent to external readers for feedback.
+Supports first draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/doc.nnn/repwr.1.00.html) (`repwr.Rmd`) sent to external readers for feedback.
 
 Release 0.93 2018-07-25
 -----------------------
@@ -85,8 +112,8 @@ Release candidate
 
 This version is nearly a complete rewrite of the previous version. Some highlights are
 
--   Removed obsolete scripts including `scope.R` and `distr.R`
--   Added `repwr.R` and many other scripts
+-   Removed obsolete scripts including `R/scope.R` and `R/distr.R`
+-   Added `R/repwr.R` and many other scripts
 -   For data, added current top-level files needed for analysis and plotting. Did not add data subdirectories as these are huge (261MB for m=1e3, 980MB for m=1e4) and not needed once the simulation is done
 
 Release 0.92 2018-01-01

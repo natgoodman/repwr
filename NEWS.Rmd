@@ -3,22 +3,22 @@ title: "Revision history for repwr repository"
 author: "Nathan (Nat) Goodman"
 date: "September 3, 2018"
 output:
+  pdf_document: default
   github_document:
     html_preview: no
-  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
 ---
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
-## Release 1.20 2018-MM-DD
+## Release 1.20 2018-09-26
 
-Supports shortened blog post, "Systematic Replication Makes a Lot of Mistakes" (`resig.Rmd`).
+Supports shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`).
 
 New files
 
-- `R/doc_resig.R` generates figures for resig blog post
+- `R/doc_resig.R` generates figures and tables for resig blog post
 - `R/sim_resig.R` like `R/sim.R` but only computes measures needed for resig blog post: `sig1`, `sig2`, `sdir`
 - `R/resig.R` like `R/repwr.R` but loads resig-specific files
 
@@ -41,7 +41,7 @@ Bug fixes
 
 ## Release 1.11 2018-08-31
 
-Supports third draft blog post, "Systematic Replication Has Limited Power to Detect Bad Science" (`repwr.Rmd`).
+Supports third draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
 
 Document changes
 
@@ -52,7 +52,7 @@ Document changes
 
 ## Release 1.10 2018-08-22
 
-Supports second draft blog post, "Systematic Replication Has Limited Power to Detect Bad Science" (`repwr.Rmd`).
+Supports second draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
 
 Document changes
 
@@ -109,7 +109,8 @@ Code cleanup
 
 ## Release 1.00 2018-07-27
 
-Supports first draft blog post, "Replication Has Limited Power to Detect Bad Science" (`repwr.Rmd`) sent to external readers for feedback.
+Supports first draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/doc.nnn/repwr.1.00.html) (`repwr.Rmd`) sent to external readers for feedback.
+
 
 ## Release 0.93 2018-07-25
 
