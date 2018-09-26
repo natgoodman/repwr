@@ -22,13 +22,14 @@ n###############################################################################
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 ## fignum is initial figure number
+## figpfx is prefix prepended to figure number, eg, 'S' for supplement figures
 ## typical args passed to init:
 ##   save.fig - are figures saved to files
 ##   figscreen - are figures plotted on screen
 ##   fignew - is each figure plotted in new window
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
-  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),fignum=1,
+  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),figpfx=NULL,fignum=1,
            ## args passed to init. not spec'ed here else screws up init defaults
            ## save.fig=T,figscreen=if(doc=='readme') T else F,fignew=figscreen,
            ## docfun set later after init processes doc
@@ -40,7 +41,7 @@ dodoc=
     }
     ## set docfun after init sets doc
     if (missing(docfun)) docfun=get(paste(sep='_','doc',doc));
-    docfun();
+    docfun(...);
 }
 ## --- Document Functions ---
 ## utility functions to make figures and tables for documents
@@ -49,11 +50,12 @@ dodoc=
 ##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
 ##   works only because no plot-function arg matches it
 dofig=
-  function(figfun,figname=NULL,figsect=parent(figsect,NULL),fignum=parent(fignum,1),
+  function(figfun,figname=NULL,figsect=parent(figsect,NULL),
+           figpfx=parent(figpfx,NULL),fignum=parent(fignum,1),
            figscreen=parent(figscreen,T),fignew=parent(fignew,T),id=parent(id,NULL),
            ...) {
     figname=paste(collapse='_',c(figsect,figname));
-    file=filename_fig(figname,fignum,id);
+    file=filename_fig(figname,figpfx,fignum,id);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
     ## NG 18-08-10: new scheme for plotting to file
@@ -80,7 +82,7 @@ dofig=
       dev.png=dev.cur();
       }
     ## draw the figure!
-    figfun(...,fignum=fignum);
+    figfun(...,fignum=paste(collapse='',c(figpfx,fignum)));
     if (plot.to.file&plot.to.screen) 
       ## png parameters found by trial and error. look reasonable
       ## TODO: learn the right way to do this!

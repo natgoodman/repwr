@@ -377,11 +377,11 @@ filename_data=function(what,id=NULL,suffix='RData')
 basename_data=function(what,id=NULL) filename(datadir,base=paste_id(what,id));
 
 ##### figure - saved in figdir. may have numeric tail
-filename_fig=function(figname,fignum=NULL,id=NULL,i=NULL,suffix='png')
-  filename(basename_fig(figname,fignum,id,i),suffix=suffix);
-basename_fig=function(figname,fignum=NULL,id=NULL,i=NULL) {
+filename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL,suffix='png')
+  filename(basename_fig(figname,figpfx,fignum,id,i),suffix=suffix);
+basename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL) {
   if (!is.null(i)) i=sprintf("%02i",i);
-  if (!is.null(fignum)) fignum=c('figure',sprintf("%03i",fignum));
+  if (!is.null(fignum)) fignum=c('figure',paste(collapse='',c(figpfx,sprintf("%03i",fignum))));
   base=paste(collapse='_',c(fignum,figname));
   basename=filename(figdir,base=base,tail=i);
   paste_id(basename,id);
