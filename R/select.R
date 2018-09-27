@@ -24,7 +24,7 @@
 ##   filter and interpolate, determine rate type, convert rates per type
 ## specify query (aka filter) by n1,n2,d1,d2 or xdata
 ##   n1,n2,d1,d2 - query is row-by-row combination
-##   xdata - data.frame given desired combinations
+##   xdata - data.frame with desired combinations
 ## specify posr by explicit parameter or id or from, relto smry types
 ## rate.rule is keyword (eg, nonzro) or function that maps posr,rate.tol to logical vector
 ##   specify by keyword or function that maps posr,rate.tol to logical vector
