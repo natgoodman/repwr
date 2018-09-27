@@ -4,6 +4,11 @@ Nathan (Nat) Goodman
 September 3, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.21 2018-09-27
+-----------------------
+
+Fixed typos and restored code accidentally deleted in version 1.20
+
 Release 1.20 2018-09-26
 -----------------------
 
