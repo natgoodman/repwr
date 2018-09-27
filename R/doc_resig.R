@@ -22,27 +22,33 @@
 #################################################################################
 ## --- Generate Figures and Tables for resig Blog Post
 ## make figures and tables for blog post
+## subdoc is blog, supplement, all. control which sections run
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
 doc_resig=
   function(sect=parent(sect,NULL),
-           figpfx=parent(figpfx,NULL),fignum=parent(fignum,1),
+           subdoc='blog',subdocx=match.arg(subdoc,cq(blog,supplement,all)),
+           figpfx=if(subdocx=='supplement') 'S' else NULL,
+           fignum=parent(fignum,1),
            figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
-    sect.all=cq(blog_start,blog_exact,blog_nearexact,
-                exact,nearexact,        # synonyms for blog_exact, blog_nearexact
-                supp_start,supp_inexact);
-    if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+    subdoc=subdocx;                      # to avoid confusion later
+    sect.blog=cq(exact,nearexact,repwise);
+    sect.supp=cq(supp_start,supp_inexact);
+    sect.all=c(sect.blog,sect.supp);
+    if (is.null(sect)) {
+      sect=if (subdoc=='blog') sect.blog else if (subdoc=='supplement') sect.supp else sect.all;
+      }
+    else sect=pmatch_choice(sect,sect.all);
     d.nonzro=d[d!=0];
     col=col_resig();                    # colors for plotratm, plotragm
 ##### blog_start - reset fignum to 1, set figpfx to NULL
-#####   not necessary. included for stylistic consistency with 'supp'
+##### not necessary. included for stylistic consistency with 'supp'
     if ((figsect='blog_start') %in% sect) {
       figpfx=NULL;
       fignum=1;
     }
 ##### exact
-    if (('exact' %in% sect)|('blog_exact' %in% sect)) {
-      figsect='exact';
+    if ((figsect='exact') %in% sect) {
       title.desc='Exact replication';
       dofig(plotrate,'fpr',d=0,n1=20,n2=seq(50,by=50,len=10),smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
@@ -53,13 +59,27 @@ doc_resig=
       dofig(plotratm,'fnr',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fnr'),title.legend='d',legend='right');
-      tbl.n2byd2=cutoff_n2byd2(xdata);
-      tbl.d2byn2=cutoff_d2byn2(xdata);
-      dotbl(fnr_n2byd2=tbl.n2byd2,fnr_d2byn2=tbl.d2byn2);
+      ## support statements: FPR=sig.level/2, FNR=1-power
+      drat=data_rate(rate.rule='nonzro',xdata=expand.grid(n1=n,n2=n,d1=d,d2=d),mesr=cq(sig2));
+      drat.exact=subset(drat,subset=d1==d2);
+      drat.f=subset(drat.exact,subset=!true.dd);
+      fpr_vs_siglevel=mean(drat.f$sig2-sig.level/2);
+      drat.t=subset(drat.exact,subset=true.dd);
+      drat.t$power=with(drat.t,power.t.test(n=n2,delta=d2)$power);
+      fnr_vs_power=with(drat.t,cor(sig2,1-power));
+      theory=t(setNames(c(fpr_vs_siglevel,fnr_vs_power),c('fpr-sig.level/2','cor(fnr,1-power)')));
+      ## support final para: if d is small, n2 must be big...
+      ## tables show n2,d2 value that achieve 'cutoff' FNR
+      fnr_n2byd2=cutoff_n2byd2(xdata);
+      fnr_d2byn2=cutoff_d2byn2(xdata);
+      ## theoretical calculation of n2 value that achieve 'cutoff' FNR
+      n2.20=power.t.test(delta=0.2,power=0.80)$n;
+      n2.05=power.t.test(delta=0.2,power=0.95)$n;
+      fnr_power=t(setNames(c(n2.20,n2.05),cq(n2.20,n2.05)));
+      dotbl(theory,fnr_n2byd2,fnr_d2byn2,fnr_power);
     }
 ##### near exact
-    if (('nearexact' %in% sect)|('blog_nearexact' %in% sect)) {
-      figsect='nearexact';
+    if ((figsect='nearexact') %in% sect) {
       title.desc='Near exact replication';
       ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
       near=round(seq(0,0.4,by=0.1),digits=5);
@@ -70,10 +90,6 @@ doc_resig=
       dofig(plotragm,'fpr',xdata=xdata,x=cq(n1,n2,d1),rate='fpr',col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fpr'),title.legend='near',legend='topright');
-      ## these tables show n2, near values that achieve 'cutoff' FPR
-      tbl.fpr=cutoff_n2bynear(xdata,rate='fpr');
-      ## tbl.nearbyn2=cutoff_nearbyn2(xdata,rate='fpr');
-      dotbl(fpr=tbl.fpr);
      
       xdata=lapply(near,function(near) {
         d1=0.5;
@@ -101,11 +117,38 @@ doc_resig=
       dofig(plotragm,'fpr+fnr',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig(cq(fpr,fnr)),title.legend='near',legend='topright');
-
-      ## these tables show n2, near values that achieve 'cutoff' FNR
-      tbl.fnr=cutoff_n2bynear(xdata,rate='fnr');
-      ## tbl.nearbyn2=cutoff_nearbyn2(xdata,rate='fnr');
-      dotbl(fpr=tbl.fpr);
+      ## support statements: near=0.1, n2=150 sweet spot with both error rates about 0.05
+      ## For near=0.3 crossover point is n2=137 with error rates of about 0.15.
+      n2crossover=crossover_n2bynear(xdata);
+      ## error tables at end of Near Exact
+      ## construct xdata for error tables
+      near=round(c(0.1,0.3),digits=5);
+      xdata=lapply(near,function(near) {
+        do.call(rbind,lapply(d,function(d1) {
+          d2=round(seq(d1-near,d1+near,by=0.01),digits=5);
+          d2=d2[d2>=0&d2<=1];           # trim d2 to [0,1]
+          expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=d1,d2=d2);
+        }))})
+      names(xdata)=near;
+      err=nearexact_err(xdata);
+      err_perl=err2perl(err);
+      dotbl(n2crossover,err,err_perl);
+      ## convert to almost the right thing in perl
+      ## perl -n -e '@row=split; shift @row if /^\d+/; print "| ",join(" | ",@row)," |\n"' > foo
+      ## copy-and-paste err_perl
+      err<<-err;                        # for next section
+    }
+##### replication wise error rates
+    if ((figsect='repwise') %in% sect) {
+      title.desc='Replication-wise error';
+      ## RW error tables
+      prop.true=round(seq(0.05,0.95,by=0.05),digits=5);
+      rwerr=nearexact_rwerr(err,prop.true);
+      rwerr_perl=rwerr2perl(rwerr)
+      dotbl(rwerr,rwerr_perl);
+      ## convert to almost the right thing in perl
+      ## perl -n -e '@row=split; shift @row if /^\d+/; print "| ",join(" | ",@row)," |\n"' > foo
+      ## copy-and-paste reerr_perl
     }
 ##### supp_start - reset fignum to 1, set figpfx to 'S'
     if ((figsect='supp_start') %in% sect) {
@@ -113,8 +156,8 @@ doc_resig=
       fignum=1;
     }
 ##### supp_inexact
-    if ('supp_inexact' %in% sect) {
-      figsect='inexact';
+    if ((figsect='supp_inexact') %in% sect) {
+      figsect=sub('^supp_','',figsect);
       title.desc='Inexact replication';
       xdata=lapply(d,function(d)
         xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0,d2=d));
@@ -142,8 +185,6 @@ doc_resig=
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title.desc=title.desc,title.legend='near',legend='topright');
     }
-
-    
     sect;
   }
 ## palettes are RColorBrewer sequential palette names
@@ -199,58 +240,124 @@ cutoff_d2byn2=function(xdata,cutoff=c(0.05,0.2)) {
       d2=uniroot(function(d2) d2sig2(d2)-cutoff,interval=c(0,1))$root
       data.frame(cutoff=cutoff,n2=unique(drat$n2),d2=d2);
     }))}))}
-
-cutoff_n2bynear=function(xdata,rate,cutoff=c(0.05,0.2)) {
+crossover_n2bynear=function(xdata) {
   if (is.data.frame(xdata))
-    stop('cutoff_n2bynear needs a list of xdata data fromes, not a single data frame');
-  ## construct list of drags, one per xdata data frame
-  drag=sapply(xdata,function(xdata) data_agg(xdata=xdata,x=cq(n2),rate=rate,mesr='sig2'),
-              simplify=F);
-  do.call(rbind,lapply(cutoff,function(cutoff) {
-    do.call(rbind,lapply(seq_along(drag),function(i) {
-    near=names(drag)[i]; drag=drag[[i]]; 
-    drag=data.frame(n2=drag$byx,sig2=drag[[rate]]);
-    n2sig2=function(n2) predict(smooth.spline(drag$n2,drag$sig2,spar=0.5),n2)$y;
-    if (sign(n2sig2(50)-cutoff)==sign(n2sig2(500)-cutoff)) n2=NA
-    else n2=uniroot(function(n2) n2sig2(n2)-cutoff,interval=c(50,500))$root;
-    data.frame(cutoff=cutoff,near=near,n2=round(n2));
-    }))}))}
-
-cutoff_nearbyn2=function(xdata,rate,cutoff=c(0.05,0.2)) {
+    stop('crossover_n2bynear needs a list of xdata data fromes, not a single data frame');
+  near=names(xdata);
+  do.call(rbind,lapply(near,function(near) {
+    xdata=xdata[[near]];
+    xdata.fpr=subset(xdata,subset=d1==0);
+    drag.fpr=data_agg(xdata=xdata.fpr,x=cq(n2),rate='fpr',mesr='sig2');
+    data.fpr=data.frame(n2=drag.fpr$byx,fpr=drag.fpr$fpr[,1]);
+    xdata.fnr=subset(xdata,subset=d1!=0);
+    d1=unique(xdata.fnr$d1);
+    do.call(rbind,lapply(d1,function(d1) {
+      xdata.fnr=xdata.fnr[xdata.fnr$d1==d1,,drop=F];
+      drag.fnr=data_agg(xdata=xdata.fnr,x=cq(n2),rate='fnr',mesr='sig2');
+      data.fnr=data.frame(n2=drag.fnr$byx,fnr=drag.fnr$fnr[,1]);
+      n2fpr=function(n2,data=parent(data.fpr)) {
+        predict(smooth.spline(data$n2,data$fpr,spar=0.5),n2)$y
+      }
+      n2fnr=function(n2,data=parent(data.fnr)) {
+        predict(smooth.spline(data$n2,data$fnr,spar=0.5),n2)$y
+      }
+      if (sign(n2fpr(50)-n2fnr(50))==sign(n2fpr(500)-n2fnr(500))) 
+        return(data.frame(near,d1,n2=NA,rate=NA))
+      else
+        n2=uniroot(function(n2) n2fpr(n2)-n2fnr(n2),interval=c(50,500))$root; rate=n2fpr(n2);
+      data.frame(near,d1,n2=round(n2),rate)
+    }));
+  }))}
+## error table for end of Near Exact
+nearexact_err=function(xdata) {
   if (is.data.frame(xdata))
-    stop('cutoff_n2bynear needs a list of xdata data fromes, not a single data frame');
-  ## construct list of drags, one per xdata data frame
-  drag=sapply(xdata,function(xdata) data_agg(xdata=xdata,x=cq(n2),rate=rate,mesr='sig2'),
-              simplify=F);
-  drag=do.call(rbind,lapply(cutoff,function(cutoff) {
-    do.call(rbind,lapply(seq_along(drag),function(i) {
-      near=as.numeric(names(drag)[i]); drag=drag[[i]];
-      data.frame(near=near,n2=drag$byx,sig2=drag[[rate]]);
-    }))}));
-  byn2=split(drag,drag$n2);
-  do.call(rbind,lapply(cutoff,function(cutoff) {
-    do.call(rbind,lapply(byn2,function(drag) {
-      nearsig2=function(near) predict(smooth.spline(drag$near,drag$sig2,spar=0.5),near)$y;
-      if (sign(nearsig2(min(drag$near))-cutoff)==sign(nearsig2(max(drag$near))-cutoff)) near=NA
-      else near=uniroot(function(near) nearsig2(near)-cutoff,interval=range(drag$near))$root
-      data.frame(cutoff=cutoff,n2=unique(drag$n2),near=near);
+    stop('nearexact_err needs a list of xdata data fromes, not a single data frame');
+  near=names(xdata);
+  do.call(rbind,lapply(near,function(near) {
+    xdata=xdata[[near]];
+    xdata.fpr=subset(xdata,subset=d1==0);
+    drag.fpr=data_agg(xdata=xdata.fpr,x=cq(n2),rate='fpr',mesr='sig2');
+    data.fpr=data.frame(n2=drag.fpr$byx,fpr=drag.fpr$fpr[,1]);
+    xdata.fnr=subset(xdata,subset=d1!=0);
+    d1=unique(xdata.fnr$d1);
+    do.call(rbind,lapply(d1,function(d1) {
+      xdata.fnr=xdata.fnr[xdata.fnr$d1==d1,,drop=F];
+      drag.fnr=data_agg(xdata=xdata.fnr,x=cq(n2),rate='fnr',mesr='sig2');
+      data.fnr=data.frame(n2=drag.fnr$byx,fnr=drag.fnr$fnr[,1]);
+      n2fpr=function(n2,data=parent(data.fpr)) {
+        predict(smooth.spline(data$n2,data$fpr,spar=0.5),n2)$y
+      }
+      n2fnr=function(n2,data=parent(data.fnr)) {
+        predict(smooth.spline(data$n2,data$fnr,spar=0.5),n2)$y
+      }
+      n2=sort(unique(xdata$n2));
+      ## data.frame(near=as.numeric(near),d1,n2,fpr=n2fpr(n2),fnr=max(0,n2fnr(n2)));
+      fpr=n2fpr(n2);
+      fnr=sapply(n2fnr(n2), function(fnr) max(0,fnr));
+      data.frame(near=as.numeric(near),d1,n2,fpr,fnr);
     }))}))}
-
-n2fpr=function(n2,near=0.3) {
-  data=data.fpr[[as.character(near)]];
-  predict(smooth.spline(data$n2,data$fpr,spar=0.5),n2)$y
+## convert err table into format useful for perl
+err2perl=function(tbl.err,n2=c(150,300,450),near=c(0.1,0.3),d1=c(0.2,0.5,0.8)) {
+  tbl.err=tbl.err[tbl.err$n2%in%n2&tbl.err$near%in%near&tbl.err$d1%in%d1,];
+  tbl.bycase=split(tbl.err,with(tbl.err,paste(n2,near)))
+  fnr=do.call(rbind,lapply(tbl.bycase,function(tbl) t(tbl$fnr)));
+  colnames(fnr)=cq(FNR_02,FNR_05,FNR_08)
+  fpr=do.call(rbind,lapply(tbl.bycase,function(tbl) tbl[1,'fpr']))
+  case=do.call(rbind,strsplit(names(tbl.bycase),' '))
+  case=apply(case,1:2,as.numeric);
+  colnames(case)=cq(n2,near)
+  tbl=data.frame(case,FPR=fpr,fnr)
+  rownames(tbl)=NULL
+  tbl=round(tbl,digits=2)
+  tbl=subset(tbl,subset=n2%in%c(150,300,450))
+  tbl[with(tbl,order(n2,near)),];
 }
-n2fnr=function(n2,d1=0.5,near=0.3) {
-  data=data.fnr[[as.character(near)]];
-  data=data[data$d1==d1,,drop=F];
-  predict(smooth.spline(data$n2,data$fnr,spar=0.5),n2)$y
-}
+## convert to almost the right thing in perl
+## perl -n -e '@row=split; shift @row if /^\d+/; print "| ",join(" | ",@row)," |\n"' > foo
+## copy-and-paste err_perl
 
-crossover=function(near=0.3,d1=0.5) {
-  if (sign(n2fpr(50,near=near)-n2fnr(50,d1=d1,near=near))==
-      sign(n2fpr(500,near=near)-n2fnr(500,d1=d1,near=near))) 
-    return(data.frame(near,d1,n2=NA,rate=NA));
-  n2=uniroot(function(n2) n2fpr(n2,near=near)-n2fnr(n2,d1=d1,near=near),interval=c(50,500))$root;
-  rate=n2fpr(n2,near=near);
-  data.frame(near,d1,n2=round(n2),rate)
+## RW error table for Replication-wise error rates
+nearexact_rwerr=function(err,prop.true) {
+  do.call(rbind,lapply(prop.true,function(prop.true) 
+    with(err,data.frame(n2,near,d1,prop.true,
+                        rwfpr=rw_fpr(fpr,fnr,prop.true),rwfnr=rw_fnr(fpr,fnr,prop.true)))));
+}
+## convert rwerr table into format useful for perl
+rwerr2perl=
+  function(tbl.rwerr,n2=150,near=c(0.1,0.3),d1=c(0.2,0.5,0.8),prop.true=c(0.1,0.25,0.5,0.75,0.9)) {
+    tbl.rwerr=tbl.rwerr[tbl.rwerr$n2%in%n2&tbl.rwerr$near%in%near&tbl.rwerr$d1%in%d1,];
+    tbl.bycase=split(tbl.rwerr,with(tbl.rwerr,paste(n2,near,prop.true)));
+    rwfpr=do.call(rbind,lapply(tbl.bycase,function(tbl) t(tbl$rwfpr)));
+    rwfnr=do.call(rbind,lapply(tbl.bycase,function(tbl) t(tbl$rwfnr)));
+    colnames(rwfpr)=cq(RWFPR_02,RWFPR_05,RWFPR_08);
+    colnames(rwfnr)=cq(RWFNR_02,RWFNR_05,RWFNR_08);
+    case=do.call(rbind,strsplit(names(tbl.bycase),' '));
+    case=apply(case,1:2,as.numeric);
+    colnames(case)=cq(n2,near,prop.true);
+    tbl=data.frame(case,rwfpr,rwfnr);
+    rownames(tbl)=NULL;
+    tbl=round(tbl,digits=2);
+    tbl=subset(tbl,subset=(n2==150&prop.true%in%c(0.1,0.25,0.5,0.75,0.9)));
+    tbl[with(tbl,order(n2,near,prop.true)),];
+  }
+## convert to almost the right thing in perl
+## perl -n -e '@row=split; shift @row if /^\d+/; print "| ",join(" | ",@row)," |\n"' > foo
+## copy-and-paste rwerr_perl
+
+## false discovery rate calculations. why does this give me SOOO much trouble??
+rw_fpr=function(fpr=0.05,fnr=0.2,prop.true=.5) {
+  prop.false=1-prop.true;
+  prop.tp=(1-fnr)*prop.true;
+  prop.fp=fpr*prop.false;
+  prop.pos=prop.fp+prop.tp;
+  rw.fpr=prop.fp/prop.pos;
+  rw.fpr;
+}
+rw_fnr=function(fpr=0.05,fnr=0.2,prop.true=.5) {
+  prop.false=1-prop.true;
+  prop.tn=(1-fpr)*prop.false;
+  prop.fn=fnr*prop.true;
+  prop.neg=prop.fn+prop.tn;
+  rw.fnr=prop.fn/prop.neg;
+  rw.fnr;
 }
