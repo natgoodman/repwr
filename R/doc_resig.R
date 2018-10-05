@@ -28,33 +28,36 @@
 doc_resig=
   function(sect=parent(sect,NULL),
            subdoc='blog',subdocx=match.arg(subdoc,cq(blog,supplement,all)),
-           figpfx=if(subdocx=='supplement') 'S' else NULL,
-           fignum=parent(fignum,1),
+           figpfx=if((subdocx=='supplement')|(!is.null(sect)&all(grepl('^supp_',sect))))
+                    'S' else NULL,
+           tblpfx=if((subdocx=='supplement')|(!is.null(sect)&all(grepl('^supp_',sect))))
+                    'S' else NULL,
+           fignum=parent(fignum,1),tblnum=parent(tblnum,1),
            figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
     subdoc=subdocx;                      # to avoid confusion later
     sect.blog=cq(exact,nearexact,repwise);
-    sect.supp=cq(supp_start,supp_inexact);
+    sect.supp=cq(supp_start,supp_exact,supp_inexact,supp_nearexact);
     sect.all=c(sect.blog,sect.supp);
     if (is.null(sect)) {
       sect=if (subdoc=='blog') sect.blog else if (subdoc=='supplement') sect.supp else sect.all;
       }
     else sect=pmatch_choice(sect,sect.all);
     d.nonzro=d[d!=0];
-    col=col_resig();                    # colors for plotratm, plotragm
+    n2=n[n>=50];                       # standard n2: exclude 20
+    col=col_resig();                   # colors for plotratm, plotragm
 ##### blog_start - reset fignum to 1, set figpfx to NULL
 ##### not necessary. included for stylistic consistency with 'supp'
     if ((figsect='blog_start') %in% sect) {
-      figpfx=NULL;
-      fignum=1;
+      figpfx=tblpfx=NULL;
+      fignum=tblnum=1;
     }
 ##### exact
     if ((figsect='exact') %in% sect) {
       title.desc='Exact replication';
-      dofig(plotrate,'fpr',d=0,n1=20,n2=seq(50,by=50,len=10),smooth='spline',
+      dofig(plotrate,'fpr',d=0,n1=20,n2=n2,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fpr'),legend=NULL);
-       xdata=lapply(d.nonzro,function(d)
-        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=d,d2=d));
+      xdata=lapply(d.nonzro,function(d) xdata=expand.grid(n1=20,n2=n2,d1=d,d2=d));
       names(xdata)=as.character(d.nonzro);
       dofig(plotratm,'fnr',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
@@ -82,38 +85,21 @@ doc_resig=
     if ((figsect='nearexact') %in% sect) {
       title.desc='Near exact replication';
       ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
-      near=round(seq(0,0.4,by=0.1),digits=5);
-      xdata=lapply(near,function(near) {
-        d2=round(seq(0,near,by=0.01),digits=5);
-        expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0,d2=d2)});
-      names(xdata)=as.character(near);
+      near=seq(0,0.4,by=0.1);
+      xdata=xdata_near(n1=20,n2=n2,d1=0,near=near);
       dofig(plotragm,'fpr',xdata=xdata,x=cq(n1,n2,d1),rate='fpr',col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fpr'),title.legend='near',legend='topright');
      
-      xdata=lapply(near,function(near) {
-        d1=0.5;
-        d2=round(seq(d1-near,d1+near,by=0.01),digits=5);
-        ## trim d2 to [0,1]
-        d2=d2[d2>=0&d2<=1]; 
-        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=d1,d2=d2)});
-      names(xdata)=as.character(near);
+      xdata=xdata_near(n1=20,n2=n2,d1=0.5,near=near);
       dofig(plotragm,'fnr',xdata=xdata,x=cq(n1,n2,d1),rate='fnr',col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fnr'),title.legend='near',legend='topright');
 
-      near=round(c(0.1,0.3),digits=5);
-      xdata=lapply(near,function(near) {
-        d2=round(seq(0,near,by=0.01),digits=5);
-        fpr=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0,d2=d2);
-        d1=0.5;
-        d2=round(seq(d1-near,d1+near,by=0.01),digits=5);
-        ## trim d2 to [0,1]
-        d2=d2[d2>=0&d2<=1]; 
-        fnr=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=d1,d2=d2);
-        rbind(fpr,fnr);
-      })
-      names(xdata)=as.character(near);
+      near=c(0.1,0.3);
+      xdata.fpr=xdata_near(n1=20,n2=n2,d1=0,near=near);
+      xdata.fnr=xdata_near(n1=20,n2=n2,d1=0.5,near=near);
+      xdata=xdata_rbind(xdata.fpr,xdata.fnr);
       dofig(plotragm,'fpr+fnr',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig(cq(fpr,fnr)),title.legend='near',legend='topright');
@@ -122,14 +108,8 @@ doc_resig=
       n2crossover=crossover_n2bynear(xdata);
       ## error tables at end of Near Exact
       ## construct xdata for error tables
-      near=round(c(0.1,0.3),digits=5);
-      xdata=lapply(near,function(near) {
-        do.call(rbind,lapply(d,function(d1) {
-          d2=round(seq(d1-near,d1+near,by=0.01),digits=5);
-          d2=d2[d2>=0&d2<=1];           # trim d2 to [0,1]
-          expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=d1,d2=d2);
-        }))})
-      names(xdata)=near;
+      near=c(0.1,0.3);
+      xdata=xdata_near(n1=20,n2=n2,d1=d,near=near)
       err=nearexact_err(xdata);
       err_perl=err2perl(err);
       dotbl(n2crossover,err,err_perl);
@@ -150,10 +130,67 @@ doc_resig=
       ## perl -n -e '@row=split; shift @row if /^\d+/; print "| ",join(" | ",@row)," |\n"' > foo
       ## copy-and-paste reerr_perl
     }
-##### supp_start - reset fignum to 1, set figpfx to 'S'
+##### supp_start - reset fignum to 1, set figpfx to 'S'. also tblnum, tblpfx
     if ((figsect='supp_start') %in% sect) {
-      figpfx='S';
-      fignum=1;
+      figpfx=tblpfx='S';
+      fignum=tblnum=1;
+    }
+##### supp_exact
+    if ((figsect='supp_exact') %in% sect) {
+      figsect=sub('^supp_','',figsect);
+      title.desc='Exact replication';
+      ## fpr
+      dofig(plotrate,'fpr_n1=020',d=0,n1=20,n2=n2,smooth='spline',
+            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resig('fpr'),legend=NULL);
+      dofig(plotrate,'fpr_n1=200',d=0,n1=200,n2=n2,smooth='spline',
+            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resig('fpr'),legend=NULL);
+      ## fnr
+      ## compute 1-power2 vs. n2 - specialized for plotfnr!
+      power.n2=power_n2();
+      ## construct xdata lists for n1=20 and n1=200
+      xdata.020=lapply(d.nonzro,function(d) xdata=expand.grid(n1=20,n2=n2,d1=d,d2=d));
+      names(xdata.020)=as.character(d.nonzro);
+      xdata.200=lapply(d.nonzro,function(d) xdata=expand.grid(n1=200,n2=n2,d1=d,d2=d));
+      names(xdata.200)=as.character(d.nonzro);
+      ## plots using std posr - includes sdir
+      dofig(plotfnr_exact,'fnr_n1=020',xdata=xdata.020,col=col)
+      dofig(plotfnr_exact,'fnr_n1=200',xdata=xdata.200,col=col);
+      ## plots using sig1_sig1 posr - omits sdir
+      dofig(plotfnr_exact,'fnr_nosdir_n1=020',xdata=xdata.020,col=col,posr.id='sig1_sig1')
+      dofig(plotfnr_exact,'fnr_nosdir_n1=200',xdata=xdata.200,col=col,posr.id='sig1_sig1');
+      ## fnr vs 1-power
+      xdata=expand.grid(n1=n,n2=n,d1=d.nonzro,d2=d);
+      xdata=subset(xdata,subset=(d1==d2));
+      dofig(plotfnrpwr_exact,'fnr_vs_power',xdata=xdata);
+      dofig(plotfnrpwr_exact,'fnr_vs_power_nosdir',xdata=xdata,posr.id='sig1_sig1');
+      ## correlation of fnr vs power2
+      drat.std=dratfnrpwr_exact(xdata,posr.id='std');
+      drat.nosdir=dratfnrpwr_exact(xdata,posr.id='sig1_sig1');
+      corfnrpwr=do.call(rbind,lapply(d.nonzro,function(d) {
+        drat.std=subset(drat.std,subset=(d2<=d));
+        drat.nosdir=subset(drat.nosdir,subset=(d2<=d));
+        cor.std=with(drat.std,cor(sig2,1-pwr2));
+        cor.nosdir=with(drat.nosdir,cor(sig2,1-pwr2));
+        data.frame(d2=d,cor.std,cor.nosdir);}))
+      dotbl(corfnrpwr);
+      ## tables showing n2,d2 value that achieve 'cutoff' FNR
+      fnr_n2byd2.020=cutoff_n2byd2(xdata.020);
+      fnr_n2byd2.200=cutoff_n2byd2(xdata.200);
+      fnr_n2byd2=merge(fnr_n2byd2.020,fnr_n2byd2.200,by=cq(cutoff,d2),suffixes=c('.020','.200'));
+      fnr_n2byd2=fnr_n2byd2[with(fnr_n2byd2,order(cutoff,d2)),];
+      ##
+      fnr_d2byn2.020=cutoff_d2byn2(xdata.020);
+      fnr_d2byn2.200=cutoff_d2byn2(xdata.200);
+      fnr_d2byn2=merge(fnr_d2byn2.020,fnr_d2byn2.200,by=cq(cutoff,n2),suffixes=c('.020','.200'));
+      fnr_d2byn2=fnr_d2byn2[with(fnr_d2byn2,order(cutoff,n2)),];
+      dotbl(fnr_n2byd2,fnr_d2byn2);
+      ## TODO: plot something from these tables
+      dofig(plotfnrcutoff_exact,'fnr_cutoff',fnr_d2byn2=fnr_d2byn2);
+
     }
 ##### supp_inexact
     if ((figsect='supp_inexact') %in% sect) {
@@ -187,6 +224,24 @@ doc_resig=
     }
     sect;
   }
+## generate standard xdata for near-exact plots
+xdata_near=function(n1,n2,d1,near,step=0.01) {
+  d1=round(d1,digits=5);
+  xdata=lapply(near,function(near) {
+    do.call(rbind,lapply(d1,function(d1) {
+      d2=round(seq(d1-near,d1+near,by=step),digits=5);
+      d2=d2[d2>=0&d2<=1];             #trim d2 to [0,1]
+      expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=d1,d2=d2)}))});
+  names(xdata)=as.character(near);
+  xdata;
+}
+## merge compatible xdata lists for combined fpr,fnr near-exact plots
+xdata_rbind=function(xdata1,xdata2) {
+  name=unique(c(names(xdata1),names(xdata2)));
+  xdata=lapply(name,function(name) rbind(xdata1[[name]],xdata2[[name]]));
+  names(xdata)=name;
+  xdata;
+}
 ## palettes are RColorBrewer sequential palette names
 col_resig=
   function(lo.brk=0.2,hi.brk=0.5,res=0.01,
@@ -205,15 +260,18 @@ title_resig=
   function(rate.type=parent(rate.type,'error'),title.desc=parent(title.desc,NULL),
            fignum=parent(fignum,NULL),figpfx=parent(figpfx,NULL),
            posr.id=parent(posr.id,'std')) {
-    rate.desc=sapply(rate.type,function(rate.type) 
-      switch(rate.type,
-             pos='positive',neg='negative',error='error',correct='correct',
-             fpr='false positive',fnr='false negative',
-             tpr='true positive',tnr='true negative',
-             roc='rate vs rate',rag='mean',ragm='mean'));
-    rate.desc=paste(collapse=' and ',rate.desc);
-    if (all(rate.type %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
-    posr.desc=if (posr.id=='std') NULL else paste_nv('posr',posr.id);
+    if (is.null(rate.type)) rate.desc=NULL
+    else {
+      rate.desc=sapply(rate.type,function(rate.type) 
+        switch(rate.type,
+               pos='positive',neg='negative',error='error',correct='correct',
+               fpr='false positive',fnr='false negative',
+               tpr='true positive',tnr='true negative',
+               roc='rate vs rate',rag='mean',ragm='mean'));
+      rate.desc=paste(collapse=' and ',rate.desc);
+      if (all(rate.type %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
+    }
+    posr.desc=if (posr.id=='std') NULL else 'w/o same-direction';
     fignum=paste(collapse='',c(figpfx,fignum));
     if (!is.null(fignum)) fignum=paste(sep='','Figure ',fignum,'.');
     paste(collapse=' ',c(fignum,title.desc,rate.desc,posr.desc));
@@ -237,7 +295,8 @@ cutoff_d2byn2=function(xdata,cutoff=c(0.05,0.2)) {
   do.call(rbind,lapply(cutoff,function(cutoff) {
     do.call(rbind,lapply(byn2,function(drat) {
       d2sig2=function(d2) predict(smooth.spline(drat$d2,drat$sig2,spar=0.5),d2)$y;
-      d2=uniroot(function(d2) d2sig2(d2)-cutoff,interval=c(0,1))$root
+      if (sign(d2sig2(0)-cutoff)==sign(d2sig2(1)-cutoff)) d2=NA
+      else d2=uniroot(function(d2) d2sig2(d2)-cutoff,interval=c(0,1))$root
       data.frame(cutoff=cutoff,n2=unique(drat$n2),d2=d2);
     }))}))}
 crossover_n2bynear=function(xdata) {
@@ -360,4 +419,68 @@ rw_fnr=function(fpr=0.05,fnr=0.2,prop.true=.5) {
   prop.neg=prop.fn+prop.tn;
   rw.fnr=prop.fn/prop.neg;
   rw.fnr;
+}
+####################
+## functions for supplement
+## plot fnr rates with 1-power overlaid
+plotfnr_exact=
+  function(xdata,posr.id='std',col=parent(col),power.n2=parent(power.n2),fignum=parent(fignum),
+           cex.title=0.9) {
+    ## plot simulated results
+    plotratm(xdata=xdata,posr.id=posr.id,x=cq(n1,n2),col=col,smooth='spline',
+             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+             title=title_resig('fnr'),title.legend='d',x.legend=8.45,y.legend=0.65);
+    ## plot theoretical values
+    x.smooth=power.n2$n2.smooth/50;       # scale n2 to x-axis. CAUTION: not general
+    y.smooth=power.n2$y.smooth;
+    matlines(x.smooth,y.smooth,col=col[colnames(y.smooth)],lty='dashed')
+  }
+## compute 1-power2 vs. n2 - specialized for plotfnr!  
+power_n2=function(n2=parent(n2),d.nonzro=parent(d.nonzro)) {
+  y=do.call(cbind,lapply(d.nonzro,function(d2) 1-power.t.test(n=n2,d=d2)$power));
+  n2.smooth=seq(min(n2),max(n2),len=100);
+  y.smooth=splinem(n2,y,xout=n2.smooth);
+  ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
+  y.smooth=apply(y.smooth,1:2,function(y) if (!is.na(y)) max(min(y,1),0) else y);
+  colnames(y.smooth)=d.nonzro;
+  list(n2.smooth=n2.smooth,y.smooth=y.smooth);
+}
+## plot fnr vs 1-power2
+plotfnrpwr_exact=function(xdata,posr.id='std',fignum=parent(fignum),cex.title=0.9) {
+  drat=dratfnrpwr_exact(xdata,posr.id);
+  ## n2col=setNames(colorRampPalette(cq(grey75,black))(11),n);
+  col=colorRampPalette(cq(grey75,black))(101)[round(drat$pwr1*100)+1];
+  ## plot(1-pwr2,drat$sig2,col=n2col[as.character(drat$n1)],pch=19,cex=0.75,
+  plot(1-drat$pwr2,drat$sig2,col=col,pch=19,cex=0.75,
+       xlab='1-power2 (theory)',ylab='false negative rate (simulated)',
+       main=title_resig(NULL,'False negative rate vs. 1-power2'),cex.main=cex.title);
+  abline(a=0,b=1,col='red');
+  grid();
+}
+## construct drat for fnr vs 1-power analyses
+dratfnrpwr_exact=function(xdata,posr.id='std') {
+  drat=data_rate(rate.rule='nonzro',xdata=xdata,posr.id=posr.id,mesr=cq(sig2));
+  drat$pwr1=with(drat,power.t.test(n=n1,delta=d1)$power);
+  drat$pwr2=with(drat,power.t.test(n=n2,delta=d2)$power);
+  drat;
+}
+## plot fnr cutoffs
+plotfnrcutoff_exact=function(fnr_d2byn2,fignum=parent(fignum),cex.title=0.9) {
+  data=merge(subset(fnr_d2byn2,subset=(cutoff==0.05)),subset(fnr_d2byn2,subset=(cutoff==0.20)),
+             by='n2',suffixes=cq('.05','.20'));
+  n2=fnr_d2byn2$n2;
+  y=data[,grep('^d2',colnames(data),value=T)];
+  n2.smooth=seq(min(n2),max(n2),len=100);
+  y.smooth=splinem(n2,y,xout=n2.smooth);
+  col=cq(red,red,blue,blue);
+  lty=cq(solid,dashed,solid,dashed);
+  matplot(n2.smooth,y.smooth,type='l',col=col,lty=lty,xlab='n2',ylab='d2',
+          main=title_resig(NULL,'d2 vs. n2 for FNR cutoff=0.05, 0.20'),cex.main=cex.title);
+  legend=sapply(strsplit(colnames(y.smooth),'\\.'),
+                function(row) {
+                  n2=as.numeric(row[2]);
+                  cutoff=as.numeric(row[3])/100;
+                  paste(sep=', ',n2,cutoff)})
+  legend('topright',bty='n',col=col,lty=lty,cex=0.8,title='n1, cutoff',legend=legend);
+  grid();
 }
