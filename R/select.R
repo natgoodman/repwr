@@ -56,7 +56,7 @@ data_rate=
     rate.cvt=if (is.logical(rate.cvt)) if (rate.cvt) 'data_rate' else 'drat_order'
              else match.arg(rate.cvt);
     posr=posr_select();
-    if (is.function(rate.rule)) true.dd=rate.rule(posr,rate.tol)
+   if (is.function(rate.rule)) true.dd=rate.rule(posr,rate.tol)
     else true.dd=true_dd(posr,rate.rule,rate.tol);
     if (rate.cvt=='data_rate') {
       ## convert rate here instead of in drat_order
