@@ -387,11 +387,11 @@ basename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL) {
   paste_id(basename,id);
 }
 ##### table - saved in tbldir. may have numeric tail
-filename_tbl=function(tblname,tblnum=NULL,id=NULL,i=NULL,suffix='txt')
-  filename(basename_tbl(tblname,tblnum,id,i),suffix=suffix);
-basename_tbl=function(tblname,tblnum=NULL,id=NULL,i=NULL) {
+filename_tbl=function(tblname,tblpfx=NULL,tblnum=NULL,id=NULL,i=NULL,suffix='png')
+  filename(basename_tbl(tblname,tblpfx,tblnum,id,i),suffix=suffix);
+basename_tbl=function(tblname,tblpfx=NULL,tblnum=NULL,id=NULL,i=NULL) {
   if (!is.null(i)) i=sprintf("%02i",i);
-  if (!is.null(tblnum)) tblnum=c('table',sprintf("%03i",tblnum));
+  if (!is.null(tblnum)) tblnum=c('table',paste(collapse='',c(tblpfx,sprintf("%03i",tblnum))));
   base=paste(collapse='_',c(tblnum,tblname));
   basename=filename(tbldir,base=base,tail=i);
   paste_id(basename,id);
