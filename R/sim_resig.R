@@ -285,11 +285,11 @@ doposr=function(smry=NULL) {
   init_smry(smry=smry);
   ## construct positive rates for cases of interest
   ## 1) standard
-  ## ## 2) from sig1 relto sig1
+  ## 2) from sig1 relto sig1 - to show effect of sdir in supplement
   ## ## 3) from sig2 relto sig1
   ## ## 4) from sig2 relto sig2
   do_posr(smry,from.type=mesr.fromtype,relto.type=mesr.reltotype,posr.id='std')
-  ## do_posr(smry,from.type='sig1',relto.type='sig1');
+  do_posr(smry,from.type='sig1',relto.type='sig1');
   ## do_posr(smry,from.type='bsln',relto.type='sig1');
   ## do_posr(smry,from.type='sig2',relto.type='sig1');
   ## do_posr(smry,from.type='sig2',relto.type='sig2');
