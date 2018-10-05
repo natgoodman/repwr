@@ -29,7 +29,8 @@
 ##   fignew - is each figure plotted in new window
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
-  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),figpfx=NULL,fignum=1,
+  function(sect=NULL,need.init=T,doc=parent(doc,'readme')
+          ,figpfx=NULL,fignum=1,tblpfx=NULL,tblnum=1,
            ## args passed to init. not spec'ed here else screws up init defaults
            ## save.fig=T,figscreen=if(doc=='readme') T else F,fignew=figscreen,
            ## docfun set later after init processes doc
@@ -96,11 +97,13 @@ dofig=
   }
 ## save one or more tables.
 dotbl=
-  function(...,sect=parent(figsect,NULL),tblnum=parent(tblnum,NULL),id=parent(id,NULL)) {
+  function(...,sect=parent(figsect,NULL),tblpfx=parent(tblpfx,NULL),tblnum=parent(tblnum,NULL),
+           id=parent(id,NULL)) {
     tbl=list(...);                           # evaluates dots
     dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
-    sapply(seq_along(tbl),function(i) {
+    tblname=sapply(seq_along(tbl),function(i) {
       name=names(tbl)[i];
+      tblnum=tblnum+i-1;
       ## test for empty name. CAUTION: do it carefully lest R complains when name is empty list
       empty.name=if(length(name)==0) T else if(nchar(name)==0) T else F;
       if (empty.name) {
@@ -108,8 +111,10 @@ dotbl=
         data=get(name,envir=parent.frame(n=4)); # n=4 empirically determined
       } else data=tbl[[i]]
       tblname=paste(sep='_',sect,name);
-      file=filename_tbl(tblname,tblnum,id);
+      file=filename_tbl(tblname,tblpfx,tblnum,id);
       save_tbl(name,data,file=file);
       ## write.table(tbl[[name]],file=file,sep='\t',quote=F,row.names=F);
       tblname;})
-  }
+    assign_parent(tblnum,tblnum+length(tbl));
+    tblname;
+ }
