@@ -366,6 +366,7 @@ plotratm=
 ## fignum is figure number. if not NULL "Figure fignum" prepended to title
 ## title.desc is additional text added to title
 ## plot.points tells whether to plot points
+##  pch, cex.points are plot char and cex for points
 ## plot.lines tells whether to plot lines
 ## for plotroc, plotrag - mesr is vector of mesrs
 ## for plotrocm, plotragm - mesr is single measure
@@ -383,7 +384,7 @@ plotroc=
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
            plot.cutoff=T,
-           plot.points=T,plot.lines=F,
+           plot.points=T,plot.lines=F,pch=16,cex.points=1,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
@@ -400,7 +401,7 @@ plotroc=
     col=col.mesr[mesr];
     cex=cex.mesr[mesr];
     x=drag[[xrate]]; y=drag[[yrate]];
-    if (plot.points) matpoints(x,y,col=col,cex=cex,pch=16);
+    if (plot.points) matpoints(x,y,col=col,pch=pch,cex=cex.points);
     if (plot.lines) {
       lwd=lwd.mesr[mesr];
       lty=lty.mesr[mesr];
@@ -426,7 +427,7 @@ plotrocm=
            fpr.cutoff=parent(fpr.cutoff,0.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
            plot.cutoff=T,
-           plot.points=T,plot.lines=F,
+           plot.points=T,plot.lines=F,pch=16,cex.points=1,
            title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
@@ -453,7 +454,8 @@ plotrocm=
       xdata=xdata[[i]];
       drag=data_agg(posr);
       x=drag[[xrate]]; y=drag[[yrate]];
-      if (plot.points) matpoints(x,y,col=col[i],pch=16);
+      ## if (plot.points) matpoints(x,y,col=col[i],pch=16);
+      if (plot.points) matpoints(x,y,col=col[i],pch=pch,cex=cex.points);
       if (plot.lines) matlines(x,y,col=col[i]);
     });
     grid();
@@ -872,8 +874,9 @@ ragm_legend=
     y=where.next$rect$top-where.next$rect$h;
     if (!plot.lines) lty=NA;
     if (!plot.points) {pch=NA; pt.cex=NA}
-    seg.len=if (plot.lines) 6 else 2;
-    legend(x,y,bty=bty,legend=rate,cex=cex,title='rate type',,title.col=title.col,
+    ## seg.len has to match rocm_legend
+    seg.len=if (plot.lines) 4 else 2;
+    legend(x,y,bty=bty,legend=rate,cex=cex,title='rate type',title.col=title.col,
            pch=pch,pt.cex=pt.cex,col='black',lwd=lwd,lty=lty,seg.len=seg.len);
   }
    
