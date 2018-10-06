@@ -14,7 +14,7 @@ urlcolor: blue
 
 ## Introduction
 
-This document contains supplementary material for the blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/) kindly posted by Bob Reed on The Replication Network.
+This document contains supplementary material for the blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/) kindly posted by Bob Reed on The Replication Network. It contains results that didn't fit in the blog post as published for reasons of space or pedagogy. It's not terribly coherent as a standalone document.  Sorry.
 
 ## Results
 
@@ -49,7 +49,7 @@ knitr::include_graphics('figure/resig/m=1e4/figure_S006_exact_fnr_nosdir_n1=200.
 
 Figures S7 and S8 plots FNR vs. $1-power2$ across the entire dataset with same-direction switch on (Figure S7) and off (Figure S8). The dots are color-coded by $power1$, the power of the original study (smaller power has lighter dots). The points fall nicely along the diagonal in both cases, with less scatter without same-direction, as expected.
 
-The correlation of the two statistics across the enitre dataset is 0.9997737 and 0.9999019 resp. under the two conditions.  When limiting to small values of $d2$, $d\le0.2$, the correlations are 0.9989049 and 0.9995707.
+The correlation of the two statistics across the enitre dataset is 0.9997737 and 0.9999019 resp. under the two conditions.  When limiting to small values of $d2_{pop}$, $d2_{pop}\le0.2$, the correlations are 0.9989049 and 0.9995707.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/resig/m=1e4/figure_S007_exact_fnr_vs_power.png');
@@ -58,7 +58,7 @@ knitr::include_graphics('figure/resig/m=1e4/figure_S008_exact_fnr_vs_power_nosdi
 
 As one would expect and Figures S3-S6 illustrate, if the population effect size is small, $n2$ must be large to reliably yield a positive result. For $d=0.2$, $n2$ must be almost 400 in theory and 442 in the simulation to achieve $FNR=0.2$; to hit $FNR=0.05$, $n2$ must be more than 650 (in theory). 
 
-Figure S9 shows the values of $n2$ and $d2$ that achieve FNR cutoffs of 0.05 and 0.20 for $n1=20$ and $n1=200$.
+Figure S9 shows the values of $n2$ and $d2_{pop}$ that achieve FNR cutoffs of 0.05 and 0.20 for $n1=20$ and $n1=200$.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/resig/m=1e4/figure_S009_exact_fnr_cutoff.png');
@@ -68,18 +68,36 @@ knitr::include_graphics('figure/resig/m=1e4/figure_S009_exact_fnr_cutoff.png');
 
 A replication is *inexact* if the two studies are sampling very different populations, meaning $d1_{pop}$ and $d2_{pop}$ can vary independently. This seems unreasonably pessimistic for a well-run replication project but serves to illustrate what happens as we vary the parameters.
 
-Figure 3 uses the same values of $n1$, $n2$, and $d1_{pop}$ as in Figure 1, but with $d2_{pop}$ ranging from 0 to 1. Figure 4 has the same parameters but fixes $d1_{pop}=0.5$, a medium effect size.
+Figures S10-S13 show FPR and FNR for two values of $n1$ (20, 200), $n2$ varying from 50 to 500, $d1_{pop}=0$ for the FPR plots and 0.5 (a medium effect size) for the FNR plots, and $d2_{pop}$ ranging from 0 to 1. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-## knitr::include_graphics('figure/resig/m=1e4/figure_003_inexact_fpr.png');
-## knitr::include_graphics('figure/resig/m=1e4/figure_004_inexact_fnr.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S010_inexact_fpr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S011_inexact_fpr_n1=200.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S012_inexact_fnr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S013_inexact_fnr_n1=200.png');
 ```
 
-FPR is bad unless $d2_{pop}$ is small and gets worse as $n2$ (and $d2_{pop}$) increase. It may seem odd that the error rate increases as the sample size increases. What's going on is a consequence of power. More power is usually good, but in this setting every positive is a false positive, so more power is bad. 
+The main point is that FPR and FNR vary in opposite directions. FPR is good for small values of $d2_{pop}$ and $n2$ and gets worse as $d2_{pop}$ and $n2$ increase. FNR is bad when $d2_{pop}$ and $n2$ are small and gets better as these parameters increase. This is the same behavior we saw in the main blog near-exact case. 
 
-FNR behaves in the opposite direction: bad when $n2$ is small and better as $n2$ (and $d2_{pop}$) increase. FNR also depends on $d1_{pop}$, getting worse when $d1_{pop}$ is smaller and better when $d1_{pop}$ is bigger (data not shown).
+Another point is that the graphs for the two values of $n1$ (20, 200) are nearly identical. I double checked the numbers driving the graphs to make sure I hadn't inadvertently used the same data for both cases. The data for the two cases are almost, but not exactly, the same.
 
 The opposing behavior of FPR and FNR as $n2$ changes is worrisome. It suggests that balancing the error rates may be tricky.
+
+The next two figures plot FPR and FNR on the same graph for $n1=20$ (Figure S14) and $n1=200$ (Figure S15). $n2$ and $d1$ are the same as above: $n2$ varies from 50 to 500, $d1_{pop}=0$ for FPR and 0.5 for FNR. $d2_{pop}$ ranges from 0 to 1 but with some of the values omitted so the graph will be legible. 
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S014_inexact_fpr+fnr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S015_inexact_fpr+fnr_n1=200.png');
+```
+
+So far so good, but I've only shown data for a few values of $d1$. To see more conditions, Figure S16 uses a *rate-vs-rate scatter plot*, inspired by *receiver operating characteristic (ROC)* curves, to plot false negative vs. false positive rates for a large range of conditions. 
+The data in this figure extends the cases shown above by letting $d1_{pop}$ vary across the entire range. Each point shows the mean false negative vs. mean false positive rate for these conditions grouped by $n1,n2$. The rationale for grouping by $n1,n2$ is they are the only observable parameters.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S016_inexact_rocm.png');
+```
+
+The figure shows the opposing behavior of FPR and FNR in stark terms.  For inexact replications, there seems little hope of balancing the error rates effectively.  Good thing this isn't a realistic scenario!
 
 #### Near exact replications
 

@@ -196,18 +196,55 @@ doc_resig=
     if ((figsect='supp_inexact') %in% sect) {
       figsect=sub('^supp_','',figsect);
       title.desc='Inexact replication';
-      xdata=lapply(d,function(d)
-        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0,d2=d));
+      ## fpr
+      xdata=lapply(d,function(d) xdata=expand.grid(n1=20,n2=n2,d1=0,d2=d));
       names(xdata)=as.character(d);
-      dofig(plotratm,'fpr',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
+      dofig(plotratm,'fpr_n1=020',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fpr'),title.legend='d2',legend='topright');
-      xdata=lapply(d,function(d)
-        xdata=expand.grid(n1=20,n2=seq(50,by=50,len=10),d1=0.5,d2=d));
+      xdata=lapply(d,function(d) xdata=expand.grid(n1=200,n2=n2,d1=0,d2=d));
       names(xdata)=as.character(d);
-      dofig(plotratm,'fnr',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
+      dofig(plotratm,'fpr_n1=200',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+            title=title_resig('fpr'),title.legend='d2',legend='topright');
+      ## fnr
+      xdata=lapply(d,function(d) xdata=expand.grid(n1=20,n2=n2,d1=0.5,d2=d));
+      names(xdata)=as.character(d);
+      dofig(plotratm,'fnr_n1=020',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fnr'),title.legend='d2',x.legend=8.45,y.legend=0.65);
+      xdata=lapply(d,function(d) xdata=expand.grid(n1=200,n2=n2,d1=0.5,d2=d));
+      names(xdata)=as.character(d);
+      dofig(plotratm,'fnr_n1=200',xdata=xdata,x=cq(n1,n2,d1),col=col,smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+            title=title_resig('fnr'),title.legend='d2',x.legend=8.45,y.legend=0.65);
+      ## fpr+fnr
+      d2=c(0,0.1,0.2,0.5,1)
+      xdata.fpr=lapply(d2,function(d2) xdata=expand.grid(n1=20,n2=n2,d1=0,d2=d2))
+      xdata.fnr=lapply(d2,function(d2) xdata=expand.grid(n1=20,n2=n2,d1=0.5,d2=d2))
+      names(xdata.fpr)=as.character(d2)
+      names(xdata.fnr)=as.character(d2)
+      xdata=xdata_rbind(xdata.fpr,xdata.fnr);
+      dofig(plotragm,'fpr+fnr_n1=020',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+            title=title_resig(cq(fpr,fnr)),
+            title.legend='d2',x.legend=9.1,y.legend=0.985,cex.legend=0.7);
+      xdata.fpr=lapply(d2,function(d2) xdata=expand.grid(n1=200,n2=n2,d1=0,d2=d2))
+      xdata.fnr=lapply(d2,function(d2) xdata=expand.grid(n1=200,n2=n2,d1=0.5,d2=d2))
+      names(xdata.fpr)=as.character(d2)
+      names(xdata.fnr)=as.character(d2)
+      xdata=xdata_rbind(xdata.fpr,xdata.fnr);
+      dofig(plotragm,'fpr+fnr_n1=200',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+            title=title_resig(cq(fpr,fnr)),
+            title.legend='d2',x.legend=9.1,y.legend=0.985,cex.legend=0.7);
+      ## the obvious rocm
+      xdata=lapply(d,function(d2) xdata=expand.grid(n1=c(20,200),n2=n2,d1=d,d2=d2));
+      names(xdata)=as.character(d);
+      dofig(plotrocm,'rocm',xdata=xdata,x=cq(n1,n2),col=col,
+            hline=c(fpr.cutoff,fnr.cutoff),vline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',
+            vhlwd=0.5,plot.cutoff=F,
+            title=title_resig(NULL,'False negative vs. false positive rate'),title.legend='d2');
    }
     if ((figsect='unused') %in% sect) {
       title.desc='Near exact replication';
