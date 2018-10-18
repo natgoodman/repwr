@@ -270,7 +270,7 @@ plotratm=
     ## collect all labels and arrange along x-axis
     labels=unique(do.call(c,lapply(xdata,function(xdata) 
       unique(apply(xdata[,x,drop=F],1,function(row) paste(collapse=' ',row))))));
-    labels=as.data.frame(apply(do.call(rbind,strsplit(labels,' ')),2,as.numeric));
+    labels=as.data.frame(apply(do.call(rbind,strsplit(labels,' ')),1:2,as.numeric));
     colnames(labels)=x;
     ## sort by 'x' variables
     ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!
@@ -575,7 +575,7 @@ plotragm=
     ## collect all labels and arrange along x-axis
     labels=unique(do.call(c,lapply(xdata,function(xdata) 
       unique(apply(xdata[,x,drop=F],1,function(row) paste(collapse=' ',row))))));
-    labels=as.data.frame(apply(do.call(rbind,strsplit(labels,' ')),2,as.numeric));
+    labels=as.data.frame(apply(do.call(rbind,strsplit(labels,' ')),1:2,as.numeric));
     colnames(labels)=x;
     ## sort by 'x' variables
     ## line below from StackExchange https://stackoverflow.com/questions/29482983/. Thx!!

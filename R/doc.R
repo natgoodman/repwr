@@ -29,8 +29,8 @@
 ##   fignew - is each figure plotted in new window
 ## docfun is document-specific function. default calculated from doc, eg, doc_repwr
 dodoc=
-  function(sect=NULL,need.init=T,doc=parent(doc,'readme')
-          ,figpfx=NULL,fignum=1,tblpfx=NULL,tblnum=1,
+  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),
+           figpfx=NULL,fignum=1,tblpfx=NULL,tblnum=1,
            ## args passed to init. not spec'ed here else screws up init defaults
            ## save.fig=T,figscreen=if(doc=='readme') T else F,fignew=figscreen,
            ## docfun set later after init processes doc
@@ -42,6 +42,7 @@ dodoc=
     }
     ## set docfun after init sets doc
     if (missing(docfun)) docfun=get(paste(sep='_','doc',doc));
+    assign_global();
     docfun(...);
 }
 ## --- Document Functions ---
@@ -52,7 +53,7 @@ dodoc=
 ##   works only because no plot-function arg matches it
 dofig=
   function(figfun,figname=NULL,figsect=parent(figsect,NULL),
-           figpfx=parent(figpfx,NULL),fignum=parent(fignum,1),
+           ## figpfx=parent(figpfx,NULL),fignum=parent(fignum,1),
            figscreen=parent(figscreen,T),fignew=parent(fignew,T),id=parent(id,NULL),
            ...) {
     figname=paste(collapse='_',c(figsect,figname));
@@ -92,12 +93,13 @@ dofig=
     if (plot.to.file)  dev.off(dev.png);
     ## close plot.to.screen device unless user wants each figure in new window
     if (plot.to.screen&&!fignew) dev.off(dev);
-    assign_parent(fignum,fignum+1);
+    ## assign_parent(fignum,fignum+1);
+    fignum<<-fignum+1;
     figname;
   }
 ## save one or more tables.
 dotbl=
-  function(...,sect=parent(figsect,NULL),tblpfx=parent(tblpfx,NULL),tblnum=parent(tblnum,NULL),
+  function(...,sect=parent(figsect,NULL),tblpfx=parent(tblpfx,NULL),tblnum=parent(tblnum,1),
            id=parent(id,NULL)) {
     tbl=list(...);                           # evaluates dots
     dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
@@ -115,6 +117,7 @@ dotbl=
       save_tbl(name,data,file=file);
       ## write.table(tbl[[name]],file=file,sep='\t',quote=F,row.names=F);
       tblname;})
-    assign_parent(tblnum,tblnum+length(tbl));
+    ## assign_parent(tblnum,tblnum+length(tbl));
+    tblnum<<-tblnum+length(tbl);
     tblname;
  }

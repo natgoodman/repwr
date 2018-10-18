@@ -387,7 +387,7 @@ basename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL) {
   paste_id(basename,id);
 }
 ##### table - saved in tbldir. may have numeric tail
-filename_tbl=function(tblname,tblpfx=NULL,tblnum=NULL,id=NULL,i=NULL,suffix='png')
+filename_tbl=function(tblname,tblpfx=NULL,tblnum=NULL,id=NULL,i=NULL,suffix='RData')
   filename(basename_tbl(tblname,tblpfx,tblnum,id,i),suffix=suffix);
 basename_tbl=function(tblname,tblpfx=NULL,tblnum=NULL,id=NULL,i=NULL) {
   if (!is.null(i)) i=sprintf("%02i",i);
@@ -404,7 +404,11 @@ basename_tbl=function(tblname,tblpfx=NULL,tblnum=NULL,id=NULL,i=NULL) {
 ##  suffix added unless already there
 filename=function(...,base=NULL,tail=NULL,suffix=NULL) {
   if (!is.null(base)||!is.null(tail)) base=paste(collapse='.',c(base,tail));
-  if (is.null(base)) file=file.path(...) else file=file.path(...,base);
+  ## NG 18-10-15: remove NULL from ... before calling file.path
+  ## do.call(f,as.list(unlist(list(...))))) from https://stackoverflow.com/questions/47360937/call-an-r-function-with-run-time-generated-ellipsis-arguments-dot-dot-dot-thr
+  ##  if (is.null(base)) file=file.path(...) else file=file.path(...,base);
+  file=do.call(file.path,as.list(unlist(list(...))));
+  if (!is.null(base)) file=file.path(...,base);
   if (!is.null(suffix)) {
     ## remove leading '.' if present
     suffix=sub('^\\.','',suffix,perl=T);
