@@ -52,12 +52,10 @@ dodoc=
 ##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
 ##   works only because no plot-function arg matches it
 dofig=
-  function(figfun,name=NULL,sect=parent(sect,NULL),...) {
-    ## compute section number and pass to lower level functions if desired
-    ## from https://stackoverflow.com/questions/5577727
-    sectnum=if(sectnum) which(sect==docsect)[1] else NULL;
+  function(figfun,name=NULL,sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),...) {
     fig=figname(name,sect,sectnum);
     file=filename_fig(name,sect,sectnum);
+    BREAKPOINT();
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
     ## NG 18-08-10: new scheme for plotting to file
@@ -99,10 +97,7 @@ dofig=
   }
 ## save one or more tables.
 dotbl=
-  function(...,sect=parent(sect,NULL)) {
-    ## compute section number and pass to lower level functions if desired
-    ## from https://stackoverflow.com/questions/5577727
-    sectnum=if(sectnum) which(sect==docsect)[1] else NULL;
+  function(...,sect=parent(sect,NULL),sectnum=parent(sectnum,NULL)) {
     tbl=list(...);                           # evaluates dots
     dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
     tblname=sapply(seq_along(tbl),function(i) {
