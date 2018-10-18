@@ -92,7 +92,7 @@ dofig=
   }
 ## save one or more tables.
 dotbl=
-  function(...,sect=parent(figsect,NULL)) {
+  function(...,sect=parent(sect,NULL)) {
     ## compute section number and pass to lower level functions if desired
     ## from https://stackoverflow.com/questions/5577727
     sectnum=if(sectnum) which(sect==docsect)[1] else NULL;
@@ -100,7 +100,6 @@ dotbl=
     dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
     tblname=sapply(seq_along(tbl),function(i) {
       name=names(tbl)[i];
-      tblnum=tblnum+i-1;
       ## test for empty name. CAUTION: do it carefully lest R complains when name is empty list
       empty.name=if(length(name)==0) T else if(nchar(name)==0) T else F;
       if (empty.name) {
@@ -108,10 +107,11 @@ dotbl=
         data=get(name,envir=parent.frame(n=4)); # n=4 empirically determined
       } else data=tbl[[i]];
       file=filename_tbl(name,sect,sectnum);
-      save_tbl(name,data,file=file);
+      BREAKPOINT();
+      ## save_tbl(name,data,file=file);
       ## write.table(tbl[[name]],file=file,sep='\t',quote=F,row.names=F);
+      tblnum<<-tblnum+1;
       tblname;})
     ## assign_parent(tblnum,tblnum+length(tbl));
-    tblnum<<-tblnum+length(tbl);
     tblname;
  }
