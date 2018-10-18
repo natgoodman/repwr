@@ -29,15 +29,22 @@
 ##   save.out - save figures, tables to files. default: T
 ##   figscreen - plot figures on screen. default: T for readme, F otherwsie
 ##   fignew - plot each figure in new window. default figscreen
-##   docfun document-specific function. default calculated from doc, subdoc eg, doc_repwr
+##   docfun document-specific function. default calculated from doc,subdoc eg, doc_repwr
 dodoc=
   function(sect=NULL,need.init=T,doc=parent(doc,'readme'),...) {
+    ## split ... args for init and init_doc. from stackoverflow.com/questions/4124900
+    dots=list(...);
+    iargs=c(list(doc=doc),dots[names(dots) %in% names(formals(init))]);
+    dargs=dots[names(dots) %in% names(formals(init_doc))];
     if (need.init) {
       ## for sandbox runs, use doc-specific init
-      if (is.na(pmatch(doc,'xperiment'))) init(doc=doc,...) else init_xperiment(doc=doc,...);
+      if (is.na(pmatch(doc,'xperiment'))) do.call('init',iargs)
+      else do.call('init_xperiment',iargs);
     }
-    docfun(...);
-}
+    do.call('init_doc',dargs);
+    docfun(sect=sect);
+  }
+
 ## --- Document Functions ---
 ## utility functions to make figures and tables for documents
 ## run plot function, save if required, label result with function name
@@ -107,8 +114,7 @@ dotbl=
         data=get(name,envir=parent.frame(n=4)); # n=4 empirically determined
       } else data=tbl[[i]];
       file=filename_tbl(name,sect,sectnum);
-      BREAKPOINT();
-      ## save_tbl(name,data,file=file);
+      save_tbl(name,data,file=file);
       ## write.table(tbl[[name]],file=file,sep='\t',quote=F,row.names=F);
       tblnum<<-tblnum+1;
       tblname;})

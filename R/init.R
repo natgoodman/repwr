@@ -381,7 +381,7 @@ init_doc=function(
   subdocx=if(is.null(subdoc)) NULL else match.arg(subdoc,cq(supp)),
   ## output directories. filename function ignores subdoc if NULL
   figdir=filename('figure',doc,subdocx,mdir), # directory for figures, eg, figure/repwr/m=1e4
-  tbldir=file.path('table',doc,subdocx,mdir), # directory for tables, eg, table/repwr/m=1e4
+  tbldir=filename('table',doc,subdocx,mdir),  # directory for tables, eg, table/repwr/m=1e4
   ## output modifiers
   outpfx=if(is.null(subdocx)) NULL else 'S',
   outsfx=if(is.null(subdocx)) NULL else letters, # used in figure and table blocks
@@ -403,10 +403,11 @@ init_doc=function(
   clean.fig=clean.out,          # remove figdir
   clean.tbl=clean.out,          # remove tbldir
   ## plot control
-  figscreen=if(doc=='readme') T else F, # plot figures on screen
+  figscreen=if(doc=='readme') T else !save.fig,
+                                 # plot figures on screen
   fignew=figscreen,              # plot each figure in new window
   ## doc generation function
-  docfun=get(paste(collapse='_',c('doc',doc,subdocx))),
+  docfun=get(paste(collapse='',c('doc_',doc,subdocx))),
   docsect=NULL,                  # all document sections. set by docfun
   end=NULL                       # placeholder for last parameter
   ) {

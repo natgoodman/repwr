@@ -292,7 +292,7 @@ save_plot=function(dev,file=NULL,what=NULL,id=NULL,i=NULL) {
 
 ##### table - saved in tbldir
 save_tbl=function(what,file=NULL,data=NULL,
-                  sect=parent(figsect,NULL),tblnum=parent(tblnum,NULL),id=parent(id,NULL),i=NULL,
+                  sect=parent(figsect,NULL),sectnum=parent(sectnum,NULL),
                   save=save.tbl,save.txt=save.txt.tbl) {
   what=as.character(pryr::subs(what));
   if (missing(data) && exists(what,envir=parent.frame(n=1)))
@@ -404,11 +404,15 @@ casename_tbl=function(name,sect,sectnum=NULL,where=cq(content,filename))
   casename_out(name,sect,tblnum,sectnum,tblblk,tblpfx,tblsfx,where=match.arg(where),what='table');
 
 filename_fig=function(figname,sect,sectnum=NULL,suffix='png')
-  filename(casename_fig(figname,sect,sectnum,where='filename'),suffix=suffix);
+  filename(basename_fig(figname,sect,sectnum),suffix=suffix);
+basename_fig=function(figname,sect,sectnum=NULL)
+  filename(figdir,casename_fig(figname,sect,sectnum,where='filename'));
 figname=function(figname,sect,sectnum=NULL,suffix='png')
   casename_fig(figname,sect,sectnum,where='content')
 filename_tbl=function(tblname,sect,sectnum=NULL,suffix='RData')
-  filename(casename_tbl(tblname,sect,sectnum,where='filename'),suffix=suffix);
+  filename(basename_tbl(tblname,sect,sectnum),suffix=suffix);
+basename_tbl=function(tblname,sect,sectnum=NULL)
+  filename(tbldir,casename_tbl(tblname,sect,sectnum,where='filename'));
 tblname=function(tblname,sect,sectnum=NULL,suffix='png')
   casename_tbl(tblname,sect,sectnum,where='content')
 
