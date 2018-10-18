@@ -385,17 +385,17 @@ init_doc=function(
   ## output modifiers
   outpfx=if(is.null(subdocx)) NULL else 'S',
   outsfx=if(is.null(subdocx)) NULL else letters, # used in figure and table blocks
-  sectnum=if(is.null(subdocx) NULL else 1,       # section number added to prefix
+  sectnum=if(is.null(subdocx)) F else T,         # add section number to prefix eg, S1
   figpfx=outpfx,
-  tblpfx=outpfx
+  tblpfx=outpfx,
   figsfx=outsfx,
-  tblsfx=outsfx
+  tblsfx=outsfx,
   fignum=1,
   tblnum=1,
-  figblk=NA,                    # index into figsfx if in figure block
-  tblblk=NA,                    # index into tblsfx if in table block
+  figblk=NULL,                    # index into figsfx if in figure block
+  tblblk=NULL,                    # index into tblsfx if in table block
   ## clean, save
-  save.out=T
+  save.out=T,
   save.fig=save.out,            # save figures (when called via dofig)
   save.tbl=save.out,            # save tables (when called via dotbl)
   save.txt.tbl=T,               # save txt tables. default T
@@ -407,6 +407,8 @@ init_doc=function(
   fignew=figscreen,              # plot each figure in new window
   ## doc generation function
   docfun=get(paste(collapse='_',c('doc',doc,subdocx))),
+  docsect=NULL,                  # all document sections. set by docfun
+  end=NULL                       # placeholder for last parameter
   ) {
   subdoc=subdocx;                # to avoid confusion later
   ## assign parameters to global variables

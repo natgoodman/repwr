@@ -396,7 +396,6 @@ title_resig=
   function(rate.type=parent(rate.type,'error'),title.desc=parent(title.desc,NULL),
            fignum=parent(fignum,NULL),figpfx=parent(figpfx,NULL),
            posr.id=parent(posr.id,'std')) {
-    BREAKPOINT();
     if (is.null(rate.type)) rate.desc=NULL
     else {
       rate.desc=sapply(rate.type,function(rate.type) 

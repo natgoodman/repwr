@@ -45,10 +45,12 @@ dodoc=
 ##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
 ##   works only because no plot-function arg matches it
 dofig=
-  function(figfun,figname=NULL,figsect=parent(figsect,NULL),id=parent(id,NULL),...) {
-
-    figname=paste(collapse='_',c(figsect,figname));
-    file=filename_fig(figname,figpfx,fignum,id);
+  function(figfun,name=NULL,sect=parent(sect,NULL),...) {
+    ## compute section number and pass to lower level functions if desired
+    ## from https://stackoverflow.com/questions/5577727
+    sectnum=if(sectnum) which(sect==docsect)[1] else NULL;
+    fig=figname(name,sect,sectnum);
+    file=filename_fig(name,sect,sectnum);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
     ## NG 18-08-10: new scheme for plotting to file
@@ -75,7 +77,7 @@ dofig=
       dev.png=dev.cur();
       }
     ## draw the figure!
-    figfun(...,fignum=paste(collapse='',c(figpfx,fignum)));
+    figfun(...,fignum=fig);
     if (plot.to.file&plot.to.screen) 
       ## png parameters found by trial and error. look reasonable
       ## TODO: learn the right way to do this!
@@ -90,8 +92,10 @@ dofig=
   }
 ## save one or more tables.
 dotbl=
-  function(...,sect=parent(figsect,NULL),tblpfx=parent(tblpfx,NULL),tblnum=parent(tblnum,1),
-           id=parent(id,NULL)) {
+  function(...,sect=parent(figsect,NULL)) {
+    ## compute section number and pass to lower level functions if desired
+    ## from https://stackoverflow.com/questions/5577727
+    sectnum=if(sectnum) which(sect==docsect)[1] else NULL;
     tbl=list(...);                           # evaluates dots
     dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
     tblname=sapply(seq_along(tbl),function(i) {
@@ -102,9 +106,8 @@ dotbl=
       if (empty.name) {
         name=as.character(dots[[i]]);
         data=get(name,envir=parent.frame(n=4)); # n=4 empirically determined
-      } else data=tbl[[i]]
-      tblname=paste(sep='_',sect,name);
-      file=filename_tbl(tblname,tblpfx,tblnum,id);
+      } else data=tbl[[i]];
+      file=filename_tbl(name,sect,sectnum);
       save_tbl(name,data,file=file);
       ## write.table(tbl[[name]],file=file,sep='\t',quote=F,row.names=F);
       tblname;})
