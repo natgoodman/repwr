@@ -377,15 +377,31 @@ filename_data=function(what,id=NULL,suffix='RData')
 basename_data=function(what,id=NULL) filename(datadir,base=paste_id(what,id));
 
 ##### output (figure, table) - saved in figdir, tbldir. may have numeric tail
-casename_out=function(figname,
+casename_out=
+  function(name,num,sect,blk,pfx,sfx,
+           where=match.arg(cq(content,filename)),what=match.arg(cq(figure,table)),
+           id=NULL) {
+    sfx=if(!is.na(blk)) sfx=blksfx[blk] else NULL;
+    if (where=='filename') {
+      if (!is.null(sect)) pfx=paste(sep='',pfx,sect,'_');
+      num=sprintf("%03i",num);
+      base=paste(collapse='',c(what,pfx,num,sfx));
+      casename=paste(sep='_',what,base);
+    } else {
+      if (!is.null(sect)) pfx=paste(sep='',pfx,sect,'-');
+      what=ucfirst(where);
+      base=paste(collapse='',c(what,pfx,num,sfx));
+      casename=paste(sep=' ',what,base);
+    }
+    paste_id(casename,id);
+  }
+casename_fig=function(name,where=match.arg(cq(content,filename)),id=NULL)
+  casename_out(name,fignum,sectnum,figblk,fig,pfx,figsfx,where,id);
+casename_tbl=function(name,where=match.arg(cq(content,filename)),id=NULL)
+  casename_out(name,tblnum,sectnum,tblblk,tbl,pfx,tblsfx,where,id);
 
 
-                     ,id=NULL,short=F) {
-  casename=
-    if (short) paste(sep=',',n,d_pretty(d))
-      else paste(sep=',',paste_nv(n),paste_nv(d,d_pretty(d)));
-  paste_id(casename,id);
-}
+
 filename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL,suffix='png')
   filename(basename_fig(figname,figpfx,fignum,id,i),suffix=suffix);
 basename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL) {

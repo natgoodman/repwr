@@ -45,10 +45,8 @@ dodoc=
 ##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
 ##   works only because no plot-function arg matches it
 dofig=
-  function(figfun,figname=NULL,figsect=parent(figsect,NULL),
-           ## figpfx=parent(figpfx,NULL),fignum=parent(fignum,1),
-           figscreen=parent(figscreen,T),fignew=parent(fignew,T),id=parent(id,NULL),
-           ...) {
+  function(figfun,figname=NULL,figsect=parent(figsect,NULL),id=parent(id,NULL),...) {
+
     figname=paste(collapse='_',c(figsect,figname));
     file=filename_fig(figname,figpfx,fignum,id);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));

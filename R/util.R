@@ -98,6 +98,10 @@ cq=function(...) {
    stop("... must contain names or character strings");
 return(vapply(dots,as.character,""));
 }
+## upper case first letter of word. like Perl's ucfirst
+## from https://stackoverflow.com/questions/18509527/first-letter-to-upper-case/18509816
+ucfirst=function(word) paste0(toupper(substr(word,1,1)),substr(word,2,nchar(word)));
+
 ## extend akima::aspline for matrix
 asplinem=function(x,y,xout,...) {
   if (is.vector(y)) y=data.frame(y=y);

@@ -385,14 +385,15 @@ init_doc=function(
   ## output modifiers
   outpfx=if(is.null(subdocx)) NULL else 'S',
   outsfx=if(is.null(subdocx)) NULL else letters, # used in figure and table blocks
+  sectnum=if(is.null(subdocx) NULL else 1,       # section number added to prefix
   figpfx=outpfx,
   tblpfx=outpfx
   figsfx=outsfx,
   tblsfx=outsfx
   fignum=1,
   tblnum=1,
-  figblk=NULL,
-  tblblk=NULL,
+  figblk=NA,                    # index into figsfx if in figure block
+  tblblk=NA,                    # index into tblsfx if in table block
   ## clean, save
   save.out=T
   save.fig=save.out,            # save figures (when called via dofig)
