@@ -65,8 +65,9 @@ init=function(
   detldir=file.path(datadir,'detl'),       # directory for detailed results files
   smrydir=file.path(datadir,'smry'),       # directory for summary results files
   posrdir=file.path(datadir,'posr'),       # directory for positive rate files
-  figdir=file.path('figure',docx,mdir),    # directory for figures. default eg, figure/repwr/m=1e4
-  tbldir=file.path('table',docx,mdir),     # directory for tables. default eg, table/repwr/m=1e4
+  ## NG 18-10-18: figdir, tbldir moved to init_doc
+  ## figdir=file.path('figure',docx,mdir), # directory for figures. default eg, figure/repwr/m=1e4
+  ## tbldir=file.path('table',docx,mdir), # directory for tables. default eg, table/repwr/m=1e4
   id=NULL,                                 # info tacked onto filenames. not used much
   verbose=F,                               # print progress messages
   ## program control
@@ -91,8 +92,9 @@ init=function(
   save.smry=save,                # save analysis summary files (RData)
   save.posr=save,                # save positive rate files (RData)
   save.data=save,                # save top level results (RData & txt formats)
-  save.fig=T,                    # save figures (when called via dofig)
-  save.tbl=T,                    # save tables
+  ## NG 18-10-18: save.fig, save.tbl moved to init_doc
+  ## save.fig=T,                 # save figures (when called via dofig)
+  ## save.tbl=T,                 # save tables
   save.txt=NA,                   # save results in txt format as well as RData
                                  #   NA means use default rule for type:
                                  #   F for all but top level data
@@ -103,7 +105,8 @@ init=function(
   save.txt.smry=!is.na(save.txt)&save.txt, # save txt case-by-case summaries. default F
   save.txt.posr=is.na(save.txt)|save.txt,  # save txt positive rate files. default T
   save.txt.data=is.na(save.txt)|save.txt,  # save txt top level results. default T
-  save.txt.tbl=T,                # save txt tables. default T
+  ## NG 18-10-18: save.txt.tbl moved to init_doc
+  ## save.txt.tbl=T,                # save txt tables. default T
   keep=NA,                       # shorthand for other keep params 
                                  #   NA means use default keep rule for type:
                                  #   T for all but detl
@@ -118,8 +121,9 @@ init=function(
                                  #    
   clean=F,                       # remove everything and start fresh
   clean.data=clean,              # remove datadir & memlist
-  clean.fig=clean,               # remove figdir
-  clean.tbl=clean,               # remove tbldir
+  ## NG 18-10-18: clean.fig, clean.tbl moved to init_doc
+  ## clean.fig=clean,               # remove figdir
+  ## clean.tbl=clean,               # remove tbldir
   clean.memlist=T,               # clean memlist cache - always safe
   clean.sim=F,                   # clean simulations. default F
   clean.simr=F,                  # clean simr data. default F
@@ -128,9 +132,10 @@ init=function(
   clean.smry=F,                  # clean case-by-case summaries. default F
   clean.posr=F,                  # clean positive rate files. default F
   clean.toplevel=F,              # clean top-level data. default F
+  ## NG 18-10-18: plot control moved to init_doc
   ## plot control
-  figscreen=if (docx=='readme') T else F, # plot figures on screen
-  fignew=figscreen,              # plot each figure in new window
+  ## figscreen=if (docx=='readme') T else F, # plot figures on screen
+  ## fignew=figscreen,              # plot each figure in new window
   ##
   end=NULL                       # placeholder for last parameter
   ) {
@@ -144,11 +149,14 @@ init=function(
   ## do it before calling any functions that rely on globals
   assign_global();
   ## clean and create output directories and internal memory values as needed
-  outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir,figdir,tbldir);
+  ## NG 18-10-18:  figdir, tbldir moved to init_doc
+  ## outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir,figdir,tbldir);
+  outdir=c(datadir,simdir,simrdir,sidir,detldir,smrydir,posrdir);
   memlist=cq(sim.list,simr.list,si.list,detl.list,smry.list,posr.list,data.list);
   if (clean.data) unlink(datadir,recursive=T);
-  if (clean.fig) unlink(figdir,recursive=T);
-  if (clean.tbl) unlink(tbldir,recursive=T);
+  ## NG 18-10-18: clean.fig, clean.tbl moved to init_doc
+  ## if (clean.fig) unlink(figdir,recursive=T);
+  ## if (clean.tbl) unlink(tbldir,recursive=T);
   if (clean.memlist) suppressWarnings(rm(list=memlist,envir=.GlobalEnv));
   ## clear init_smry & init_mesr flags so these will be rerun
   suppressWarnings(rm(list=cq(init.smry,init.mesr),envir=.GlobalEnv));
@@ -365,4 +373,49 @@ init_mesr=
     sapply(grep('mesr',ls(),value=T),function(what) assign(what,get(what),envir=.GlobalEnv));
     init.mesr<<-T;         # so dosmry will know init_mesr done
     invisible(T);
+}
+
+## initialize doc parameters
+init_doc=function(
+  subdoc=NULL,
+  subdocx=if(is.null(subdoc)) NULL else match.arg(subdoc,cq(supp)),
+  ## output directories. filename function ignores subdoc if NULL
+  figdir=filename('figure',doc,subdocx,mdir), # directory for figures, eg, figure/repwr/m=1e4
+  tbldir=file.path('table',doc,subdocx,mdir), # directory for tables, eg, table/repwr/m=1e4
+  ## output modifiers
+  outpfx=if(is.null(subdocx)) NULL else 'S',
+  outsfx=if(is.null(subdocx)) NULL else letters, # used in figure and table blocks
+  figpfx=outpfx,
+  tblpfx=outpfx
+  figsfx=outsfx,
+  tblsfx=outsfx
+  fignum=1,
+  tblnum=1,
+  figblk=NULL,
+  tblblk=NULL,
+  ## clean, save
+  save.out=T
+  save.fig=save.out,            # save figures (when called via dofig)
+  save.tbl=save.out,            # save tables (when called via dotbl)
+  save.txt.tbl=T,               # save txt tables. default T
+  clean.out=F,
+  clean.fig=clean.out,          # remove figdir
+  clean.tbl=clean.out,          # remove tbldir
+  ## plot control
+  figscreen=if(doc=='readme') T else F, # plot figures on screen
+  fignew=figscreen,              # plot each figure in new window
+  ## doc generation function
+  docfun=get(paste(collapse='_',c('doc',doc,subdocx))),
+  ) {
+  subdoc=subdocx;                # to avoid confusion later
+  ## assign parameters to global variables
+  ## do it before calling any functions that rely on globals
+  assign_global();
+
+  ## clean and create output directories
+  outdir=c(figdir,tbldir);
+  if (clean.fig) unlink(figdir,recursive=T);
+  if (clean.tbl) unlink(tbldir,recursive=T);
+  sapply(outdir,function(dir) dir.create(dir,recursive=TRUE,showWarnings=FALSE));
+  invisible();
 }

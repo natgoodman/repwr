@@ -376,7 +376,16 @@ filename_data=function(what,id=NULL,suffix='RData')
   filename(basename_data(what,id),suffix=suffix);
 basename_data=function(what,id=NULL) filename(datadir,base=paste_id(what,id));
 
-##### figure - saved in figdir. may have numeric tail
+##### output (figure, table) - saved in figdir, tbldir. may have numeric tail
+casename_out=function(figname,
+
+
+                     ,id=NULL,short=F) {
+  casename=
+    if (short) paste(sep=',',n,d_pretty(d))
+      else paste(sep=',',paste_nv(n),paste_nv(d,d_pretty(d)));
+  paste_id(casename,id);
+}
 filename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL,suffix='png')
   filename(basename_fig(figname,figpfx,fignum,id,i),suffix=suffix);
 basename_fig=function(figname,figpfx=NULL,fignum=NULL,id=NULL,i=NULL) {

@@ -21,28 +21,21 @@
 ## --- Generate Figures and Tables for Document ---
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
-## fignum is initial figure number
-## figpfx is prefix prepended to figure number, eg, 'S' for supplement figures
-## typical args passed to init:
-##   save.fig - are figures saved to files
-##   figscreen - are figures plotted on screen
-##   fignew - is each figure plotted in new window
-## docfun is document-specific function. default calculated from doc, eg, doc_repwr
+## other params passed to init or init_doc. typically
+##   subdoc - NULL or 'supp'. default: NULL
+##   fignum, tblnum - initial figure, table number. default: 1
+##   figpfx, tblpfx - prefix prepended to figure, table number, eg, 'S' for supp
+##   figsfx, tblsfx - suffices appended to figure, table number in 'blocks' eg, a,b,c,...
+##   save.out - save figures, tables to files. default: T
+##   figscreen - plot figures on screen. default: T for readme, F otherwsie
+##   fignew - plot each figure in new window. default figscreen
+##   docfun document-specific function. default calculated from doc, subdoc eg, doc_repwr
 dodoc=
-  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),
-           figpfx=NULL,fignum=1,tblpfx=NULL,tblnum=1,
-           ## args passed to init. not spec'ed here else screws up init defaults
-           ## save.fig=T,figscreen=if(doc=='readme') T else F,fignew=figscreen,
-           ## docfun set later after init processes doc
-           docfun=NULL,
-           ...) {
+  function(sect=NULL,need.init=T,doc=parent(doc,'readme'),...) {
     if (need.init) {
       ## for sandbox runs, use doc-specific init
       if (is.na(pmatch(doc,'xperiment'))) init(doc=doc,...) else init_xperiment(doc=doc,...);
     }
-    ## set docfun after init sets doc
-    if (missing(docfun)) docfun=get(paste(sep='_','doc',doc));
-    assign_global();
     docfun(...);
 }
 ## --- Document Functions ---
