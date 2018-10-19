@@ -81,7 +81,6 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       dofig(plotfnr_exact,'fnr_n1=020',xdata=xdata.020,col=col)
       dofig(plotfnr_exact,'fnr_n1=200',xdata=xdata.200,col=col);
       ## plots using sig1_sig1 posr - omits sdir
-      figblk_start();
       dofig(plotfnr_exact,'fnr_nosdir_n1=020',xdata=xdata.020,col=col,posr.id='sig1_sig1')
       dofig(plotfnr_exact,'fnr_nosdir_n1=200',xdata=xdata.200,col=col,posr.id='sig1_sig1');
       ## fnr vs 1-power
