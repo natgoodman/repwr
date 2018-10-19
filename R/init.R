@@ -385,7 +385,7 @@ init_doc=function(
   ## output modifiers
   outpfx=if(is.null(subdocx)) NULL else 'S',
   outsfx=if(is.null(subdocx)) NULL else letters, # used in figure and table blocks
-  sectnum=if(is.null(subdocx)) F else T,         # add section number to prefix eg, S1
+  sectnum=if(is.null(subdocx)) NULL else T,      # add section number to prefix eg, S1
   figpfx=outpfx,
   tblpfx=outpfx,
   figsfx=outsfx,

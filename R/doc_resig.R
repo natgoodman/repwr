@@ -35,7 +35,7 @@ doc_resig=function(sect=parent(sect,NULL)) {
     sectnum=if(sectnum) which(sect==sect.all)[1] else NULL;
     ## exact
     if (sect=='exact') {
-      title.desc='Exact replication';
+      sect.desc='Exact replication';
       dofig(plotrate,'fpr',d=0,n1=20,n2=n2,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resig('fpr'),legend=NULL);
@@ -65,7 +65,7 @@ doc_resig=function(sect=parent(sect,NULL)) {
     }
     ## near exact
     if (sect=='nearexact') {
-      title.desc='Near exact replication';
+      sect.desc='Near exact replication';
       ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
       near=seq(0,0.4,by=0.1);
       xdata=xdata_near(n1=20,n2=n2,d1=0,near=near);
@@ -100,7 +100,7 @@ doc_resig=function(sect=parent(sect,NULL)) {
     }
     ## replication wise error rates
     if (sect=='repwise') {
-      title.desc='Replication-wise error';
+      sect.desc='Replication-wise error';
       ## RW error tables
       prop.true=round(seq(0.05,0.95,by=0.05),digits=5);
       rwerr=nearexact_rwerr(err,prop.true);

@@ -65,6 +65,7 @@ col_resig=
 ## generate title for doc_resig. simpler and shorter than general case
 title_resig=
   function(rate.type=parent(rate.type,'error'),title.desc=parent(title.desc,NULL),
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL),
            posr.id=parent(posr.id,'std')) {
     if (is.null(rate.type)) rate.desc=NULL
     else {
@@ -78,9 +79,8 @@ title_resig=
       if (all(rate.type %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
     }
     posr.desc=if (posr.id=='std') NULL else 'w/o same-direction';
-    fignum=paste(collapse='',c(figpfx,fignum));
-    if (!is.null(fignum)) fignum=paste(sep='','Figure ',fignum,'.');
-    paste(collapse=' ',c(fignum,title.desc,rate.desc,posr.desc));
+    fig=paste(sep='','Figure ',figname(name,sect,sectnum),'.');
+    paste(collapse=' ',c(fig,sect.desc,rate.desc,title.desc,posr.desc));
   }
 ## --- Generate Analytic Tables ---
 ## these functions calculate crossover points
@@ -228,10 +228,23 @@ rw_fnr=function(fpr=0.05,fnr=0.2,prop.true=.5) {
   rw.fnr;
 }
 ####################
-## --- Plot Functions for Supplemente ---
+## --- Plot Functions for Supplement ---
+## plot boxplots of fpr vs.n1
+plotboxfpr_exact=
+  function(drat,posr.id='std',cex.title=0.9,ylim=c(0,0.1),
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
+    boxplot(sig2~n1,data=drat,notch=F,xlab='n1',ylab='false positive rate',ylim=ylim,
+            main=title_resig('fpr','vs. n1'),
+            cex.main=cex.title);
+    cutoff=if(posr.id=='std') 0.025 else 0.05;
+    abline(h=c(cutoff,mean(drat$sig2)),col='red',lty=cq(dashed,solid));
+    grid();
+  }
+    
 ## plot fnr rates with 1-power overlaid
 plotfnr_exact=
-  function(xdata,posr.id='std',col=parent(col),power.n2=parent(power.n2),cex.title=0.9) {
+  function(xdata,posr.id='std',col=parent(col),power.n2=parent(power.n2),cex.title=0.9,
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     ## plot simulated results
     plotratm(xdata=xdata,posr.id=posr.id,x=cq(n1,n2),col=col,smooth='spline',
              hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
@@ -252,17 +265,19 @@ power_n2=function(n2=parent(n2),d.nonzro=parent(d.nonzro)) {
   list(n2.smooth=n2.smooth,y.smooth=y.smooth);
 }
 ## plot fnr vs 1-power2
-plotfnrpwr_exact=function(xdata,posr.id='std',cex.title=0.9) {
-  drat=dratfnrpwr_exact(xdata,posr.id);
-  ## n2col=setNames(colorRampPalette(cq(grey75,black))(11),n);
-  col=colorRampPalette(cq(grey75,black))(101)[round(drat$pwr1*100)+1];
-  ## plot(1-pwr2,drat$sig2,col=n2col[as.character(drat$n1)],pch=19,cex=0.75,
-  plot(1-drat$pwr2,drat$sig2,col=col,pch=19,cex=0.75,
-       xlab='1-power2 (theory)',ylab='false negative rate (simulated)',
-       main=title_resig(NULL,'False negative rate vs. 1-power2'),cex.main=cex.title);
-  abline(a=0,b=1,col='red');
-  grid();
-}
+plotfnrpwr_exact=
+  function(xdata,posr.id='std',cex.title=0.9,
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
+    drat=dratfnrpwr_exact(xdata,posr.id);
+    ## n2col=setNames(colorRampPalette(cq(grey75,black))(11),n);
+    col=colorRampPalette(cq(grey75,black))(101)[round(drat$pwr1*100)+1];
+    ## plot(1-pwr2,drat$sig2,col=n2col[as.character(drat$n1)],pch=19,cex=0.75,
+    plot(1-drat$pwr2,drat$sig2,col=col,pch=19,cex=0.75,
+         xlab='1-power2 (theory)',ylab='false negative rate (simulated)',
+         main=title_resig('fnr','vs. 1-power2'),cex.main=cex.title);
+    abline(a=0,b=1,col='red');
+    grid();
+  }
 ## construct drat for fnr vs 1-power analyses
 dratfnrpwr_exact=function(xdata,posr.id='std') {
   drat=data_rate(rate.rule='nonzro',xdata=xdata,posr.id=posr.id,mesr=cq(sig2));
@@ -271,25 +286,27 @@ dratfnrpwr_exact=function(xdata,posr.id='std') {
   drat;
 }
 ## plot fnr cutoffs
-plotfnrcutoff_exact=function(fnr_d2byn2,cex.title=0.9) {
-  data=merge(subset(fnr_d2byn2,subset=(cutoff==0.05)),subset(fnr_d2byn2,subset=(cutoff==0.20)),
-             by='n2',suffixes=cq('.05','.20'));
-  n2=fnr_d2byn2$n2;
-  y=data[,grep('^d2',colnames(data),value=T)];
-  n2.smooth=seq(min(n2),max(n2),len=100);
-  y.smooth=splinem(n2,y,xout=n2.smooth);
-  col=cq(red,red,blue,blue);
-  lty=cq(solid,dashed,solid,dashed);
-  matplot(n2.smooth,y.smooth,type='l',col=col,lty=lty,xlab='n2',ylab='d2',
-          main=title_resig(NULL,'d2 vs. n2 for FNR cutoff=0.05, 0.20'),cex.main=cex.title);
-  legend=sapply(strsplit(colnames(y.smooth),'\\.'),
-                function(row) {
-                  n2=as.numeric(row[2]);
-                  cutoff=as.numeric(row[3])/100;
-                  paste(sep=', ',n2,cutoff)})
-  legend('topright',bty='n',col=col,lty=lty,cex=0.8,title='n1, cutoff',legend=legend);
-  grid();
-}
+plotfnrcutoff_exact=
+  function(fnr_d2byn2,cex.title=0.9,
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
+    data=merge(subset(fnr_d2byn2,subset=(cutoff==0.05)),subset(fnr_d2byn2,subset=(cutoff==0.20)),
+               by='n2',suffixes=cq('.05','.20'));
+    n2=fnr_d2byn2$n2;
+    y=data[,grep('^d2',colnames(data),value=T)];
+    n2.smooth=seq(min(n2),max(n2),len=100);
+    y.smooth=splinem(n2,y,xout=n2.smooth);
+    col=cq(red,red,blue,blue);
+    lty=cq(solid,dashed,solid,dashed);
+    matplot(n2.smooth,y.smooth,type='l',col=col,lty=lty,xlab='n2',ylab='d2',
+            main=title_resig(NULL,'d2 vs. n2 for FNR cutoff=0.05, 0.20'),cex.main=cex.title);
+    legend=sapply(strsplit(colnames(y.smooth),'\\.'),
+                  function(row) {
+                    n2=as.numeric(row[2]);
+                    cutoff=as.numeric(row[3])/100;
+                    paste(sep=', ',n2,cutoff)})
+    legend('topright',bty='n',col=col,lty=lty,cex=0.8,title='n1, cutoff',legend=legend);
+    grid();
+  }
 ## --- Miscellaneous Functions for Exploration ---
 ## compare drats, typically generated with different values of n1
 ## xdata may be data frames or lists of xdata data fromes

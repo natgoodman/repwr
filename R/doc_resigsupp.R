@@ -1,4 +1,4 @@
-#################################################################################
+################################################################################
 ##
 ## Author:  Nat Goodman
 ## Created: 18-10-18
@@ -32,98 +32,16 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
   n2=n[n>=50];                       # standard n2: exclude 20
   col=col_resig();                   # colors for plotratm, plotragm
   sapply(sect,function(sect) {
-    ## compute section number. from stackoverflow.com/questions/5577727
-    sectnum=if(sectnum) which(sect==sect.all)[1] else NULL;
+    if (!is.null(sectnum)) {
+      ## compute section number. from stackoverflow.com/questions/5577727
+      sectnum=which(sect==sect.all)[1];
+      fignum<<-1;
+    }
     ## exact
     if (sect=='exact') {
-      title.desc='Exact replication';
-      dofig(plotrate,'fpr',d=0,n1=20,n2=n2,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fpr'),legend=NULL);
-      xdata=lapply(d.nonzro,function(d) xdata=expand.grid(n1=20,n2=n2,d1=d,d2=d));
-      names(xdata)=as.character(d.nonzro);
-      dofig(plotratm,'fnr',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='d',legend='right');
-      ## support statements: FPR=sig.level/2, FNR=1-power
-      drat=data_rate(rate.rule='nonzro',xdata=expand.grid(n1=n,n2=n,d1=d,d2=d),mesr=cq(sig2));
-      drat.exact=subset(drat,subset=d1==d2);
-      drat.f=subset(drat.exact,subset=!true.dd);
-      fpr_vs_siglevel=mean(drat.f$sig2-sig.level/2);
-      drat.t=subset(drat.exact,subset=true.dd);
-      drat.t$power=with(drat.t,power.t.test(n=n2,delta=d2)$power);
-      fnr_vs_power=with(drat.t,cor(sig2,1-power));
-      theory=t(setNames(c(fpr_vs_siglevel,fnr_vs_power),c('fpr-sig.level/2','cor(fnr,1-power)')));
-      ## support final para: if d is small, n2 must be big...
-      ## tables show n2,d2 value that achieve 'cutoff' FNR
-      fnr_n2byd2=cutoff_n2byd2(xdata);
-      fnr_d2byn2=cutoff_d2byn2(xdata);
-      ## theoretical calculation of n2 value that achieve 'cutoff' FNR
-      n2.20=power.t.test(delta=0.2,power=0.80)$n;
-      n2.05=power.t.test(delta=0.2,power=0.95)$n;
-      fnr_power=t(setNames(c(n2.20,n2.05),cq(n2.20,n2.05)));
-      dotbl(theory,fnr_n2byd2,fnr_d2byn2,fnr_power);
-    }
-##### near exact
-    if ((figsect='nearexact') %in% sect) {
-      title.desc='Near exact replication';
-      ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
-      near=seq(0,0.4,by=0.1);
-      xdata=xdata_near(n1=20,n2=n2,d1=0,near=near);
-      dofig(plotragm,'fpr',xdata=xdata,x=cq(n1,n2,d1),rate='fpr',col=col,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fpr'),title.legend='near',legend='topright');
-     
-      xdata=xdata_near(n1=20,n2=n2,d1=0.5,near=near);
-      dofig(plotragm,'fnr',xdata=xdata,x=cq(n1,n2,d1),rate='fnr',col=col,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='near',legend='topright');
-
-      near=c(0.1,0.3);
-      xdata.fpr=xdata_near(n1=20,n2=n2,d1=0,near=near);
-      xdata.fnr=xdata_near(n1=20,n2=n2,d1=0.5,near=near);
-      xdata=xdata_rbind(xdata.fpr,xdata.fnr);
-      dofig(plotragm,'fpr+fnr',xdata=xdata,x=cq(n1,n2),col=col,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig(cq(fpr,fnr)),title.legend='near',legend='topright');
-      ## support statements: near=0.1, n2=150 sweet spot with both error rates about 0.05
-      ## For near=0.3 crossover point is n2=137 with error rates of about 0.15.
-      n2crossover=crossover_n2bynear(xdata);
-      ## error tables at end of Near Exact
-      ## construct xdata for error tables
-      near=c(0.1,0.3);
-      xdata=xdata_near(n1=20,n2=n2,d1=d,near=near)
-      err=nearexact_err(xdata);
-      err_perl=err2perl(err);
-      dotbl(n2crossover,err,err_perl);
-      ## convert to almost the right thing in perl
-      ## perl -n -e '@row=split; shift @row if /^\d+/; print "| ",join(" | ",@row)," |\n"' > foo
-      ## copy-and-paste err_perl
-      err<<-err;                        # for next section
-    }
-##### replication wise error rates
-    if ((figsect='repwise') %in% sect) {
-      title.desc='Replication-wise error';
-      ## RW error tables
-      prop.true=round(seq(0.05,0.95,by=0.05),digits=5);
-      rwerr=nearexact_rwerr(err,prop.true);
-      rwerr_perl=rwerr2perl(rwerr)
-      dotbl(rwerr,rwerr_perl);
-      ## convert to almost the right thing in perl
-      ## perl -n -e '@row=split; shift @row if /^\d+/; print "| ",join(" | ",@row)," |\n"' > foo
-      ## copy-and-paste reerr_perl
-    }
-##### supp_start - reset fignum to 1, set figpfx to 'S'. also tblnum, tblpfx
-    if ((figsect='supp_start') %in% sect) {
-      figpfx<<-tblpfx='S';
-      fignum<<-1;
-      tblnum<<-1;
-    }
-##### supp_exact
-    if ((figsect='supp_exact') %in% sect) {
-      figsect<<-sub('^supp_','',figsect);
-      title.desc<<-'Exact replication';
+      sect.desc='Exact replication';
       ## fpr
+      figblk_start();
       dofig(plotrate,'fpr_n1=020',d=0,n1=20,n2=n2,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
@@ -146,9 +64,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
                            cor.n1n2=cor(rowMeans(drat.std[,cq(n1,n2)]),drat.std$sig2));
       dotbl(fpr,corfprstd);
       ## boxplots also show no obvious correlation with n1, n2, or mean(n1,n2).
-      ## TODO: decide whether to add as figures...
-      ## boxplot(sig2~n1,data=drat.std,notch=F); abline(h=c(0.025,mean(drat.nosdir$sig2)),col='red',lty=cq(dashed,solid))
-      ##  boxplot(sig2~n1,data=drat.nosdir,notch=F); abline(h=c(0.050,mean(drat.nosdir$sig2)),col='red',lty=cq(dashed,solid))
+      ## TODO: decide whether to keep boxplots as figures...
+      boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
+      dofig(plotboxfpr_exact,'box',drat=drat.std,posr.id='std',ylim=boxlim);
+      dofig(plotboxfpr_exact,'box_nosdir',drat=drat.nosdir,posr.id='sig1_sig1',ylim=boxlim);
       ## fnr
       ## compute 1-power2 vs. n2 - specialized for plotfnr!
       power.n2=power_n2();
@@ -158,15 +77,18 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       xdata.200=lapply(d.nonzro,function(d) xdata=expand.grid(n1=200,n2=n2,d1=d,d2=d));
       names(xdata.200)=as.character(d.nonzro);
       ## plots using std posr - includes sdir
+      figblk_start();
       dofig(plotfnr_exact,'fnr_n1=020',xdata=xdata.020,col=col)
       dofig(plotfnr_exact,'fnr_n1=200',xdata=xdata.200,col=col);
       ## plots using sig1_sig1 posr - omits sdir
+      figblk_start();
       dofig(plotfnr_exact,'fnr_nosdir_n1=020',xdata=xdata.020,col=col,posr.id='sig1_sig1')
       dofig(plotfnr_exact,'fnr_nosdir_n1=200',xdata=xdata.200,col=col,posr.id='sig1_sig1');
       ## fnr vs 1-power
+      figblk_start();
       xdata=expand.grid(n1=n,n2=n,d1=d.nonzro,d2=d);
       xdata=subset(xdata,subset=(d1==d2));
-      dofig(plotfnrpwr_exact,'fnr_vs_power',xdata=xdata);
+      dofig(plotfnrpwr_exact,'fnr_vs_power',xdata=xdata)
       dofig(plotfnrpwr_exact,'fnr_vs_power_nosdir',xdata=xdata,posr.id='sig1_sig1');
       ## correlation of fnr vs power2
       drat.std=dratfnrpwr_exact(xdata,posr.id='std');
@@ -177,7 +99,6 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
         cor.std=with(drat.std,cor(sig2,1-pwr2));
         cor.nosdir=with(drat.nosdir,cor(sig2,1-pwr2));
         data.frame(d2=d,cor.std,cor.nosdir);}))
-      dotbl(corfnrpwr);
       ## tables showing n2,d2 value that achieve 'cutoff' FNR
       fnr_n2byd2.020=cutoff_n2byd2(xdata.020);
       fnr_n2byd2.200=cutoff_n2byd2(xdata.200);
@@ -188,14 +109,13 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       fnr_d2byn2.200=cutoff_d2byn2(xdata.200);
       fnr_d2byn2=merge(fnr_d2byn2.020,fnr_d2byn2.200,by=cq(cutoff,n2),suffixes=c('.020','.200'));
       fnr_d2byn2=fnr_d2byn2[with(fnr_d2byn2,order(cutoff,n2)),];
-      dotbl(fnr_n2byd2,fnr_d2byn2);
+      dotbl(corfnrpwr,fnr_n2byd2,fnr_d2byn2);
+      figblk_end();
       dofig(plotfnrcutoff_exact,'fnr_cutoff',fnr_d2byn2=fnr_d2byn2);
     }
-##### supp_inexact
-    if ((figsect='supp_inexact') %in% sect) {
-      figsect=sub('^supp_','',figsect);
-      title.desc='Inexact replication';
-      BREAKPOINT()
+    ## inexact
+    if (sect=='inexact') {
+      sect.desc='Inexact replication';
       ## fpr
       xdata.020=xdata_inexact(n1=20,d1=0);
       xdata.200=xdata_inexact(n1=200,d1=0);
@@ -248,10 +168,9 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
             vhlwd=0.5,plot.cutoff=F,
             title=title_resig(NULL,'False negative vs. false positive rate'),title.legend='d2');
     }
-    ##### supp_nearexact
-    if ((figsect='supp_nearexact') %in% sect) {
-      title.desc='Near exact replication';
-      BREAKPOINT()
+    ## nearexact
+    if (sect=='nearexact') {
+      sect.desc='Near exact replication';
       ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
       near=seq(0.1,0.5,by=0.1);
       ## fpr
@@ -284,6 +203,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## drat_plotsig2(xdata.020,xdata.200)
       ## plot fnr for single values of n1, n2, multiple d1
       n1=20;
+      ## TODO: 'caution' probably obsolete
       ## CAUTION: must use loop, NOT sapply, for scoping of fignum to work!
       ## Hmmm... not sure it makes sense to do all these figures
       for (n2x in c(100,200,300,400)) {

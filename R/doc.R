@@ -53,9 +53,8 @@ dodoc=
 ##   works only because no plot-function arg matches it
 dofig=
   function(figfun,name=NULL,sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),...) {
-    fig=figname(name,sect,sectnum);
+    ## fig=figname(name,sect,sectnum);
     file=filename_fig(name,sect,sectnum);
-    BREAKPOINT();
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
     ## NG 18-08-10: new scheme for plotting to file
@@ -82,7 +81,8 @@ dofig=
       dev.png=dev.cur();
       }
     ## draw the figure!
-    figfun(...,fignum=fig);
+    ## figfun(...,fignum=fig);
+    figfun(...);
     if (plot.to.file&plot.to.screen) 
       ## png parameters found by trial and error. look reasonable
       ## TODO: learn the right way to do this!
@@ -92,14 +92,17 @@ dofig=
     ## close plot.to.screen device unless user wants each figure in new window
     if (plot.to.screen&&!fignew) dev.off(dev);
     ## assign_parent(fignum,fignum+1);
-    fignum<<-fignum+1;
+    ## fignum<<-fignum+1;
+    figinc();
     figname;
   }
 ## save one or more tables.
 dotbl=
-  function(...,sect=parent(sect,NULL),sectnum=parent(sectnum,NULL)) {
+  function(...,block=T,sect=parent(sect,NULL),sectnum=parent(sectnum,NULL)) {
     tbl=list(...);                           # evaluates dots
     dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
+    ## start table block if necessary
+    if (block&length(tbl)>1) tblblk_start();
     tblname=sapply(seq_along(tbl),function(i) {
       name=names(tbl)[i];
       ## test for empty name. CAUTION: do it carefully lest R complains when name is empty list
@@ -111,8 +114,45 @@ dotbl=
       file=filename_tbl(name,sect,sectnum);
       save_tbl(name,data,file=file);
       ## write.table(tbl[[name]],file=file,sep='\t',quote=F,row.names=F);
-      tblnum<<-tblnum+1;
+      ## tblnum<<-tblnum+1;
+      tblinc();
       tblname;})
+    if (block) tblblk_end();
     ## assign_parent(tblnum,tblnum+length(tbl));
     tblname;
  }
+
+## manage figure,table numbers, blocks
+figinc=function() if (!is.null(figblk)) figblk<<-figblk+1 else fignum<<-fignum+1;
+figblk_start=function() {
+  ## if already in block, end it
+  if (!is.null(figblk)) fignum<<-fignum+1;
+  figblk<<-1;
+}
+figblk_end=function() {
+  ## do nothing if not in block, else end it
+  if (is.null(figblk)) return();
+  figblk<<-NULL;
+  fignum<<-fignum+1;
+}
+tblinc=function() if (!is.null(tblblk)) tblblk<<-tblblk+1 else tblnum<<-tblnum+1;
+tblblk_start=function() {
+  ## if already in block, end it
+  if (!is.null(tblblk)) tblnum<<-tblnum+1;
+  tblblk<<-1;
+}
+tblblk_end=function() {
+  ## do nothing if not in block, else end it
+  if (is.null(tblblk)) return();
+  tblblk<<-NULL;
+  tblnum<<-tblnum+1;
+}
+outblk_start=function() {
+  figblk_start();
+  tblblk_start();
+}
+outblk_end=function() {
+  figblk_end();
+  tblblk_end();
+}
+
