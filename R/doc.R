@@ -52,7 +52,9 @@ dodoc=
 ##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
 ##   works only because no plot-function arg matches it
 dofig=
-  function(figfun,name=NULL,sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),...) {
+  function(figfun,name=NULL,
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL),
+           ...) {
     ## fig=figname(name,sect,sectnum);
     file=filename_fig(name,sect,sectnum);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
@@ -98,7 +100,8 @@ dofig=
   }
 ## save one or more tables.
 dotbl=
-  function(...,block=T,sect=parent(sect,NULL),sectnum=parent(sectnum,NULL)) {
+  function(...,block=T,
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     tbl=list(...);                           # evaluates dots
     dots=match.call(expand.dots=FALSE)$...;  # doesn't evaluate dots
     ## start table block if necessary
