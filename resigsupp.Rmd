@@ -1,0 +1,177 @@
+---
+title: "Systematic Replication May Make Many Mistakes: Supplementary Material"
+author: "Nathan (Nat) Goodman"
+date: "October 15, 2018"
+output:
+  html_document:
+    css: css/html_document.css
+    highlight: kate
+  pdf_document: default
+linkcolor: cyan
+citecolor: green
+urlcolor: blue
+---
+
+## Introduction
+
+This document contains supplementary material for the blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/) kindly posted by Bob Reed on The Replication Network. It contains results that didn't fit in the blog post as published for reasons of space or pedagogy. It's not terribly coherent as a standalone document.  Sorry.
+
+## Results
+
+### Exact replications
+
+A replication is *exact* if the two studies are sampling the same population; this means $d1_{pop}=d2_{pop}$. For this ideal case, replication works exactly as intuition predicts. Theory tell us that FPR is the significance level divided by 2 (the factor of 2 because the effect sizes must have the same direction) and $FNR=1-power2$, where $power2$ is the power of the replica study. As we'll see, the simulated FPR is dead-on, but the simulated FNR is not as good, esp. when $n1$ and $d$ are small.
+
+Figures S1 is the same as Figure 1 in the blog post with the addition of a dashed red horizontal line at $sig.level/2=0.025$ (just barely visible beneath the solid red line depicting FPR). The figure shows FPR for $n1=20$ and $n2$ varying from 50 to 500. The x-axis shows all four parameters using $d1$, $d2$ as shorthand for $d1_{pop}$, $d2_{pop}$. $d1_{pop}=d2_{pop}=0$ throughout because this is the only way to get false positives with exact replications. Figure S2 is the same but for $n1=200$, 10x the previous value. There is a barely visible dashed red line at 0.025 in both figures to demonstrate that $FPR=sig.level/2=0.025$ as theory predicts.  
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S001_exact_fpr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S002_exact_fpr_n1=200.png');
+```
+
+Figures S1 and S2 are essentially identical illustrating that $n1$, the original sample size, has no effect on the results. I checked the numbers driving the graphs to make sure I hadn't inadvertently used the same data for both cases; the data are similar but not exactly the same.
+
+Figure S3 is like Figure 2 in the blog post with the addition of dashed lines depicting $1-power2$ and with the legend moved down a smidge. It shows FNR for $n1=20$ and $n2$ varying from 50 to 500 (the same values as in Figure S1) but with $d1_{pop}=d2_{pop}$ ranging from 0.1 to 1. Figure S4 is the same but with $n1=200$. 
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S003_exact_fnr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S004_exact_fnr_n1=200.png');
+```
+
+For $n1=20$ (Figure S3), the simulated FNR is a bit greater than theory predicts when $d$ is small. For $n1=200$ (Figure S4), the fit is good for all values of $d$: the dashed lines are mostly hidden by the solid ones.
+
+I get worried when my simulated results differ consistently from theory, even when the discrepancy is small.  So I explored.  It turns out the difference is due to the same-direction requirement; when power is low, same-direction has a large enough effect to increase FNR noticeably. Figures S5 and S6 repeat the figures with same-direction switched off. Theory and simulation now agree quite well for both values of $n1$.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S005_exact_fnr_nosdir_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S006_exact_fnr_nosdir_n1=200.png');
+```
+
+Figures S7 and S8 plots FNR vs. $1-power2$ across the entire dataset with same-direction switch on (Figure S7) and off (Figure S8). The dots are color-coded by $power1$, the power of the original study (smaller power has lighter dots). The points fall nicely along the diagonal in both cases, with less scatter without same-direction, as expected.
+
+The correlation of the two statistics across the enitre dataset is 0.9997737 and 0.9999019 resp. under the two conditions.  When limiting to small values of $d2_{pop}$, $d2_{pop}\le0.2$, the correlations are 0.9989049 and 0.9995707.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S007_exact_fnr_vs_power.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S008_exact_fnr_vs_power_nosdir.png');
+```
+
+As one would expect and Figures S3-S6 illustrate, if the population effect size is small, $n2$ must be large to reliably yield a positive result. For $d=0.2$, $n2$ must be almost 400 in theory and 442 in the simulation to achieve $FNR=0.2$; to hit $FNR=0.05$, $n2$ must be more than 650 (in theory). 
+
+Figure S9 shows the values of $n2$ and $d2_{pop}$ that achieve FNR cutoffs of 0.05 and 0.20 for $n1=20$ and $n1=200$.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S009_exact_fnr_cutoff.png');
+```
+
+#### Inexact replications
+
+A replication is *inexact* if the two studies are sampling very different populations, meaning $d1_{pop}$ and $d2_{pop}$ can vary independently. This seems unreasonably pessimistic for a well-run replication project but serves to illustrate what happens as we vary the parameters.
+
+Figures S10-S13 show FPR and FNR for two values of $n1$ (20, 200), $n2$ varying from 50 to 500, $d1_{pop}=0$ for the FPR plots and 0.5 (a medium effect size) for the FNR plots, and $d2_{pop}$ ranging from 0 to 1. 
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S010_inexact_fpr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S011_inexact_fpr_n1=200.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S012_inexact_fnr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S013_inexact_fnr_n1=200.png');
+```
+
+The main point is that FPR and FNR vary in opposite directions. FPR is good for small values of $d2_{pop}$ and $n2$ and gets worse as $d2_{pop}$ and $n2$ increase. FNR is bad when $d2_{pop}$ and $n2$ are small and gets better as these parameters increase. This is the same behavior we saw in the main blog near-exact case. 
+
+Another point is that the graphs for the two values of $n1$ (20, 200) are nearly identical. I checked the numbers driving the graphs to make sure I hadn't inadvertently used the same data for both cases; the data are similar but not exactly the same.
+
+The opposing behavior of FPR and FNR as $n2$ changes is worrisome. It suggests that balancing the error rates may be tricky.
+
+The next two figures plot FPR and FNR on the same graph for $n1=20$ (Figure S14) and $n1=200$ (Figure S15). $n2$ and $d1$ are the same as above: $n2$ varies from 50 to 500, $d1_{pop}=0$ for FPR and 0.5 for FNR. $d2_{pop}$ ranges from 0 to 1 but with some of the values omitted so the graph will be legible. 
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S014_inexact_fpr+fnr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S015_inexact_fpr+fnr_n1=200.png');
+```
+
+So far so good, but I've only shown data for a few values of $d1$. To see more conditions, Figure S16 uses a *rate-vs-rate scatter plot*, inspired by *receiver operating characteristic (ROC)* curves, to plot false negative vs. false positive rates for a large range of conditions. 
+The data in this figure extends the cases shown above by letting $d1_{pop}$ vary across the entire range. Each point shows the mean false negative vs. mean false positive rate for these conditions grouped by $n1,n2$. The rationale for grouping by $n1,n2$ is they are the only observable parameters.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_S016_inexact_rocm.png');
+```
+
+The figure shows the opposing behavior of FPR and FNR in stark terms.  For inexact replications, there seems little hope of balancing the error rates effectively.  Good thing this isn't a realistic scenario!
+
+#### Near exact replications
+
+A replication is *near-exact* if the populations differ slightly, which means $d1_{pop}$ and $d2_{pop}$ differ by a small amount, $near$; technically $abs(d1_{pop}-d2_{pop})\le near$.
+
+Figures S17-S20 show FPR and FNR for two values of $n1$ (20, 200), $n2$ varying from 50 to 500, $d1_{pop}=0$ for the FPR plots and 0.5 (a medium effect size) for the FNR plots, and $near$ ranging from 0 to 1. In these figures, $d2_{pop}$ ranges from $d1_{pop}-near$ to $d1_{pop}+near$ with values $<0$ discarded.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_017_nearexact_fpr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_018_nearexact_fpr_n1=200.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_019_nearexact_fnr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_020_nearexact_fnr_n1=200.png');
+```
+
+As in the inexact case, FPR and FNR vary in opposite directions. FPR is good for small values of $near$ and $n2$ and gets worse as $near$ and $n2$ increase. FNR is bad when $near$ and $n2$ are small and gets better as these parameters increase. This is the same behavior we saw in the main blog near-exact case. Also, as in previous cases, the graphs for the two values of $n1$ (20, 200) are nearly identical. I checked the numbers to make sure I hadn't inadvertently used the same data for both cases; the data are similar but not exactly the same.
+
+To show the tradeoff between FPR and FNR, Figures S21 and S22 plot both error rates on the same graph for the two values of $n1=20$.
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/m=1e4/figure_021_nearexact_fpr+fnr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_022_nearexact_fpr+fnr_n1=200.png');
+```
+
+For $near=0.1$, $n2=150$ is a sweet spot with both error rates about 0.05. For $near=0.3$, the crossover point is $n2=137$ with error rates of about 0.15. In the above figure, the effect size for true instances is 0.5, a medium value. FNR is worse for smaller effect sizes and better for bigger sizes as one would expect, making the tradeoff harder. The table below shows the error rates for a few values of $n2$, $near$, and $d1_{pop}$. Note that FPR only depends on $n2$ and $near$, while FNR depends on all three parameters. The FNR columns are for different values of $d1_{pop}$.
+
+| n2    | near  | FPR   | FNR 0.2 | FNR 0.5 | FNR 0.8 |
+| :---: | :---: | :---: | :----: | :---: | :---: |
+| 150 | 0.1 | 0.05 | 0.61 | 0.06 | 0.00 |
+| 150 | 0.3 | 0.16 | 0.50 | 0.13 | 0.01 |
+| 300 | 0.1 | 0.07 | 0.39 | 0.00 | 0.00 |
+| 300 | 0.3 | 0.24 | 0.36 | 0.03 | 0.00 |
+| 450 | 0.1 | 0.10 | 0.26 | 0.00 | 0.00 |
+| 450 | 0.3 | 0.29 | 0.31 | 0.01 | 0.00 |
+
+FNR is great for $d1_{pop}=0.8$, mostly fine for $d1_{pop}=0.5$, and bad for $d1_{pop}=0.2$. Pushing up $n2$ helps but even when $n2=450$, FNR is probably unacceptable for $d1_{pop}=0.2$. Increasing $n2$ worsens FPR. It seems the crossover point above, $n2=137$, is about right. Rounding up to 150 is a reasonable approximation.
+
+### Replication-wise error rates
+
+The error rates reported so far depend on the truth status of the replication: *true* for FPR. *false* for FNR. The next step is to convert these into replication-wise error rates: RWFPR and RWFNR. To do so, we need one more parameter: $prop.true$, the proportion of replications that are true. 
+
+Of course, we don't know the value of $prop.true$; arguably $prop.true$ is the most important parameter systematic replication is trying to estimate. Like $near$, it probably varies by research field and may also depend on the quality of the investigator. Some authors assume $prop.true=0.5$, but I see little evidence to support any particular value.  It's easy enough to run a range of values and see how $prop.true$ affects the error rates.
+
+The table below shows the results for $n2=150$, $near=0.1,0.3$ as above, and $prop.true$ ranging from 0.1 to 0.9. The RWFPR and RWFNR columns are for different values of $d1_{pop}$.
+
+| n2    | near  | prop.true | RWFPR 0.2 | RWFPR 0.5 | RWFPR 0.8 | RWFNR 0.2 | RWFNR 0.5 | RWFNR 0.8 |
+| :---: | :---: | :-------: | :------: | :------: | :------: | :------: | :------: | :------: |
+| 150 | 0.1 | 0.10 | 0.55 | 0.34 | 0.32 | 0.07 | 0.01 | 0.00 |
+| 150 | 0.1 | 0.25 | 0.29 | 0.14 | 0.14 | 0.18 | 0.02 | 0.00 |
+| 150 | 0.1 | 0.50 | 0.12 | 0.05 | 0.05 | 0.39 | 0.06 | 0.00 |
+| 150 | 0.1 | 0.75 | 0.04 | 0.02 | 0.02 | 0.66 | 0.15 | 0.01 |
+| 150 | 0.1 | 0.90 | 0.01 | 0.01 | 0.01 | 0.85 | 0.35 | 0.03 |
+| 150 | 0.3 | 0.10 | 0.74 | 0.62 | 0.59 | 0.06 | 0.02 | 0.00 |
+| 150 | 0.3 | 0.25 | 0.49 | 0.35 | 0.32 | 0.17 | 0.05 | 0.00 |
+| 150 | 0.3 | 0.50 | 0.24 | 0.15 | 0.14 | 0.37 | 0.13 | 0.01 |
+| 150 | 0.3 | 0.75 | 0.10 | 0.06 | 0.05 | 0.64 | 0.32 | 0.04 |
+| 150 | 0.3 | 0.90 | 0.03 | 0.02 | 0.02 | 0.84 | 0.58 | 0.10 |
+
+Check out the top and bottom rows. The top row depicts a scenario where most replications are false ($prop.true=0.1$) and the replicas closely match the original studies ($near=0.1$); for this case, most positives are mistakes and most negatives are accurate. The bottom row is a case where most replications are true ($prop.true=0.9$) and the replicas diverge from the originals ($near=0.3$); here most positives are correct and, unless $d1_{pop}$ is large, most negatives are mistakes. 
+
+Which scenario is realistic? There are plenty of opinions but scant evidence. Your guess is as good as mine. 
+
+## Discussion
+
+Systematic replication is a poor statistical test. Replication works well when care is taken to ensure the replica closely matches the original study. This is the norm in focused, one-off replication studies aiming to confirm or refute a single finding. It seems unrealistic in systematic replication projects, which typically prioritize uniformity over fidelity to run lots of studies at reasonable cost. If the studies differ as they almost certainly must in systematic projects, mistake rates grow and may be unacceptably high under many conditions.
+
+My results suggest that systematic replication is unsuitable as a tool for validating existing studies. An alternative is to switch gears and focus on generalizability. This would change the mindset of replication researchers more than the actual work. Instead of trying to refute a study, you would assume the study is correct within the limited setting of the original investigation and try to extend it to other settings. The scientific challenge becomes defining good "other settings" - presumably there are many sensible choices -- and selecting studies that are a good fit for each. This seems a worthy problem in its own right that would move the field forward no matter how many original studies successfully generalize.
+
+I’ve seen plenty of bad science up close and personal, but in my experience statistics isn't the main culprit. The big problem I see is faulty research methods. Every scientific field has accepted standard research methods. If the methods are bad, even "good" results are likely to be wrong; the results may be highly replicable but wrong nonetheless.
+
+The quest to root out bad science is noble but ultimately futile. "Quixotic" comes to mind. Powerful economic forces shape the size and make-up of research areas. Inevitably some scientists are better researchers than others. But "Publish or Perish" demands that all scientists publish research papers. Those who can, publish good science; those who can't, do the best they can.
+
+We will do more good by helping good scientists do good science than by trying to slow down the bad ones. The truly noble quest is to develop tools and techniques that make good scientists more productive. That's the best way to get more good science into the literature.  
+
+## Comments Please!
+
+Please post comments using the [GitHub Issue Tracker](https://github.com/natgoodman/repwr/issues).
+
