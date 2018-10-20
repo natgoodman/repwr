@@ -31,8 +31,11 @@ doc_resig=function(sect=parent(sect,NULL)) {
   n2=n[n>=50];                       # standard n2: exclude 20
   col=col_resig();                   # colors for plotratm, plotragm
   sapply(sect,function(sect) {
-    ## compute section number. from stackoverflow.com/questions/5577727
-    sectnum=if(sectnum) which(sect==sect.all)[1] else NULL;
+    if (!is.null(sectnum)) {
+      ## compute section number. from stackoverflow.com/questions/5577727
+      sectnum=which(sect==sect.all)[1];
+      fignum<<-1;
+    }
     ## exact
     if (sect=='exact') {
       sect.desc='Exact replication';

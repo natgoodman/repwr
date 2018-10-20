@@ -390,7 +390,7 @@ casename_out=
     base=paste(collapse='',c(pfx,num,sfx));
     ## if (where=='content') what=ucfirst(what);
     if (where=='filename')
-      casename=paste(collapse='',c(what,pfx,num,sfx,'_',sect,'_',name))
+      casename=paste(collapse='',c(what,'_',pfx,num,sfx,'_',sect,'_',name))
     else {
       if (!is.null(sectnum)) pfx=paste(sep='',pfx,'-');
       ## casename=paste(collapse='',c(what,' ',pfx,num,sfx));
