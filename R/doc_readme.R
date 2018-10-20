@@ -24,14 +24,18 @@
 ## make figures and tables for blog post
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
-doc_readme=
-  function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
-    sect.all=cq(plotrate,plotratm,heatrate,roc,rag,multi_sig2,small_telescopes);
-    if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+doc_readme=function(sect=parent(sect,NULL)) {
+  sect.all=cq(plotrate,plotratm,heatrate,roc,rag,multi_sig2,small_telescopes);
+  if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
 #################### nonzro
+  sapply(sect,function(sect) {
+    if (!is.null(sectnum)) {
+      ## compute section number. from stackoverflow.com/questions/5577727
+      sectnum=which(sect==sect.all)[1];
+      fignum<<-1;
+    }
 ##### plotrate
-    if ((figsect='plotrate') %in% sect) {
+    if (sect=='plotrate') {
       dofig(plotrate,'nonzro_fpr',rate.rule='nonzro',d=0,n1=20,n2=n,legend='topright');
       dofig(plotrate,'nonzro_fnr',rate.rule='nonzro',d1=0.5,d2=d,n1=20,n2=50,legend='topright');
       dofig(plotrate,'sameff_fpr',rate.rule='sameff',d1=0.5,d2=d[d!=0.5],n1=20,n2=50,
@@ -39,21 +43,18 @@ doc_readme=
       dofig(plotrate,'sameff_fnr',rate.rule='sameff',d=d,n1=20,n2=50,legend='topright');
     }
 ##### plotratm
-    if ((figsect='plotratm') %in% sect) {
+    if (sect=='plotratm') {
       d2=d[d!=0&d!=1];
-      xdata=lapply(d2,function(d2)
-        xdata=expand.grid(n1=20,n2=n,d1=0,d2=d2));
+      xdata=lapply(d2,function(d2) xdata=expand.grid(n1=20,n2=n,d1=0,d2=d2));
       names(xdata)=as.character(d2);
       dofig(plotratm,'nonzro_fpr',xdata=xdata,rate.rule='nonzro',x=cq(n1,n2,d1),
             title=title_ratm('nonzro','fpr'),title.legend='d2',legend='topright');
-      xdata=lapply(n,function(n2)
-        xdata=expand.grid(n1=20,n2=n2,d1=0.5,d2=d));
+      xdata=lapply(n,function(n2) xdata=expand.grid(n1=20,n2=n2,d1=0.5,d2=d));
       names(xdata)=as.character(n);
       dofig(plotratm,'nonzro_fnr',xdata=xdata,rate.rule='nonzro',x=cq(n1,d1,d2),
             title=title_ratm('nonzro','fnr'),title.legend='n2',legend='topright');
       d2=d[d!=0.5];
-      xdata=lapply(d2,function(d2)
-        xdata=expand.grid(n1=20,n2=n,d1=0.5,d2=d2));
+      xdata=lapply(d2,function(d2) xdata=expand.grid(n1=20,n2=n,d1=0.5,d2=d2));
       names(xdata)=as.character(d2);
       dofig(plotratm,'sameff_fpr',xdata=xdata,rate.rule='sameff',x=cq(n1,n2,d1),
             title=title_ratm('sameff','fpr'),title.legend='d2',legend='right');
@@ -66,7 +67,7 @@ doc_readme=
             title=title_ratm('sameff','fnr'),title.legend='d2',legend='topright');
     }
 ##### heatrate
-    if ((figsect='heatrate') %in% sect) {
+    if (sect=='heatrate') {
       dofig(heatrate,'nonzro_fpr',rate.rule='nonzro',d=0,n1=20,n2=n);
       dofig(heatrate,'nonzro_fnr',rate.rule='nonzro',d1=0.5,d2=d,n1=20,n2=50);
       ## show several values of n2,d2 in one heatmap
@@ -78,14 +79,14 @@ doc_readme=
             smooth=F);
     }
 #####  plotroc
-    if ((figsect='roc') %in% sect) {
+    if (sect=='roc') {
       xdata=xdata_readme(near=0);
       dofig(plotroc,'exact',title.desc='exact replication',rate.rule='nonzro',xdata=xdata);
       xdata=xdata_readme(near=1);
       dofig(plotroc,'inexact',title.desc='inexact replication',rate.rule='nonzro',xdata=xdata);
     }
 #####  plotrag
-    if ((figsect='rag') %in% sect) {
+    if (sect=='rag') {
       xdata=xdata_readme(near=0);
       dofig(plotrag,'exact',title.desc='exact replication',rate.rule='nonzro',xdata=xdata,
             smooth='aspline');
@@ -94,7 +95,7 @@ doc_readme=
             smooth='aspline');
     }
 #####  plotrocm, plotragm
-    if ((figsect='multi_sig2') %in% sect) {
+    if (sect=='multi_sig2') {
       ## near exact. sig2
       near=round(c(0.01,0.05,0.1,0.2),digits=5);
       xdata=lapply(c(0,near,1),function(near) xdata=xdata_readme(near=near));
@@ -105,7 +106,7 @@ doc_readme=
             smooth='aspline',mesr='sig2');
     }
 ##########
-    if ((figsect='small_telescopes') %in% sect) {
+    if (sect=='small_telescopes') {
       xdata=xdata_readme(near=0.1);
       dofig(plotroc,'roc',rate.rule='nonzro',xdata=xdata,
             title.desc='near=0.1',mesr=cq(sig2,d2.scp1));
@@ -113,7 +114,8 @@ doc_readme=
             title.desc='near=0.1',smooth='aspline',mesr=cq(sig2,d2.scp1));
     }
     sect;
-  }
+  })
+}
 ## generate standard xdata for aggregated plots
 xdata_readme=function(near=0,nx=2.5,n2.num=2,n1=c(20,40,60)) {
   d2=round(seq(0,1,by=0.01),digits=5);
