@@ -85,7 +85,7 @@ plotrate=
            smooth=c(cq(aspline,spline,loess,none),TRUE,FALSE),
            plot.points=F,cex.points=0.75,cex.single=1,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
-           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
+           title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            doc=parent(doc,'readme'),
            legend.where='bottomright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
@@ -117,7 +117,7 @@ plotrate=
       title=paste(collapse="\n",c(fignum,title_rate(),title.desc,xtitle));
     }
     if (xaxt=='auto') if (nrow(xdata)<=xaxt.max) xaxt='n' else xaxt='s';
-    if (xaxt=='n') {
+   if (xaxt=='n') {
       matplot(x,ydata,type='n',xlab=NA,ylab=ylab,main=title,cex.main=cex.title,
               xlim=xlim,ylim=ylim,xaxt='n');
       xaxis(at=x,labels=xdata,xlab=xlab);
@@ -178,7 +178,7 @@ heatrate=
            x=cq(auto,n1,n2,d1,d2,asis),xtitle=cq(none,auto,n,d,n1,n2,d1,d2),
            fpr.cutoff=parent(fpr.cutoff,.05),fnr.cutoff=parent(fnr.cutoff,0.20),
            smooth=c(cq(auto,none),0,1,TRUE,FALSE),
-           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
+           title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='farright',x.legend=NULL,y.legend=NULL,cex.legend=0.75) {
     ## init(must.exist=T);            # make sure environment initialized
@@ -252,7 +252,7 @@ plotratm=
            smooth=c(cq(aspline,spline,loess,none),TRUE,FALSE),
            plot.points=F,plot.lines=T,cex.points=0.75,cex.single=1,lwd=2,lty='solid',
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
-           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NA,
+           title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NA,
            legend.where='right',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            title.legend='d',
            xlim=NULL,ylim=c(0,1)) {
@@ -385,7 +385,7 @@ plotroc=
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
            plot.cutoff=T,
            plot.points=T,plot.lines=F,pch=16,cex.points=1,
-           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
+           title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=c(0,1),ylim=c(0,1)) {
@@ -428,7 +428,7 @@ plotrocm=
            tpr.cutoff=parent(tpr.cutoff,1-fnr.cutoff),tnr.cutoff=parent(tnr.cutoff,1-fpr.cutoff),
            plot.cutoff=T,
            plot.points=T,plot.lines=F,pch=16,cex.points=1,
-           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,
+           title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            title.legend='replication type',
@@ -481,7 +481,7 @@ plotrag=
            plot.cutoff=T,
            smooth=c(cq(aspline,spline,loess,none),TRUE,FALSE),
            plot.points=F,plot.lines=T,
-           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,ylab='rate',
+           title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,xlab=NULL,ylab='rate',
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
@@ -550,7 +550,7 @@ plotragm=
            plot.cutoff=T,
            smooth=c(cq(aspline,spline,loess,none),TRUE,FALSE),
            plot.points=F,plot.lines=T,lty=cq(solid,dotted,dotdash,longdash),lwd=2,
-           title=NULL,fignum=NULL,title.desc=NULL,cex.title=0.9,xlab=NULL,
+           title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,xlab=NULL,
            ylab=if(length(rate)==1) rate2lab(rate) else 'rate',
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
@@ -650,7 +650,7 @@ xdata_xtitle=function(xdata,xtitle) {
     ## remove single-valued vars from xdata and put in title
     if (!is.null(x.single)) {
       ## remove vars from xdata without converting one column data frame into vector (sigh...)
-      ## from https://stackoverflow.com/questions/4605206/drop-data-frame-columns-by-name
+      ## from stackoverflow.com/questions/4605206
       xdata=within(xdata,rm(list=names(x.single)));
       ## coalesce pairs with same values
       x.n=x.single[grep('^n',names(x.single),value=T)];

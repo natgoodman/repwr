@@ -55,7 +55,6 @@ dofig=
   function(figfun,name=NULL,
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL),
            ...) {
-    ## fig=figname(name,sect,sectnum);
     file=filename_fig(name,sect,sectnum);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
@@ -84,6 +83,7 @@ dofig=
       }
     ## draw the figure!
     ## figfun(...,fignum=fig);
+    fignum=figname(name,sect,sectnum);  # set fignum for standard plot functions
     figfun(...);
     if (plot.to.file&plot.to.screen) 
       ## png parameters found by trial and error. look reasonable
