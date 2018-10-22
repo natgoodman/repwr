@@ -22,29 +22,6 @@
 ## file at https://github.com/natgoodman/NewPro/FDR/LICENSE 
 ##
 #################################################################################
-source('R/check.R');
-source('R/datman.R');
-source('R/doc.R');
-## source('R/doc_readme.R');
-## source('R/doc_repwr.R');
-source('R/doc_resig.R');
-source('R/doc_resigsupp.R');
-source('R/doc_resig_fun.R');
-## source('R/doc_xperiment.R');
-## source('R/doc_tech.R');
-source('R/init.R');
-source('R/plot.R');
-source('R/select.R');
-# source('R/sim.R');
+source('R/repwr.R');
+## overlay specialized files
 source('R/sim_resig.R');
-source('R/stats.R');
-source('R/util.R');
-
-## ---- run ----
-## run the program
-## parameters defined in init
-run=function(doc='resig',...) {
-  init(doc=doc,...);
-  dodata(need.init=F,...);             # generate data - ie, run simulation
-  dodoc(need.init=F,...);              # generate figures for doc
-}
