@@ -35,19 +35,21 @@ run=function(save.fig=T,clean.fig=save.fig,...) {
   cmp_detl();                               # run test
 }
 ## init for this sandbox. same parameters as readme
-init_xperiment=init_hack_proptrue=
+init_xperiment=init_detl_conditional=
   function(doc='xperiment',m=1e3,clean.fig=T,...) {
     subdoc='detl_conditional';
     mdir=paste_nv(m,m_pretty(m));
     init(doc='xperiment',
          n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=m,mdir=mdir,
          datadir=filename('data','xperiment',subdoc,mdir),
-         figdir=filename('figure','xperiment',subdoc,mdir),
          clean=F,clean.fig=clean.fig,
          clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
          clean.detl=T,clean.smry=T,clean.posr=T,
          ...);
   }
+## init_doc for this sandbox
+init_doc_xperiment=function(...) init_doc(subdoc='detl_conditional',clean.out=T,...)
+
 ## contruct one detl case
 ##### do readme mesrs under conditional
 ##    doc needs:   sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1

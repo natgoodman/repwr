@@ -34,14 +34,14 @@ dodoc=
   function(sect=NULL,need.init=T,doc=parent(doc,'readme'),...) {
     ## split ... args for init and init_doc. from stackoverflow.com/questions/4124900
     dots=list(...);
-    iargs=c(list(doc=doc),dots[names(dots) %in% names(formals(init))]);
-    dargs=dots[names(dots) %in% names(formals(init_doc))];
+    init.args=c(list(doc=doc),dots[names(dots) %in% names(formals(init))]);
+    initdoc.args=dots[names(dots) %in% names(formals(init_doc))];
     if (need.init) {
       ## for sandbox runs, use doc-specific init
-      if (is.na(pmatch(doc,'xperiment'))) do.call('init',iargs)
-      else do.call('init_xperiment',iargs);
+      if (is.na(pmatch(doc,'xperiment'))) do.call('init',init.args)
+      else do.call('init_xperiment',init.args);
     }
-    do.call('init_doc',dargs);
+    do.call('init_doc',initdoc.args);
     docfun(sect=sect);
   }
 

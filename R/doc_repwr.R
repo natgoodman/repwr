@@ -23,27 +23,31 @@
 ## make figures and tables for blog post
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
-doc_repwr=
-  function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,figscreen)) {
-    sect.all=cq(nonzro_exact_fpr,nonzro_exact_fnr,nonzro_exact_roc,
-                nonzro_inexact_roc,nonzro_nearexact,sameff_nearexact,small_telescopes);
-    if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+doc_repwr=function(sect=parent(sect,NULL)) {
+  sect.all=cq(nonzro_exact_fpr,nonzro_exact_fnr,nonzro_exact_roc,
+              nonzro_inexact_roc,nonzro_nearexact,sameff_nearexact,small_telescopes);
+  if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+  sapply(sect,function(sect) {
+    if (!is.null(sectnum)) {
+      ## compute section number. from stackoverflow.com/questions/5577727
+      sectnum=which(sect==sect.all)[1];
+      fignum<<-1;
+    }
 #################### nonzro
 ##### exact
-   if ((figsect='nonzro_exact_fpr') %in% sect) {
+    if (sect=='nonzro_exact_fpr') {
       ## exact reps. false positives
       ## 2x2 panel for d=0
-     dofig(plotrate,'n1=20_plot',rate.rule='nonzro',d=0,n1=20,n2=seq(50,by=50,len=10),
-           legend='topright');
-     dofig(plotrate,'n1=40_plot',rate.rule='nonzro',d=0,n1=40,n2=seq(100,by=100,len=10),
+      dofig(plotrate,'n1=20_plot',rate.rule='nonzro',d=0,n1=20,n2=seq(50,by=50,len=10),
             legend='topright');
-     dofig(heatrate,'n1=20_heat',rate.rule='nonzro',d=0,n1=20,n2=seq(50,by=50,len=10),
-           smooth='none');
-     dofig(heatrate,'n1=40_heat',rate.rule='nonzro',d=0,n1=40,n2=seq(100,by=100,len=10),
-           smooth='none');
+      dofig(plotrate,'n1=40_plot',rate.rule='nonzro',d=0,n1=40,n2=seq(100,by=100,len=10),
+            legend='topright');
+      dofig(heatrate,'n1=20_heat',rate.rule='nonzro',d=0,n1=20,n2=seq(50,by=50,len=10),
+            smooth='none');
+      dofig(heatrate,'n1=40_heat',rate.rule='nonzro',d=0,n1=40,n2=seq(100,by=100,len=10),
+            smooth='none');
     }
-    if ((figsect='nonzro_exact_fnr') %in% sect) {
+    if (sect=='nonzro_exact_fnr') {
       ## exact reps. false negatives. show several values of d in one heatmap
       xdata=subset(expand.grid(n1=20,n2=seq(50,by=100,len=5),d1=c(0.2,0.5,0.8),d2=c(0.2,0.5,0.8)),
                    subset=d1==d2);
@@ -56,20 +60,20 @@ doc_repwr=
                    subset=d1==d2);
       dofig(heatrate,'n1=40_heat',rate.rule='nonzro',xdata=xdata,smooth='none',vline=c(5.5,10.5));
       ## abline(v=c(5.5,10.5));
-     }
-    if ((figsect='nonzro_exact_roc') %in% sect) {
+    }
+    if (sect=='nonzro_exact_roc') {
       ## show same point with roc
       xdata=xdata_repwr(near=0);
       dofig(plotroc,rate.rule='nonzro',xdata=xdata);
     }
 ##### inexact
-    if ((figsect='nonzro_inexact_roc') %in% sect) {
+    if (sect=='nonzro_inexact_roc') {
       ## inexact reps. nonzro. key point: false positives are terrible
       xdata=xdata_repwr(near=1);
       dofig(plotroc,rate.rule='nonzro',xdata=xdata);
-   }
+    }
 ##### near exact
-    if ((figsect='nonzro_nearexact') %in% sect) {
+    if (sect=='nonzro_nearexact') {
       ## near exact. sig2
       near=round(c(0.01,0.05,0.1,0.2),digits=5);
       xdata=lapply(c(0,near,1),function(near) xdata=xdata_repwr(near=near));
@@ -79,7 +83,7 @@ doc_repwr=
             rate='fpr',smooth='loess',mesr='sig2');
     }
 ########## sameff
-    if ((figsect='sameff_nearexact') %in% sect) {
+    if (sect=='sameff_nearexact') {
       xdata=xdata_repwr(near=1);
       dofig(plotroc,'unconstrained_delta=0.1',rate.rule='sameff',rate.tol=0.1,xdata=xdata,
             title.desc='d1, d2 unconstrained');
@@ -93,7 +97,7 @@ doc_repwr=
             title.desc='d2 <= d1');
     }
 ##########
-    if ((figsect='small_telescopes') %in% sect) {
+    if (sect=='small_telescopes') {
       xdata=xdata_repwr(near=0.1);
       dofig(plotroc,'nonzro_roc',rate.rule='nonzro',xdata=xdata,
             title.desc='near=0.1',mesr=cq(sig2,d2.scp1));
@@ -107,7 +111,8 @@ doc_repwr=
             title.desc='d2 <= d1',smooth='none',mesr=cq(sig2,d2.scp1));
     }
     sect;
-  }
+  })
+}
 ## generate standard xdata for aggregated plots
 xdata_repwr=function(near=0,nx=2.5,n2.num=2,n1=seq(20,by=20,len=8)) {
   d2=round(seq(0,1,by=0.01),digits=5);

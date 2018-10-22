@@ -37,8 +37,14 @@ source('R/util.R');
 ## ---- run ----
 ## run the program
 ## parameters defined in init
-run=function(...) {
-  init(...);
-  dodata(need.init=F,...);             # generate data - ie, run simulation
-  dodoc(need.init=F,...);              # generate figures for doc
+run=function(need.init=T,...) {
+  ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
+  dots=list(...);
+  init.args=c(list(doc=doc),dots[names(dots) %in% names(formals(init))]);
+  dodata.args=dots[names(dots) %in% names(formals(dodata))];
+  dodoc.args=dots[names(dots) %in% names(formals(dodoc))];
+  dodoc.args$need.init=F;
+  if (need.init) do.call('init',iargs);
+  do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
+  do.call('dodoc',c(need.init=F,dodoc.args));   # generate figures, tables for doc
 }
