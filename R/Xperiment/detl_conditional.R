@@ -28,28 +28,47 @@
 source('R/repwr.R');
 ## --- Eperimental sandbox functions ---
 ## run for this sandbox
-run=function(save.fig=T,clean.fig=save.fig,...) {
-  init_xperiment(save.fig=T,clean.fig=save.fig,...);
-  dodata(need.init=F,...);                  # generate data - ie, run simulation
-  dodoc(need.init=F,docfun=doc_readme,...); # generate figures for doc
+run=function(need.init=T,doc='xperiment',...) {
+  ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
+  dots=list(...);
+  init.args=dots[names(dots) %in% names(formals(init_xperiment)));
+  dodata.args=dots[names(dots) %in% names(formals(dodata))];
+  dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc_xperiment)))];
+  if (need.init) do.call('init_xperiment',c(doc=doc,init.args);
+  do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
+  do.call('dodoc',c(need.init=F,doc=doc,dodoc.args));   # generate figures, tables for doc
   cmp_detl();                               # run test
 }
 ## init for this sandbox. same parameters as readme
 init_xperiment=init_detl_conditional=
-  function(doc='xperiment',m=1e3,clean.fig=T,...) {
-    subdoc='detl_conditional';
-    mdir=paste_nv(m,m_pretty(m));
-    init(doc='xperiment',
+  function(doc='xperiment',subdoc='detl_conditional',
+           n=20*2^(0:4),
+           d=c(0,0.2,0.5,0.8,1),
+           m=1e3,
+           mdir=paste_nv(m,m_pretty(m)),            # m subdirectory
+           datadir=filename('data','xperiment',subdoc,mdir),
+           clean=F,clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
+           clean.detl=T,clean.smry=T,clean.posr=T,
+           ...) {
+    init.args=dots[names(dots) %in% names(formals(init))];
+    
+    
+     init(doc='xperiment',
          n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=m,mdir=mdir,
          datadir=filename('data','xperiment',subdoc,mdir),
-         clean=F,clean.fig=clean.fig,
-         clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
+         clean=F,clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
          clean.detl=T,clean.smry=T,clean.posr=T,
          ...);
   }
 ## init_doc for this sandbox
-init_doc_xperiment=function(...) init_doc(subdoc='detl_conditional',clean.out=T,...)
-
+init_doc_xperiment=function(clean.out=T,figscreen=T,...) {
+  subdoc='detl_conditional';
+  init_doc(subdoc='detl_conditional',
+           figdir=filename('figure',doc,subdoc,mdir),
+           tbldir=filename('table',doc,subdoc,mdir),
+           clean.out=clean.out,figscreen=figscreen,
+           ...);
+}
 ## contruct one detl case
 ##### do readme mesrs under conditional
 ##    doc needs:   sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1

@@ -25,7 +25,8 @@ source('R/doc.R');
 source('R/doc_readme.R');
 source('R/doc_repwr.R');
 source('R/doc_resig.R');
-source('R/doc_xperiment.R');
+source('R/doc_resigsupp.R');
+source('R/doc_resig_fun.R');
 source('R/doc_tech.R');
 source('R/init.R');
 source('R/plot.R');
@@ -40,11 +41,10 @@ source('R/util.R');
 run=function(need.init=T,...) {
   ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
   dots=list(...);
-  init.args=c(list(doc=doc),dots[names(dots) %in% names(formals(init))]);
+  init.args=dots[names(dots) %in% names(formals(init))];
   dodata.args=dots[names(dots) %in% names(formals(dodata))];
-  dodoc.args=dots[names(dots) %in% names(formals(dodoc))];
-  dodoc.args$need.init=F;
-  if (need.init) do.call('init',iargs);
+  dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc)))];
+  if (need.init) do.call('init',init.args);
   do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
   do.call('dodoc',c(need.init=F,dodoc.args));   # generate figures, tables for doc
 }

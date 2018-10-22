@@ -25,3 +25,17 @@
 source('R/repwr.R');
 ## overlay specialized files
 source('R/sim_resig.R');
+
+## ---- run ----
+## run the program
+## parameters defined in init
+run=function(need.init=T,doc='resig',...) {
+  ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
+  dots=list(...);
+  init.args=dots[names(dots) %in% names(formals(init))];
+  dodata.args=dots[names(dots) %in% names(formals(dodata))];
+  dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc)))];
+  if (need.init) do.call('init',c(doc=doc,init.args));
+  do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
+  do.call('dodoc',c(need.init=F,doc=doc,dodoc.args));   # generate figures, tables for doc
+}

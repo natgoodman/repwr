@@ -27,7 +27,6 @@
 doc_readme=function(sect=parent(sect,NULL)) {
   sect.all=cq(plotrate,plotratm,heatrate,roc,rag,multi_sig2,small_telescopes);
   if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
-#################### nonzro
   sapply(sect,function(sect) {
     if (!is.null(sectnum)) {
       ## compute section number. from stackoverflow.com/questions/5577727

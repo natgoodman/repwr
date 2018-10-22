@@ -34,14 +34,19 @@ dodoc=
   function(sect=NULL,need.init=T,doc=parent(doc,'readme'),...) {
     ## split ... args for init and init_doc. from stackoverflow.com/questions/4124900
     dots=list(...);
-    init.args=c(list(doc=doc),dots[names(dots) %in% names(formals(init))]);
-    initdoc.args=dots[names(dots) %in% names(formals(init_doc))];
-    if (need.init) {
-      ## for sandbox runs, use doc-specific init
-      if (is.na(pmatch(doc,'xperiment'))) do.call('init',init.args)
-      else do.call('init_xperiment',init.args);
+    if (is.na(pmatch(doc,'xperiment'))) {
+      ## normal doc
+      init.args=dots[names(dots) %in% names(formals(init))];
+      initdoc.args=dots[names(dots) %in% names(formals(init_doc))];
+      if (need.init) do.call('init',c(doc=doc,init.args));
+      do.call('init_doc',initdoc.args);
+    } else {
+      ## experimenal sandbox
+      init.args=c(list(doc=doc),dots[names(dots) %in% names(formals(init_xperiment))]);
+      initdoc.args=dots[names(dots) %in% names(formals(init_doc_xperiment))];
+      if (need.init) do.call('init_xperiment',c(doc=doc,init.args));
+      do.call('init_doc_xperiment',initdoc.args);
     }
-    do.call('init_doc',initdoc.args);
     docfun(sect=sect);
   }
 

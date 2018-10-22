@@ -74,6 +74,7 @@ assign_global=function() {
   env=parent.frame(n=1);
   sapply(ls(envir=env),function(what) assign(what,get(what,envir=env),envir=.GlobalEnv));
 }
+## TODO NG 18-10-22: I don't think this is still used...
 ## copy variable to parent. used in dofig to update fignum
 assign_parent=function(what,value) {
   what=as.character(pryr::subs(what));
