@@ -20,15 +20,15 @@ source('R/repwr.R');
 ## --- Eperimental sandbox functions ---
 ## run for this sandbox
 run=function(need.init=T,...) {
-  if (need.init) wrap_fun(init_xperiment);
+  if (need.init) wrap_fun(init_xperiment,...);
   need.init=F;
-  ## wrap_fun(dodata);                # use repwr data
-  wrap_fun(dodoc,init_doc_xperiment,doc='xperiment'); # generate figures, tables for doc
+  ## wrap_fun(dodata);                                    # use repwr data
+  wrap_fun(dodoc,init_doc_xperiment,doc='xperiment',...); # generate figures, tables for doc
 }
 ## init for this sandbox. same parameters as rewpr
 init_xperiment=function(doc='repwr',...) {
   ## call init with our arguments
-  wrap_fun(init);
+  wrap_fun(init,...);
 }
 ## init_doc for this sandbox
 init_doc_xperiment=
@@ -37,7 +37,7 @@ init_doc_xperiment=
            tbldir=filename('table',doc,subdoc,mdir),
            clean.out=T,figscreen=T,...) {
    doc<<-'xperiment';                    # bodily set doc to keep init_doc happy
-   wrap_fun(init_doc);
+   wrap_fun(init_doc,...);
  }
 
 ## make figures and tables for experimental sandbox code

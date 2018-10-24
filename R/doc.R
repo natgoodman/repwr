@@ -34,12 +34,12 @@ dodoc=
   function(sect=NULL,need.init=T,doc=parent(doc,'readme'),...) {
     if (is.na(pmatch(doc,'xperiment'))) {
       ## normal doc
-      if (need.init) wrap_fun(init);
-      wrap_fun(init_doc);
+      if (need.init) wrap_fun(init,...);
+      wrap_fun(init_doc,...);
     } else {
       ## experimenal sandbox
-      if (need.init) wrap_fun(init_xperiment);
-      wrap_fun(init_doc_xperiment);
+      if (need.init) wrap_fun(init_xperiment,...);
+      wrap_fun(init_doc_xperiment,...);
     }
     docfun(sect=sect);
   }

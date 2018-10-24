@@ -41,6 +41,6 @@ source('R/util.R');
 run=function(need.init=T,...) {
   if (need.init) wrap_fun(init);
   need.init=F;
-  wrap_fun(dodata);               # generate data - ie, run simulation
-  wrap_fun(dodoc,init_doc);       # generate figures, tables for doc
+  wrap_fun(dodata,...);               # generate data - ie, run simulation
+  wrap_fun(dodoc,init_doc,...);       # generate figures, tables for doc
 }

@@ -23,8 +23,8 @@ source('R/repwr.R');
 run=function(need.init=T,doc='xperiment',...) {
   if (need.init) wrap_fun(init_xperiment);
   need.init=F;
-  wrap_fun(dodata);                   # generate data - ie, run simulation
-  wrap_fun(dodoc,init_doc_xperiment); # generate figures, tables for doc
+  wrap_fun(dodata,...);                   # generate data - ie, run simulation
+  wrap_fun(dodoc,init_doc_xperiment,...); # generate figures, tables for doc
 }
 ## init for this sandbox. same parameters as readme
 init_xperiment=
@@ -34,14 +34,14 @@ init_xperiment=
            datadir=filename('data','xperiment',subdoc,mdir),
            ...) {
     ## call init with our arguments
-    wrap_fun(init);
+    wrap_fun(init,...);
   }
 ## init_doc for this sandbox
 init_doc_xperiment=
   function(subdoc='hack_proptrue',docfun=doc_xperiment,
            figdir=filename('figure',doc,subdoc,mdir),tbldir=filename('table',doc,subdoc,mdir),
            clean.out=T,figscreen=T,...) {
-    wrap_fun(init_doc);
+    wrap_fun(init_doc,...);
  }
 
 ## NG 18-07-21: quick hack to look at increasing number of false positives

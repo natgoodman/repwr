@@ -31,8 +31,8 @@ source('R/repwr.R');
 run=function(need.init=T,doc='xperiment',...) {
   if (need.init) wrap_fun(init_xperiment);
   need.init=F;
-  wrap_fun(dodata);                   # generate data - ie, run simulation
-  wrap_fun(dodoc,init_doc_xperiment); # generate figures, tables for doc
+  wrap_fun(dodata,...);                   # generate data - ie, run simulation
+  wrap_fun(dodoc,init_doc_xperiment,...); # generate figures, tables for doc
   cmp_detl();                                     # run test
 }
 ## init for this sandbox. same parameters as readme
@@ -45,14 +45,14 @@ init_xperiment=
            clean.detl=T,clean.smry=T,clean.posr=T,
            ...) {
     ## call init with our arguments
-    wrap_fun(init);
+    wrap_fun(init,...);
   }
 ## init_doc for this sandbox
 init_doc_xperiment=
   function(subdoc='detl_conditional',docfun=doc_readme,
            figdir=filename('figure',doc,subdoc,mdir),tbldir=filename('table',doc,subdoc,mdir),
            clean.out=T,figscreen=T,...) {
-    wrap_fun(init_doc);
+    wrap_fun(init_doc,...);
  }
 ## contruct one detl case
 ##### do readme mesrs under conditional
