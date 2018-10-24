@@ -28,27 +28,6 @@
 source('R/repwr.R');
 ## --- Eperimental sandbox functions ---
 ## run for this sandbox
-## run=function(save.fig=T,clean.fig=save.fig,...) {
-##   init_xperiment(save.fig=T,clean.fig=save.fig,...);
-##   dodata(need.init=F,...);                  # generate data - ie, run simulation
-##   dodoc(need.init=F,docfun=doc_readme,...); # generate figures for doc
-##   cmp_detl();                               # run test
-## }
-## ## init for this sandbox. same parameters as readme
-## init_xperiment=init_hack_proptrue=
-##   function(doc='xperiment',m=1e3,clean.fig=T,...) {
-##     subdoc='detl_handcrafted';
-##     mdir=paste_nv(m,m_pretty(m));
-##     init(doc='xperiment',
-##          n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=m,mdir=mdir,
-##          datadir=filename('data','xperiment',subdoc,mdir),
-##          figdir=filename('figure','xperiment',subdoc,mdir),
-##          clean=F,clean.fig=clean.fig,
-##          clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
-##          clean.detl=T,clean.smry=T,clean.posr=T,
-##          ...);
-##   }
-
 run=function(need.init=T,doc='xperiment',...) {
   if (need.init) wrap_fun(init_xperiment);
   need.init=F;
@@ -75,7 +54,6 @@ init_doc_xperiment=
            clean.out=T,figscreen=T,...) {
     wrap_fun(init_doc);
  }
-
 
 ## contruct one detl case
 ##### hand crafted for readme mesrs
