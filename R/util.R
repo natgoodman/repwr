@@ -81,9 +81,9 @@ assign_parent=function(what,value) {
   if (missing(value)) value=get(what,envir=parent.frame(n=1));
   assign(what,value,envir=parent.frame(n=2));
 }
-## NG 18-10-24: wrap function - propogate locals and ... and call function
-##   used by Xperiment sandbox code. maybe someday move into real code
+## NG 18-10-24: wrap function - propogate locals and ... then call function
 ##   morefun are additional functions called by fun with ... args
+## adapted from stackoverflow.com/questions/4124900
 wrap_fun=function(fun,morefun=NULL,...) {
   env=parent.frame(n=1);
   x=ls(envir=env);

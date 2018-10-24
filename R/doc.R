@@ -32,21 +32,6 @@
 ##   docfun document-specific function. default calculated from doc,subdoc eg, doc_repwr
 dodoc=
   function(sect=NULL,need.init=T,doc=parent(doc,'readme'),...) {
-    ## split ... args for init and init_doc. from stackoverflow.com/questions/4124900
-    dots=list(...);
-    ## if (is.na(pmatch(doc,'xperiment'))) {
-    ##   ## normal doc
-    ##   init.args=dots[names(dots) %in% names(formals(init))];
-    ##   initdoc.args=dots[names(dots) %in% names(formals(init_doc))];
-    ##   if (need.init) do.call('init',c(doc=doc,init.args));
-    ##   do.call('init_doc',initdoc.args);
-    ## } else {
-    ##   ## experimenal sandbox
-    ##   init.args=c(list(doc=doc),dots[names(dots) %in% names(formals(init_xperiment))]);
-    ##   initdoc.args=dots[names(dots) %in% names(formals(init_doc_xperiment))];
-    ##   if (need.init) do.call('init_xperiment',c(doc=doc,init.args));
-    ##   do.call('init_doc_xperiment',initdoc.args);
-    ## }
     if (is.na(pmatch(doc,'xperiment'))) {
       ## normal doc
       if (need.init) wrap_fun(init);
