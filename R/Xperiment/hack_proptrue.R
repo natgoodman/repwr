@@ -9,6 +9,8 @@
 ## Experimental sandbox code related to replication power blog post
 ## Implements quick hack to determine whether adjusting prop.true
 ## has a big effect on repwr results. Short answer: no
+## Program plots figures using standard readme data and special data generated here
+## Test consists of visual comparison
 ##
 ## This software is open source, distributed under the MIT License. See LICENSE
 ## file at https://github.com/natgoodman/NewPro/FDR/LICENSE 
@@ -18,20 +20,44 @@
 source('R/repwr.R');
 ## --- Eperimental sandbox functions ---
 ## run for this sandbox
-run=function(save.fig=T,clean.fig=save.fig,...) {
-  init_xperiment(save.fig=T,clean.fig=save.fig,...);
-  dodata(need.init=F,...);                      # generate data - ie, run simulation
-  dodoc(need.init=F,docfun=doc_xperiment,...);  # generate figures for doc
+## run=function(save.fig=T,clean.fig=save.fig,...) {
+##   init_xperiment(save.fig=T,clean.fig=save.fig,...);
+##   dodata(need.init=F,...);                      # generate data - ie, run simulation
+##   dodoc(need.init=F,docfun=doc_xperiment,...);  # generate figures for doc
+## }
+## ## init for this sandbox
+## init_xperiment=init_hack_proptrue=
+##   function(doc='xperiment',...) {
+##     subdoc='hack_proptrue';
+##     init(doc='xperiment',
+##          n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=1e3,mdir=paste_nv(m,m_pretty(m)),
+##          datadir=filename('data','xperiment',subdoc,'m=1e3'),
+##          figdir=filename('figure','xperiment',subdoc,'m=1e3'),...);
+##   }
+run=function(need.init=T,doc='xperiment',...) {
+  if (need.init) wrap_fun(init_xperiment);
+  need.init=F;
+  wrap_fun(dodata);                   # generate data - ie, run simulation
+  wrap_fun(dodoc,init_doc_xperiment); # generate figures, tables for doc
 }
-## init for this sandbox
-init_xperiment=init_hack_proptrue=
-  function(doc='xperiment',...) {
-    subdoc='hack_proptrue';
-    init(doc='xperiment',
-         n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=1e3,mdir=paste_nv(m,m_pretty(m)),
-         datadir=filename('data','xperiment',subdoc,'m=1e3'),
-         figdir=filename('figure','xperiment',subdoc,'m=1e3'),...);
+## init for this sandbox. same parameters as readme
+init_xperiment=
+  function(doc='xperiment',subdoc='hack_proptrue',
+           n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=1e3,
+           mdir=paste_nv(m,m_pretty(m)),            # m subdirectory
+           datadir=filename('data','xperiment',subdoc,mdir),
+           ...) {
+    ## call init with our arguments
+    wrap_fun(init);
   }
+## init_doc for this sandbox
+init_doc_xperiment=
+  function(subdoc='hack_proptrue',docfun=doc_xperiment,
+           figdir=filename('figure',doc,subdoc,mdir),tbldir=filename('table',doc,subdoc,mdir),
+           clean.out=T,figscreen=T,...) {
+    wrap_fun(init_doc);
+ }
+
 ## NG 18-07-21: quick hack to look at increasing number of false positives
 ##   for n=20,40 and d=0, runs dosim1 repeatedly to get 90% positives (default 900 out of 1000)
 ##   since there are 5 values of d, this sets FPR=0.9*m/5*m=0.18 vs. ~0.01 in standard sim
@@ -60,16 +86,15 @@ dosim=function() {
 ## make figures and tables for experimental sandbox code
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and all matches run
-doc_xperiment=doc_hack_proptrue=
-  function(sect=parent(sect,NULL),
-           fignum=parent(fignum,1),figscreen=parent(figscreen,T),fignew=parent(fignew,F)) {
-    sect.all=cq(plotrate,heatrate,roc,multi_sig2,small_telescopes);
-    if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
-    xfigdir=figdir;
-#################### nonzro
+doc_xperiment=function(sect=parent(sect,NULL)) {
+  sect.all=cq(plotrate,heatrate,roc,multi_sig2,small_telescopes);
+  if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
+  ## program plots figures using standard readme data and special data generated here
+  ## test consists of visual comparison
+  sapply(sect,function(sect) {
 ##### plotrate
-    if ((figsect='plotrate') %in% sect) {
-      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T); 
+    if (sect=='plotrate') {
+      init(doc='readme',clean=F,clean.memlist=T); 
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,legend='topright')
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
@@ -79,10 +104,10 @@ doc_xperiment=doc_hack_proptrue=
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,legend='topright')
       dofig(plotrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=40,n2=100,legend='topright')
-   }
+    }
 ##### heatrate
-    if ((figsect='heatrate') %in% sect) {
-      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T); 
+    if (sect=='heatrate') {
+      init(doc='readme',clean=F,clean.memlist=T); 
       dofig(heatrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
             d1=0,d2=seq(0.1,1,by=0.1),n1=20,n2=50,smooth=F)
       dofig(heatrate,'nonzro_fpr',title.desc=doc,rate.rule='nonzro',mesr=mesr.heatdflt,
@@ -94,16 +119,16 @@ doc_xperiment=doc_hack_proptrue=
             d1=0,d2=seq(0.1,1,by=0.1),n1=40,n2=100,smooth=F)
     }
 #####  plotroc
-    if ((figsect='roc') %in% sect) {
+    if (sect=='roc') {
       xdata=xdata_xperiment(near=0);
-      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
+      init(doc='readme',clean=F,clean.memlist=T);
       dofig(plotroc,'exact',title.desc=paste('exact',doc),rate.rule='nonzro',
             xdata=xdata);
       init_xperiment(clean=F,clean.memlist=T); 
       dofig(plotroc,'exact',title.desc=paste('exact',doc),,rate.rule='nonzro',
             xdata=xdata);
       xdata=xdata_xperiment(near=1);
-      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
+      init(doc='readme',clean=F,clean.memlist=T);
       dofig(plotroc,'inexact',title.desc=paste('inexact',doc),rate.rule='nonzro',
             xdata=xdata);
       init_xperiment(clean=F,clean.memlist=T);
@@ -112,12 +137,12 @@ doc_xperiment=doc_hack_proptrue=
 
     }
 #####  plotrocm, plotragm
-    if ((figsect='multi_sig2') %in% sect) {
+    if (sect=='multi_sig2') {
       ## near exact. sig2
       near=round(c(0.01,0.05,0.1,0.2),digits=5);
       xdata=lapply(c(0,near,1),function(near) xdata=xdata_xperiment(near=near));
       names(xdata)=c('exact',paste(sep=' ','near',near),'inexact');
-      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
+      init(doc='readme',clean=F,clean.memlist=T);
       dofig(plotrocm,'rocm',rate.rule='nonzro',xdata=xdata,title.desc=paste('near',doc),
             mesr='sig2');
       dofig(plotragm,'ragm',rate.rule='nonzro',xdata=xdata,title.desc=paste('near',doc),
@@ -129,9 +154,9 @@ doc_xperiment=doc_hack_proptrue=
             smooth='aspline',mesr='sig2');
     }
 ##########
-    if ((figsect='small_telescopes') %in% sect) {
+    if (sect=='small_telescopes') {
       xdata=xdata_xperiment(near=0.1);
-      init(doc='readme',figdir=xfigdir,clean=F,clean.memlist=T);
+      init(doc='readme',clean=F,clean.memlist=T);
       dofig(plotroc,'roc',rate.rule='nonzro',xdata=xdata,
             title.desc=paste('near=0.1',doc),mesr=cq(sig2,d2.scp1));
       dofig(plotrag,'rag',rate.rule='nonzro',xdata=xdata,
@@ -143,7 +168,8 @@ doc_xperiment=doc_hack_proptrue=
             title.desc=paste('near=0.1',doc),smooth='aspline',mesr=cq(sig2,d2.scp1));
     }
     sect;
-  }
+  })
+}
 ## generate standard xdata for aggregated plots
 xdata_xperiment=function(near=0,nx=2.5,n2.num=2,n1=c(20,40,60)) {
   d2=round(seq(0,1,by=0.01),digits=5);
