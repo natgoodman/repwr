@@ -30,13 +30,10 @@ source('R/repwr.R');
 ## run for this sandbox
 run=function(need.init=T,doc='xperiment',...) {
   ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
-  dots=list(...);
-  init.args=dots[names(dots) %in% names(formals(init_xperiment))];
-  dodata.args=dots[names(dots) %in% names(formals(dodata))];
-  dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc_xperiment)))];
-  ## if (need.init) do.call('init_xperiment',c(doc=doc,init.args));
-  ## do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
-  ## do.call('dodoc',c(need.init=F,doc=doc,dodoc.args));   # generate figures, tables for doc
+  ## dots=list(...);
+  ## init.args=dots[names(dots) %in% names(formals(init_xperiment))];
+  ## dodata.args=dots[names(dots) %in% names(formals(dodata))];
+  ## dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc_xperiment)))];
   if (need.init) wrap_fun(init_xperiment);
   need.init=F;
   wrap_fun(dodata);                   # generate data - ie, run simulation
@@ -61,12 +58,7 @@ init_doc_xperiment=
            figdir=filename('figure',doc,subdoc,mdir),tbldir=filename('table',doc,subdoc,mdir),
            clean.out=T,figscreen=T,...) {
     wrap_fun(init_doc);
-    ## init_doc(subdoc='detl_conditional',
-    ##        figdir=filename('figure',doc,subdoc,mdir),
-    ##        tbldir=filename('table',doc,subdoc,mdir),
-    ##        clean.out=clean.out,figscreen=figscreen,
-    ##        ...);
-}
+ }
 ## contruct one detl case
 ##### do readme mesrs under conditional
 ##    doc needs:   sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1

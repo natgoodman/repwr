@@ -384,9 +384,9 @@ init_doc=function(
   figdir=filename('figure',doc,subdocx,mdir), # directory for figures, eg, figure/repwr/m=1e4
   tbldir=filename('table',doc,subdocx,mdir),  # directory for tables, eg, table/repwr/m=1e4
   ## output modifiers
-  outpfx=if(is.null(subdocx)) NULL else 'S',
-  outsfx=if(is.null(subdocx)) NULL else letters, # used in figure and table blocks
-  sectnum=if(is.null(subdocx)) NULL else T,      # add section number to prefix eg, S1
+  outpfx=if(doc=='xperiment'|is.null(subdocx)) NULL else 'S',
+  outsfx=if(doc=='xperiment'|is.null(subdocx)) NULL else letters, # used in figure and table blocks
+  sectnum=if(doc=='xperiment'|is.null(subdocx)) NULL else T, # add section number to prefix eg, S1
   figpfx=outpfx,
   tblpfx=outpfx,
   figsfx=outsfx,

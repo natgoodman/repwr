@@ -88,12 +88,10 @@ wrap_fun=function(fun,morefun=NULL,...) {
   env=parent.frame(n=1);
   x=ls(envir=env);
   fx=do.call(c,lapply(c(fun,morefun),function(fun) names(formals(fun))));
-  ## args=sapply(x[x%in%names(formals(fun))],function(x) get(x,envir=env),simplify=F);
   args=sapply(x[x%in%fx],function(x) get(x,envir=env),simplify=F);
   dots=list(...);
-  ## args=c(args,dots[names(dots) %in% names(formals(fun))]);
   args=c(args,dots[names(dots)%in%fx]);
-  print(">>> in wrap_fun"); BREAKPOINT();
+  ## print(">>> in wrap_fun"); BREAKPOINT();
   do.call(fun,args);
 }
 
