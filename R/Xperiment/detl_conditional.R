@@ -31,10 +31,10 @@ source('R/repwr.R');
 run=function(need.init=T,doc='xperiment',...) {
   ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
   dots=list(...);
-  init.args=dots[names(dots) %in% names(formals(init_xperiment)));
+  init.args=dots[names(dots) %in% names(formals(init_xperiment))];
   dodata.args=dots[names(dots) %in% names(formals(dodata))];
   dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc_xperiment)))];
-  if (need.init) do.call('init_xperiment',c(doc=doc,init.args);
+  if (need.init) do.call('init_xperiment',c(doc=doc,init.args));
   do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
   do.call('dodoc',c(need.init=F,doc=doc,dodoc.args));   # generate figures, tables for doc
   cmp_detl();                               # run test
@@ -50,24 +50,21 @@ init_xperiment=init_detl_conditional=
            clean=F,clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
            clean.detl=T,clean.smry=T,clean.posr=T,
            ...) {
-    init.args=dots[names(dots) %in% names(formals(init))];
-    
-    
-     init(doc='xperiment',
-         n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=m,mdir=mdir,
-         datadir=filename('data','xperiment',subdoc,mdir),
-         clean=F,clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
-         clean.detl=T,clean.smry=T,clean.posr=T,
-         ...);
+    ## call init with our arguments
+    wrap_fun(init);
   }
 ## init_doc for this sandbox
-init_doc_xperiment=function(clean.out=T,figscreen=T,...) {
-  subdoc='detl_conditional';
-  init_doc(subdoc='detl_conditional',
+init_doc_xperiment=
+  function(subdoc='detl_conditional',
            figdir=filename('figure',doc,subdoc,mdir),
            tbldir=filename('table',doc,subdoc,mdir),
-           clean.out=clean.out,figscreen=figscreen,
-           ...);
+           clean.out=T,figscreen=T,...) {
+    wrap_fun(init_doc);
+    ## init_doc(subdoc='detl_conditional',
+    ##        figdir=filename('figure',doc,subdoc,mdir),
+    ##        tbldir=filename('table',doc,subdoc,mdir),
+    ##        clean.out=clean.out,figscreen=figscreen,
+    ##        ...);
 }
 ## contruct one detl case
 ##### do readme mesrs under conditional

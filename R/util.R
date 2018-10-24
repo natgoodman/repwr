@@ -81,6 +81,17 @@ assign_parent=function(what,value) {
   if (missing(value)) value=get(what,envir=parent.frame(n=1));
   assign(what,value,envir=parent.frame(n=2));
 }
+## NG 18-10-24: wrap function - propogate locals and ... and call function
+##   used by Xperiment sandbox code. maybe someday move into real code
+wrap_fun=function(fun,...) {
+  env=parent.frame(n=1);
+  x=ls(envir=env);
+  args=sapply(x[x%in%names(formals(fun))],function(x) get(x,envir=env),simplify=F);
+  dots=list(...);
+  args=c(args,dots[names(dots) %in% names(formals(fun))]);
+  do.call(fun,args);
+}
+
 ## like match.arg but uses prefix matching and, if several.ok, returns 'em all
 pmatch_choice=function(arg,choices,several.ok=T,none.ok=F) {
   ## m=startsWith(choices,arg);
