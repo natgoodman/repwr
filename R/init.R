@@ -378,7 +378,8 @@ init_mesr=
 ## initialize doc parameters
 init_doc=function(
   subdoc=NULL,
-  subdocx=if(is.null(subdoc)) NULL else match.arg(subdoc,cq(supp)),
+  subdocx=
+    if(doc=='xperiment') subdoc else if(is.null(subdoc)) NULL else match.arg(subdoc,cq(supp)),
   ## output directories. filename function ignores subdoc if NULL
   figdir=filename('figure',doc,subdocx,mdir), # directory for figures, eg, figure/repwr/m=1e4
   tbldir=filename('table',doc,subdocx,mdir),  # directory for tables, eg, table/repwr/m=1e4

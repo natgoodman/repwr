@@ -83,12 +83,17 @@ assign_parent=function(what,value) {
 }
 ## NG 18-10-24: wrap function - propogate locals and ... and call function
 ##   used by Xperiment sandbox code. maybe someday move into real code
-wrap_fun=function(fun,...) {
+##   morefun are additional functions called by fun with ... args
+wrap_fun=function(fun,morefun=NULL,...) {
   env=parent.frame(n=1);
   x=ls(envir=env);
-  args=sapply(x[x%in%names(formals(fun))],function(x) get(x,envir=env),simplify=F);
+  fx=do.call(c,lapply(c(fun,morefun),function(fun) names(formals(fun))));
+  ## args=sapply(x[x%in%names(formals(fun))],function(x) get(x,envir=env),simplify=F);
+  args=sapply(x[x%in%fx],function(x) get(x,envir=env),simplify=F);
   dots=list(...);
-  args=c(args,dots[names(dots) %in% names(formals(fun))]);
+  ## args=c(args,dots[names(dots) %in% names(formals(fun))]);
+  args=c(args,dots[names(dots)%in%fx]);
+  print(">>> in wrap_fun"); BREAKPOINT();
   do.call(fun,args);
 }
 

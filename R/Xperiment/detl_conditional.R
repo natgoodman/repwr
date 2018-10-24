@@ -34,17 +34,19 @@ run=function(need.init=T,doc='xperiment',...) {
   init.args=dots[names(dots) %in% names(formals(init_xperiment))];
   dodata.args=dots[names(dots) %in% names(formals(dodata))];
   dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc_xperiment)))];
-  if (need.init) do.call('init_xperiment',c(doc=doc,init.args));
-  do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
-  do.call('dodoc',c(need.init=F,doc=doc,dodoc.args));   # generate figures, tables for doc
-  cmp_detl();                               # run test
+  ## if (need.init) do.call('init_xperiment',c(doc=doc,init.args));
+  ## do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
+  ## do.call('dodoc',c(need.init=F,doc=doc,dodoc.args));   # generate figures, tables for doc
+  if (need.init) wrap_fun(init_xperiment);
+  need.init=F;
+  wrap_fun(dodata);                   # generate data - ie, run simulation
+  wrap_fun(dodoc,init_doc_xperiment); # generate figures, tables for doc
+  cmp_detl();                                     # run test
 }
 ## init for this sandbox. same parameters as readme
 init_xperiment=init_detl_conditional=
   function(doc='xperiment',subdoc='detl_conditional',
-           n=20*2^(0:4),
-           d=c(0,0.2,0.5,0.8,1),
-           m=1e3,
+           n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=1e3,
            mdir=paste_nv(m,m_pretty(m)),            # m subdirectory
            datadir=filename('data','xperiment',subdoc,mdir),
            clean=F,clean.memlist=T,clean.sim=F,clean.simr=F,clean.si=F,clean.toplevel=F,
@@ -55,9 +57,8 @@ init_xperiment=init_detl_conditional=
   }
 ## init_doc for this sandbox
 init_doc_xperiment=
-  function(subdoc='detl_conditional',
-           figdir=filename('figure',doc,subdoc,mdir),
-           tbldir=filename('table',doc,subdoc,mdir),
+  function(subdoc='detl_conditional',docfun=doc_readme,
+           figdir=filename('figure',doc,subdoc,mdir),tbldir=filename('table',doc,subdoc,mdir),
            clean.out=T,figscreen=T,...) {
     wrap_fun(init_doc);
     ## init_doc(subdoc='detl_conditional',
