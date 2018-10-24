@@ -39,16 +39,8 @@ source('R/util.R');
 ## run the program
 ## parameters defined in init
 run=function(need.init=T,...) {
-  ## ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
-  ## dots=list(...);
-  ## init.args=dots[names(dots) %in% names(formals(init))];
-  ## dodata.args=dots[names(dots) %in% names(formals(dodata))];
-  ## dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc)))];
-  ## if (need.init) do.call('init',init.args);
-  ## do.call('dodata',c(need.init=F,dodata.args)); # generate data - ie, run simulation
-  ## do.call('dodoc',c(need.init=F,dodoc.args));   # generate figures, tables for doc
   if (need.init) wrap_fun(init);
   need.init=F;
-  wrap_fun(dodata);                   # generate data - ie, run simulation
-  wrap_fun(dodoc,init_doc); # generate figures, tables for doc
+  wrap_fun(dodata);               # generate data - ie, run simulation
+  wrap_fun(dodoc,init_doc);       # generate figures, tables for doc
 }

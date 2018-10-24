@@ -29,11 +29,6 @@ source('R/repwr.R');
 ## --- Eperimental sandbox functions ---
 ## run for this sandbox
 run=function(need.init=T,doc='xperiment',...) {
-  ## split ... args for init, dodata, dodoc. from stackoverflow.com/questions/4124900
-  ## dots=list(...);
-  ## init.args=dots[names(dots) %in% names(formals(init_xperiment))];
-  ## dodata.args=dots[names(dots) %in% names(formals(dodata))];
-  ## dodoc.args=dots[names(dots) %in% c(names(formals(dodoc)),names(formals(init_doc_xperiment)))];
   if (need.init) wrap_fun(init_xperiment);
   need.init=F;
   wrap_fun(dodata);                   # generate data - ie, run simulation
@@ -41,7 +36,7 @@ run=function(need.init=T,doc='xperiment',...) {
   cmp_detl();                                     # run test
 }
 ## init for this sandbox. same parameters as readme
-init_xperiment=init_detl_conditional=
+init_xperiment=
   function(doc='xperiment',subdoc='detl_conditional',
            n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=1e3,
            mdir=paste_nv(m,m_pretty(m)),            # m subdirectory
@@ -61,7 +56,7 @@ init_doc_xperiment=
  }
 ## contruct one detl case
 ##### do readme mesrs under conditional
-##    doc needs:   sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1
+##    doc needs:  sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1
 ##    code needs: sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,big2
 dodetl=function(s1=NULL,s2=NULL,n1,n2,d1,d2) {
   mesr.need=cq(sig1,sig2,sigm,sdir,d1.c2,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1,big2);
