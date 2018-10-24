@@ -20,20 +20,6 @@
 source('R/repwr.R');
 ## --- Eperimental sandbox functions ---
 ## run for this sandbox
-## run=function(save.fig=T,clean.fig=save.fig,...) {
-##   init_xperiment(save.fig=T,clean.fig=save.fig,...);
-##   dodata(need.init=F,...);                      # generate data - ie, run simulation
-##   dodoc(need.init=F,docfun=doc_xperiment,...);  # generate figures for doc
-## }
-## ## init for this sandbox
-## init_xperiment=init_hack_proptrue=
-##   function(doc='xperiment',...) {
-##     subdoc='hack_proptrue';
-##     init(doc='xperiment',
-##          n=20*2^(0:4),d=c(0,0.2,0.5,0.8,1),m=1e3,mdir=paste_nv(m,m_pretty(m)),
-##          datadir=filename('data','xperiment',subdoc,'m=1e3'),
-##          figdir=filename('figure','xperiment',subdoc,'m=1e3'),...);
-##   }
 run=function(need.init=T,doc='xperiment',...) {
   if (need.init) wrap_fun(init_xperiment);
   need.init=F;
