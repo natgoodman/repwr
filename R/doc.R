@@ -95,7 +95,7 @@ dofig=
     ## assign_parent(fignum,fignum+1);
     ## fignum<<-fignum+1;
     figinc();
-    figname;
+    name;
   }
 ## save one or more tables.
 dotbl=

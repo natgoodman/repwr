@@ -25,7 +25,12 @@
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and runs all that match
 doc_resigsupp=function(sect=parent(sect,NULL)) {
-  sect.all=cq(exact,inexact,nearexact);
+  sect.all=cq(exact_fpr,exact_fnr,inexact,nearexact);
+  sect.desc.all=
+    setNames(c('Exact replication','Exact replication',
+               'Inexact replication',
+               'Near exact replication'),sect.all);
+  
   if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
   ## doc-wide variables
   d.nonzro=d[d!=0];
@@ -37,10 +42,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       sectnum=which(sect==sect.all)[1];
       fignum<<-1;
     }
-    ## exact
-    if (sect=='exact') {
-      sect.desc='Exact replication';
-      ## fpr
+    sect.desc=sect.desc.all[sect];
+    ## exact fpr
+    if (sect=='exact_fpr') {
+      ## sect.desc='Exact replication';
       figblk_start();
       dofig(plotrate,'fpr_n1=020',d=0,n1=20,n2=n2,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
@@ -65,10 +70,14 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       dotbl(fpr,corfprstd);
       ## boxplots also show no obvious correlation with n1, n2, or mean(n1,n2).
       ## TODO: decide whether to keep boxplots as figures...
+      figblk_start();
       boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
       dofig(plotboxfpr_exact,'box',drat=drat.std,posr.id='std',ylim=boxlim);
       dofig(plotboxfpr_exact,'box_nosdir',drat=drat.nosdir,posr.id='sig1_sig1',ylim=boxlim);
-      ## fnr
+    }
+    ## exact fnr
+    if (sect=='exact_fnr') {
+      ## sect.desc='Exact replication';
       ## compute 1-power2 vs. n2 - specialized for plotfnr!
       power.n2=power_n2();
       ## construct xdata lists for n1=20 and n1=200
@@ -114,7 +123,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
     }
     ## inexact
     if (sect=='inexact') {
-      sect.desc='Inexact replication';
+      ## sect.desc='Inexact replication';
       ## fpr
       xdata.020=xdata_inexact(n1=20,d1=0);
       xdata.200=xdata_inexact(n1=200,d1=0);
@@ -169,7 +178,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
     }
     ## nearexact
     if (sect=='nearexact') {
-      sect.desc='Near exact replication';
+      ## sect.desc='Near exact replication';
       ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
       near=seq(0.1,0.5,by=0.1);
       ## fpr
