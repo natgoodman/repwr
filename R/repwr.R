@@ -26,7 +26,6 @@ source('R/doc_readme.R');
 source('R/doc_repwr.R');
 source('R/doc_resig.R');
 source('R/doc_resigsupp.R');
-source('R/doc_resig_fun.R');
 source('R/doc_tech.R');
 source('R/init.R');
 source('R/plot.R');

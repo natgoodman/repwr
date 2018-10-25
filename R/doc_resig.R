@@ -20,6 +20,7 @@
 ## file at https://github.com/natgoodman/NewPro/FDR/LICENSE 
 ##
 #################################################################################
+source('R/docfun_resig.R');
 ## --- Generate Figures and Tables for resig Blog Post ---
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and runs all that match

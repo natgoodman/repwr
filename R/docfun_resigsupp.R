@@ -1,7 +1,8 @@
 #################################################################################
 ##
 ## Author:  Nat Goodman
-## Created: 18-10-18
+## Created: 18-10-25
+##          by copying doc_resig_fun.R created 18-10-18
 ##          from doc_resig.R created 18-09-05
 ##          by renaming doc_repwr.R created 18-06-20
 ##          from doc.R created 18-06-19
@@ -63,7 +64,8 @@ xdata_rbind=function(xdata1,xdata2) {
 }
 ## --- Plot-Related Utility Functions ---
 ## palettes are RColorBrewer sequential palette names
-col_resig=
+## colors keyed by d
+color_d=
   function(lo.brk=0.2,hi.brk=0.5,res=0.01,
            lo.palette='Reds',mid.palette='Blues',hi.palette='Greens') {
     lo.steps=(lo.brk/res)+1
@@ -74,6 +76,19 @@ col_resig=
     mid.col=colorRampPalette(RColorBrewer::brewer.pal(9,mid.palette))(2*mid.steps)[-(1:mid.steps)];
     hi.col=colorRampPalette(RColorBrewer::brewer.pal(9,hi.palette))(2*hi.steps)[-(1:hi.steps)];
     setNames(c(lo.col,mid.col,hi.col),seq(0,1,by=res));
+  }
+## colors keyed by n
+color_n=
+  function(lo.brk=100,hi.brk=350,
+           lo.palette='Reds',mid.palette='Blues',hi.palette='Greens') {
+    lo.steps=length(which(n<=lo.brk));
+    mid.steps=length(which(n>lo.brk&n<=hi.brk));
+    hi.steps=length(which(n>hi.brk));
+    ## low end of RColorBrewer sequential palettes are too light
+    lo.col=colorRampPalette(RColorBrewer::brewer.pal(9,lo.palette))(2*lo.steps)[-(1:lo.steps)];
+    mid.col=colorRampPalette(RColorBrewer::brewer.pal(9,mid.palette))(2*mid.steps)[-(1:mid.steps)];
+    hi.col=colorRampPalette(RColorBrewer::brewer.pal(9,hi.palette))(2*hi.steps)[-(1:hi.steps)];
+    setNames(c(lo.col,mid.col,hi.col),n);
   }
 ## generate title for doc_resig. simpler and shorter than general case
 title_resig=

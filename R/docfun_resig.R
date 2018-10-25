@@ -1,7 +1,8 @@
 #################################################################################
 ##
 ## Author:  Nat Goodman
-## Created: 18-10-18
+## Created: 18-10-25
+##          by renaming doc_resig_fun.R created 18-10-18
 ##          from doc_resig.R created 18-09-05
 ##          by renaming doc_repwr.R created 18-06-20
 ##          from doc.R created 18-06-19
@@ -25,24 +26,6 @@
 ## generate standard xdata for exact plots
 ## CAUTION: sytlistically different from other xdata functions
 ##   I may change them all to this style if I like it
-xdata_exact=
-  function(n1=parent(n1),n2=parent(n2),d1=parent(d1),d2=d1,d=d1,by=cq(d,n1,n2,d1,d2)) {
-    d=round(d,digits=5);
-    by=match.arg(by);
-    if (by=='d') by='d1';
-    xdata=expand.grid(n1=n1,n2=n2,d1=d);
-    xdata$d2=xdata$d1;
-    by=xdata[,by];
-    split(xdata,by);
-  }
-## generate standard xdata for inexact plots
-xdata_inexact=function(n1,n2=parent(n2),d1,d2=parent(d)) {
-  d1=round(d1,digits=5);
-  d2=round(d2,digits=5);
-  xdata=lapply(d2,function(d2) xdata=expand.grid(n1=n1,n2=n2,d1=d1,d2=d2));
-  names(xdata)=as.character(d2);
-  xdata;
-}
 ## generate standard xdata for near-exact plots
 xdata_near=function(n1,n2=parent(n2),d1,near,step=0.01) {
   d1=round(d1,digits=5);
@@ -239,121 +222,4 @@ rw_fnr=function(fpr=0.05,fnr=0.2,prop.true=.5) {
   prop.neg=prop.fn+prop.tn;
   rw.fnr=prop.fn/prop.neg;
   rw.fnr;
-}
-####################
-## --- Plot Functions for Supplement ---
-## plot boxplots of fpr vs.n1
-plotboxfpr_exact=
-  function(drat,posr.id='std',cex.title=0.9,ylim=c(0,0.1),
-           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
-    boxplot(sig2~n1,data=drat,notch=F,xlab='n1',ylab='false positive rate',ylim=ylim,
-            main=title_resig('fpr','vs. n1'),
-            cex.main=cex.title);
-    cutoff=if(posr.id=='std') 0.025 else 0.05;
-    abline(h=c(cutoff,mean(drat$sig2)),col='red',lty=cq(dashed,solid));
-    grid();
-  }
-    
-## plot fnr rates with 1-power overlaid
-plotfnr_exact=
-  function(xdata,posr.id='std',col=parent(col),power.n2=parent(power.n2),cex.title=0.9,
-           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
-    ## plot simulated results
-    plotratm(xdata=xdata,posr.id=posr.id,x=cq(n1,n2),col=col,smooth='spline',
-             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-             title=title_resig('fnr'),title.legend='d',x.legend=8.45,y.legend=0.65);
-    ## plot theoretical values
-    x.smooth=power.n2$n2.smooth/50;       # scale n2 to x-axis. CAUTION: not general
-    y.smooth=power.n2$y.smooth;
-    matlines(x.smooth,y.smooth,col=col[colnames(y.smooth)],lty='dashed')
-  }
-## compute 1-power2 vs. n2 - specialized for plotfnr!  
-power_n2=function(n2=parent(n2),d.nonzro=parent(d.nonzro)) {
-  y=do.call(cbind,lapply(d.nonzro,function(d2) 1-power.t.test(n=n2,d=d2)$power));
-  n2.smooth=seq(min(n2),max(n2),len=100);
-  y.smooth=splinem(n2,y,xout=n2.smooth);
-  ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
-  y.smooth=apply(y.smooth,1:2,function(y) if (!is.na(y)) max(min(y,1),0) else y);
-  colnames(y.smooth)=d.nonzro;
-  list(n2.smooth=n2.smooth,y.smooth=y.smooth);
-}
-## plot fnr vs 1-power2
-plotfnrpwr_exact=
-  function(xdata,posr.id='std',cex.title=0.9,
-           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
-    drat=dratfnrpwr_exact(xdata,posr.id);
-    ## n2col=setNames(colorRampPalette(cq(grey75,black))(11),n);
-    col=colorRampPalette(cq(grey75,black))(101)[round(drat$pwr1*100)+1];
-    ## plot(1-pwr2,drat$sig2,col=n2col[as.character(drat$n1)],pch=19,cex=0.75,
-    plot(1-drat$pwr2,drat$sig2,col=col,pch=19,cex=0.75,
-         xlab='1-power2 (theory)',ylab='false negative rate (simulated)',
-         main=title_resig('fnr','vs. 1-power2'),cex.main=cex.title);
-    abline(a=0,b=1,col='red');
-    grid();
-  }
-## construct drat for fnr vs 1-power analyses
-dratfnrpwr_exact=function(xdata,posr.id='std') {
-  drat=data_rate(rate.rule='nonzro',xdata=xdata,posr.id=posr.id,mesr=cq(sig2));
-  drat$pwr1=with(drat,power.t.test(n=n1,delta=d1)$power);
-  drat$pwr2=with(drat,power.t.test(n=n2,delta=d2)$power);
-  drat;
-}
-## plot fnr cutoffs
-plotfnrcutoff_exact=
-  function(fnr_d2byn2,cex.title=0.9,
-           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
-    data=merge(subset(fnr_d2byn2,subset=(cutoff==0.05)),subset(fnr_d2byn2,subset=(cutoff==0.20)),
-               by='n2',suffixes=cq('.05','.20'));
-    n2=fnr_d2byn2$n2;
-    y=data[,grep('^d2',colnames(data),value=T)];
-    n2.smooth=seq(min(n2),max(n2),len=100);
-    y.smooth=splinem(n2,y,xout=n2.smooth);
-    col=cq(red,red,blue,blue);
-    lty=cq(solid,dashed,solid,dashed);
-    matplot(n2.smooth,y.smooth,type='l',col=col,lty=lty,xlab='n2',ylab='d2',
-            main=title_resig(NULL,'d2 vs. n2 for FNR cutoff=0.05, 0.20'),cex.main=cex.title);
-    legend=sapply(strsplit(colnames(y.smooth),'\\.'),
-                  function(row) {
-                    n2=as.numeric(row[2]);
-                    cutoff=as.numeric(row[3])/100;
-                    paste(sep=', ',n2,cutoff)})
-    legend('topright',bty='n',col=col,lty=lty,cex=0.8,title='n1, cutoff',legend=legend);
-    grid();
-  }
-## --- Miscellaneous Functions for Exploration ---
-## compare drats, typically generated with different values of n1
-## xdata may be data frames or lists of xdata data fromes
-## x are 'same' columns between the xdatas
-drat_cor=function(xdata1,xdata2,x=cq(n2,d1,d2)) {
-  if (!is.data.frame(xdata1)) xdata1=do.call(rbind,xdata1);
-  if (!is.data.frame(xdata2)) xdata2=do.call(rbind,xdata2);
-  if (any(dim(xdata1)!=dim(xdata2)))
-    stop(paste(sep='','incompatible xdata args: ',
-               'nrow(xdata1)=',nrow(xdata1),'; ','nrow(xdata2)=',nrow(xdata2)));
-  drat1=data_rate(xdata=xdata1,mesr='sig2');
-  drat2=data_rate(xdata=xdata2,mesr='sig2');
-  drat=merge(drat1,drat2,by=x,suffixes=c('1','2'))
-  x1=drat$sig21;
-  x2=drat$sig22;
-  ## CAUTION: cor gives NA if either sig2 vector is constant. jiggle one element
-  if (length(unique(x1))==1) x1[1]=x1[1]+.Machine$double.eps;
-  if (length(unique(x2))==1) x2[1]=x2[1]+.Machine$double.eps;
-  cor(x1,x2);
-}
-## plot sig2 vs sig2 for 2 drats
-## TODO: this is very crude...
-drat_plotsig2=function(xdata1,xdata2,x=cq(n2,d1,d2)) {
-  if (!is.data.frame(xdata1)) xdata1=do.call(rbind,xdata1);
-  if (!is.data.frame(xdata2)) xdata2=do.call(rbind,xdata2);
-  if (any(dim(xdata1)!=dim(xdata2)))
-    stop(paste(sep='','incompatible xdata args: ',
-               'nrow(xdata1)=',nrow(xdata1),'; ','nrow(xdata2)=',nrow(xdata2)));
-  drat1=data_rate(xdata=xdata1,mesr='sig2');
-  drat2=data_rate(xdata=xdata2,mesr='sig2');
-  drat=merge(drat1,drat2,by=x,suffixes=c('1','2'))
-  x1=drat$sig21;
-  x2=drat$sig22;
-  plot(x1,x2,pch=16,cex=0.5);
-  grid();
-  abline(a=0,b=1,col='red');
 }
