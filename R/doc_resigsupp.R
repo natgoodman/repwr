@@ -55,6 +55,12 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
             title=title_resig('fpr'),legend=NULL);
+      xdata=xdata_exact(n1=n,n2=n2,d=0,by='n1');
+      dofig(plotratm,'fpr_by_n1',xdata=xdata,x=cq(n2),smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
+            title=title_resig('fpr'),title.legend='n1',legend='topright');
+      BREAKPOINT();
+      
       ## confirm that FPR is sig.level/2 and that sdir is what causes FPR factor of 2
       drat.std=data_rate(xdata=expand.grid(n1=n,n2=n,d1=0,d2=0),mesr=cq(sig2))
       drat.nosdir=data_rate(xdata=expand.grid(n1=n,n2=n,d1=0,d2=0),mesr=cq(sig2),

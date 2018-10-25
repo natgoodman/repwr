@@ -22,6 +22,19 @@
 ##
 #################################################################################
 ## --- Generate and Manipulate xdata Data Frames ---
+## generate standard xdata for exact plots
+## CAUTION: sytlistically different from other xdata functions
+##   I may change them all to this style if I like it
+xdata_exact=
+  function(n1=parent(n1),n2=parent(n2),d1=parent(d1),d2=d1,d=d1,by=cq(d,n1,n2,d1,d2)) {
+    d=round(d,digits=5);
+    by=match.arg(by);
+    if (by=='d') by='d1';
+    xdata=expand.grid(n1=n1,n2=n2,d1=d);
+    xdata$d2=xdata$d1;
+    by=xdata[,by];
+    split(xdata,by);
+  }
 ## generate standard xdata for inexact plots
 xdata_inexact=function(n1,n2=parent(n2),d1,d2=parent(d)) {
   d1=round(d1,digits=5);
