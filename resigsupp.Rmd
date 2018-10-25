@@ -22,11 +22,11 @@ This document contains supplementary material for the blog post [Systematic Repl
 
 A replication is *exact* if the two studies are sampling the same population; this means $d1_{pop}=d2_{pop}$. For this ideal case, replication works exactly as intuition predicts. Theory tell us that FPR is the significance level divided by 2 (the factor of 2 because the effect sizes must have the same direction) and $FNR=1-power2$, where $power2$ is the power of the replica study. As we'll see, the simulated FPR is dead-on, but the simulated FNR is not as good, esp. when $n1$ and $d$ are small.
 
-Figures S1 is the same as Figure 1 in the blog post with the addition of a dashed red horizontal line at $sig.level/2=0.025$ (just barely visible beneath the solid red line depicting FPR). The figure shows FPR for $n1=20$ and $n2$ varying from 50 to 500. The x-axis shows all four parameters using $d1$, $d2$ as shorthand for $d1_{pop}$, $d2_{pop}$. $d1_{pop}=d2_{pop}=0$ throughout because this is the only way to get false positives with exact replications. Figure S2 is the same but for $n1=200$, 10x the previous value. There is a barely visible dashed red line at 0.025 in both figures to demonstrate that $FPR=sig.level/2=0.025$ as theory predicts.  
+Figure S1-1a shows FPR for $n1=20$ and $n2$ varying from 50 to 500. It's the same as Figure 1 in the blog post with the addition of a dashed red horizontal line at $sig.level/2=0.025$ (just barely visible beneath the solid red line depicting FPR). The x-axis shows all four parameters using $d1$, $d2$ as shorthand for $d1_{pop}$, $d2_{pop}$. $d1_{pop}=d2_{pop}=0$ throughout because this is the only way to get false positives with exact replications. Figure S1-2a shows FPR for *all* values of $n1$ using different colored lines for each value of $n1$; the lines fall on top of each other illustrating that $n1$, the original sample size, has no effect on the results. I checked the numbers driving the graphs to make sure I hadn't inadvertently used the same data for all values of $n2$; the data are similar but not exactly the same.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/resig/m=1e4/figure_S001_exact_fpr_n1=020.png');
-knitr::include_graphics('figure/resig/m=1e4/figure_S002_exact_fpr_n1=200.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S01001a_exact_fpr_n1=020.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S01001a_exact_fpr_by_n1.png');
 ```
 
 Figures S1 and S2 are essentially identical illustrating that $n1$, the original sample size, has no effect on the results. I checked the numbers driving the graphs to make sure I hadn't inadvertently used the same data for both cases; the data are similar but not exactly the same.
