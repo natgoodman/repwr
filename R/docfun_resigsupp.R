@@ -274,7 +274,8 @@ plotboxfpr_exact=
     
 ## plot fnr rates with 1-power overlaid
 plotfnr_exact=
-  function(xdata,posr.id='std',col=parent(col),power.n2=parent(power.n2),cex.title=0.9,
+  function(xdata,posr.id='std',d2col=parent(d2col),n2col=parent(n2col),
+           power.n2=parent(power.n2),cex.title=0.9,
            extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     ## plot simulated results

@@ -14,24 +14,46 @@ urlcolor: blue
 
 ## Introduction
 
-This document contains supplementary material for the blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/) kindly posted by Bob Reed on The Replication Network. It contains results that didn't fit in the blog post as published for reasons of space or pedagogy. It's not terribly coherent as a standalone document.  Sorry.
+This document contains supplementary material for the blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/) kindly posted by Bob Reed on The Replication Network. It contains results that didn't fit in the blog post as published for reasons of space or pedagogy. It's not terribly coherent as a standalone document. Sorry.
+
+I systematically explore the parameter space rather then selecting results of greatest interest to blog readers. 
+
+I display the results using a few kinds of graphs handcrafted for my purposes. 
+
+Four parameters define each pairwise replication: $n1$, $n2$, $d1_{pop}$, and $d2_{pop}$. These are the sample and population effect sizes for the two studies.
+
+>>> more TBD
+1. line graphs of rates: simple and intuitive, I think, but not good at showing data that varies across many parameters
+2. heatmaps: still reasonably intuitive and somewhat better at depicting multiple parameters
+3. rate-vs-rate scatter plots: able to display error rates across large swaths of parameter space but with less parameter resolution and perhaps less intuitive clarity; inspired by *receiver operating characteristic (ROC)* curves
+4. aggregate line graphs: same data as rate-vs-rate scatter plots but for fewer measures and with better parameter resolution
+<<<
+
 
 ## Results
 
 ### Exact replications
 
-A replication is *exact* if the two studies are sampling the same population; this means $d1_{pop}=d2_{pop}$. For this ideal case, replication works exactly as intuition predicts. Theory tell us that FPR is the significance level divided by 2 (the factor of 2 because the effect sizes must have the same direction) and $FNR=1-power2$, where $power2$ is the power of the replica study. As we'll see, the simulated FPR is dead-on, but the simulated FNR is not as good, esp. when $n1$ and $d$ are small.
+A replication is *exact* if the two studies are sampling the same population; this means $d1_{pop}=d2_{pop}$. For this ideal case, replication works exactly as intuition predicts. As we'll see, the simulated error rates match theory quite well.
 
-Figure S1-1a shows FPR for $n1=20$ and $n2$ varying from 50 to 500. It's the same as Figure 1 in the blog post with the addition of a dashed red horizontal line at $sig.level/2=0.025$ (just barely visible beneath the solid red line depicting FPR). The x-axis shows all four parameters using $d1$, $d2$ as shorthand for $d1_{pop}$, $d2_{pop}$. $d1_{pop}=d2_{pop}=0$ throughout because this is the only way to get false positives with exact replications. Figure S1-2a shows FPR for *all* values of $n1$ using different colored lines for each value of $n1$; the lines fall on top of each other illustrating that $n1$, the original sample size, has no effect on the results. I checked the numbers driving the graphs to make sure I hadn't inadvertently used the same data for all values of $n2$; the data are similar but not exactly the same.
+Theory tell us that FPR is the significance level divided by 2 (the factor of 2 because the effect sizes must have the same direction) and $FNR=1-power2$, where $power2$ is the power of the replica study. As we'll see, the simulated FPR is dead-on, but the simulated FNR is not as good, esp. when $n1$ and $d$ are small. The discrepancy is due to the same-direction requirment.
+
+#### False positive rate
+
+For this simple case, only two parameters vary: $n1$ and $n2$. The effect sizes are constant: $d1_{pop}=d2_{pop}=0$ throughout because this is the only way to get false positives with exact replications.
+
+With only two parameters, I can show the whole picture in a single graph. Figure S1-1 shows FPR vs. $n1$ and $n2$, with $n1$ on the x-axis and different colored lines for $n2$. The lines fall on top of each other and are essentially constant illustrating that the sample sizes have no effect on the results. There's a dashed red horizontal line at $sig.level/2=0.025$ (just barely visible through the solid lines depicting FPR). The factor of 2 is due to requiring the effect sizes to have the same direction. Figure S1-2 confirms this explanation by replotting the results with the same-direction filter turned off.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/resig/m=1e4/figure_S01001a_exact_fpr_n1=020.png');
-knitr::include_graphics('figure/resig/m=1e4/figure_S01001a_exact_fpr_by_n1.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S01001_exact_fpr_by_n2.png');
+knitr::include_graphics('figure/resig/m=1e4/figure_S01002_exact_fpr_by_n2_nosdir.png');
 ```
 
-Figures S1 and S2 are essentially identical illustrating that $n1$, the original sample size, has no effect on the results. I checked the numbers driving the graphs to make sure I hadn't inadvertently used the same data for both cases; the data are similar but not exactly the same.
+#### False negative rate
 
-Figure S3 is like Figure 2 in the blog post with the addition of dashed lines depicting $1-power2$ and with the legend moved down a smidge. It shows FNR for $n1=20$ and $n2$ varying from 50 to 500 (the same values as in Figure S1) but with $d1_{pop}=d2_{pop}$ ranging from 0.1 to 1. Figure S4 is the same but with $n1=200$. 
+For this case, three parameters vary: $n1$, $n2$, and $d=d1_{pop}=d2_{pop}$. 
+
+Figure S2-1 is like Figure 2 in the blog post with the addition of dashed lines depicting $1-power2$ and with the legend moved down a smidge. It shows FNR for $n1=20$ and $n2$ varying from 50 to 500 (the same values as in Figure S1) but with $d1_{pop}=d2_{pop}$ ranging from 0.1 to 1. Figure S4 is the same but with $n1=200$. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/resig/m=1e4/figure_S003_exact_fnr_n1=020.png');

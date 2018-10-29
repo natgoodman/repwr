@@ -45,38 +45,22 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       fignum<<-1;
     }
     sect.desc=sect.desc.all[sect];
+    extra=F;                            # start each section with extra off
     ## exact fpr
     if (sect=='exact_fpr') {
-      xfigblk_start();
-      dofig(plotrate,'n1=020',extra=T,d=0,n1=20,n2=n2,smooth='spline',
-            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
-            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-            title=title_resigsupp,title.rate='fpr',legend=NULL);
-      dofig(plotrate,'fpr_n1=200',extra=T,d=0,n1=200,n2=n2,smooth='spline',
-            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
-            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-            title=title_resigsupp,title.rate='fpr',legend=NULL);
-      xdata=xdata_exact(n1=n,n2=n2,d=0,by='n1');
-      dofig(plotratm,'by_n1',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
-            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
-            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-            title=title_resigsupp,title.rate='fpr',title.legend='n1',legend='topright');
-      dofig(plotratm,'by_n1_nosdir',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
-            hline=c(fpr.cutoff,fpr.cutoff,fnr.cutoff),posr.id='sig1_sig1',
-            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-            title=title_resigsupp,title.rate='fpr',title.legend='n1',legend='topright');
-      xfigblk_start();
+      ## these figures show the main point: FPR=sig.level/2 independent of n1, n2
+      ## the factor of 2 is due to sdir
       xdata=xdata_exact(n1=n,n2=n2,d=0,by='n2');
-      dofig(plotratm,'by_n2',extra=T,xdata=xdata,x=cq(n1,d1,d2),col=n2col,smooth='spline',
+      dofig(plotratm,'by_n2',xdata=xdata,x=cq(n1,d1,d2),col=n2col,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
             title=title_resigsupp,title.rate='fpr',title.legend='n2',legend='topright');
-      dofig(plotratm,'by_n2_nosdir',extra=T,xdata=xdata,x=cq(n1,d1,d2),col=n2col,smooth='spline',
+      dofig(plotratm,'by_n2_nosdir',xdata=xdata,x=cq(n1,d1,d2),col=n2col,smooth='spline',
             hline=c(fpr.cutoff,fpr.cutoff,fnr.cutoff),posr.id='sig1_sig1',
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
             title=title_resigsupp,title.rate='fpr',title.legend='n2',legend='topright');
-      
-      ## confirm that FPR is sig.level/2 and that sdir is what causes FPR factor of 2
+      ## these tables further confirm the main point: FPR=sig.level/2 independent of n1, n2
+      ## the factor of 2 is due to sdir
       drat.std=data_rate(xdata=expand.grid(n1=n,n2=n,d1=0,d2=0),mesr=cq(sig2))
       drat.nosdir=data_rate(xdata=expand.grid(n1=n,n2=n,d1=0,d2=0),mesr=cq(sig2),
                             posr.id='sig1_sig1');
@@ -89,9 +73,34 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
                            cor.n2=with(drat.std,cor(n2,sig2)),
                            cor.n1n2=cor(rowMeans(drat.std[,cq(n1,n2)]),drat.std$sig2));
       dotbl(fpr,corfprstd);
+      
+      ## remaining figures are extra
+      extra=T;
+      ## these two extra figures reprise Figure 1 of the blog post with n1=20 and n1=200
+      xfigblk_start();
+      dofig(plotrate,'n1=020',d=0,n1=20,n2=n2,smooth='spline',
+            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resigsupp,title.rate='fpr',legend=NULL);
+      dofig(plotrate,'fpr_n1=200',d=0,n1=200,n2=n2,smooth='spline',
+            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resigsupp,title.rate='fpr',legend=NULL);
+      ## these two extra figures repeat the analysis of the two 'real' figures with
+      ## n1 and n2 depicted in opposite roles (n2 on the x-axis, n1 different lines)
+      xfigblk_start();
+      xdata=xdata_exact(n1=n,n2=n2,d=0,by='n1');
+      dofig(plotratm,'by_n1',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
+            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resigsupp,title.rate='fpr',title.legend='n1',legend='topright');
+      dofig(plotratm,'by_n1_nosdir',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
+            hline=c(fpr.cutoff,fpr.cutoff,fnr.cutoff),posr.id='sig1_sig1',
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resigsupp,title.rate='fpr',title.legend='n1',legend='topright');
+
       ## boxplots also show no obvious correlation with n1, n2, or mean(n1,n2).
-      ## TODO: decide whether to keep boxplots as figures...
-      ## figblk_start();
+      xfigblk_start();
       xfigblk_start();
       boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
       dofig(plotboxfpr_exact,'box',extra=T,drat=drat.std,posr.id='std',ylim=boxlim);
@@ -109,11 +118,11 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       names(xdata.200)=as.character(d.nonzro);
       ## plots using std posr - includes sdir
       figblk_start();
-      dofig(plotfnr_exact,'fnr_n1=020',xdata=xdata.020,col=d2col)
-      dofig(plotfnr_exact,'fnr_n1=200',xdata=xdata.200,col=d2col);
+      dofig(plotfnr_exact,'fnr_n1=020',xdata=xdata.020)
+      dofig(plotfnr_exact,'fnr_n1=200',xdata=xdata.200);
       ## plots using sig1_sig1 posr - omits sdir
-      dofig(plotfnr_exact,'fnr_nosdir_n1=020',xdata=xdata.020,col=d2col,posr.id='sig1_sig1')
-      dofig(plotfnr_exact,'fnr_nosdir_n1=200',xdata=xdata.200,col=d2col,posr.id='sig1_sig1');
+      dofig(plotfnr_exact,'fnr_nosdir_n1=020',xdata=xdata.020,posr.id='sig1_sig1')
+      dofig(plotfnr_exact,'fnr_nosdir_n1=200',xdata=xdata.200,posr.id='sig1_sig1');
       ## fnr vs 1-power
       figblk_start();
       xdata=expand.grid(n1=n,n2=n,d1=d.nonzro,d2=d);
