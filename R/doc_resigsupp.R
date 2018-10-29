@@ -26,9 +26,9 @@ source('R/docfun_resigsupp.R');
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and runs all that match
 doc_resigsupp=function(sect=parent(sect,NULL)) {
-  sect.all=cq(exact,inexact,nearexact);
+  sect.all=cq(exact_fpr,exact_fnr,inexact,nearexact);
   sect.desc.all=
-    setNames(c('Exact replication',
+    setNames(c('Exact replication','Exact replication',
                'Inexact replication',
                'Near exact replication'),sect.all);
   
@@ -45,20 +45,19 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       fignum<<-1;
     }
     sect.desc=sect.desc.all[sect];
-    ## exact
-    if (sect=='exact') {
-      ## fpr
+    ## exact fpr
+    if (sect=='exact_fpr') {
       figblk_start();
-      dofig(plotrate,'fpr_n1=020',d=0,n1=20,n2=n2,smooth='spline',
+      dofig(plotrate,'n1=020',d=0,n1=20,n2=n2,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
             title=title_resig('fpr'),legend=NULL);
-      ## dofig(plotrate,'fpr_n1=200',d=0,n1=200,n2=n2,smooth='spline',
-      ##       hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
-      ##       vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-      ##       title=title_resig('fpr'),legend=NULL);
+      dofig(plotrate,'fpr_n1=200',extra=T,d=0,n1=200,n2=n2,smooth='spline',
+            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resig('fpr'),legend=NULL);
       xdata=xdata_exact(n1=n,n2=n2,d=0,by='n1');
-      dofig(plotratm,'fpr_by_n1',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
+      dofig(plotratm,'by_n1',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
             title=title_resig('fpr'),title.legend='n1',legend='topright');
@@ -82,8 +81,9 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
       ## dofig(plotboxfpr_exact,'box',drat=drat.std,posr.id='std',ylim=boxlim);
       ## dofig(plotboxfpr_exact,'box_nosdir',drat=drat.nosdir,posr.id='sig1_sig1',ylim=boxlim);
-      
-      ## fnr
+    }
+    ## exact fnr
+    if (sect=='exact_fnr') {
       ## compute 1-power2 vs. n2 - specialized for plotfnr!
       power.n2=power_n2();
       ## construct xdata lists for n1=20 and n1=200

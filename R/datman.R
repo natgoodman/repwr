@@ -398,17 +398,20 @@ casename_out=
     }
     casename;
   }
-casename_fig=function(name,sect,sectnum=NULL,where=cq(content,filename)) 
+## figure functions
+casename_fig=function(name,sect,sectnum=NULL,extra=F,where=cq(content,filename)) {
+  if (extra) {fignum=xfignum; figblk=xfigblk; figpfx=xfigpfx; figsfx=xfigsfx;}
   casename_out(name,sect,fignum,sectnum,figblk,figpfx,figsfx,where=match.arg(where),what='figure');
+}
+filename_fig=function(figname,sect,sectnum=NULL,extra=parent(extra,F),suffix='png')
+  filename(basename_fig(figname,sect,sectnum,extra=extra),suffix=suffix);
+basename_fig=function(figname,sect,sectnum=NULL,extra=parent(extra,F))
+  filename(figdir,casename_fig(figname,sect,sectnum,extra=extra,where='filename'));
+figname=function(figname,sect,sectnum=NULL,extra=parent(extra,F),suffix='png')
+  casename_fig(figname,sect,sectnum,extra=extra,where='content')
+## table functions
 casename_tbl=function(name,sect,sectnum=NULL,where=cq(content,filename))
   casename_out(name,sect,tblnum,sectnum,tblblk,tblpfx,tblsfx,where=match.arg(where),what='table');
-
-filename_fig=function(figname,sect,sectnum=NULL,suffix='png')
-  filename(basename_fig(figname,sect,sectnum),suffix=suffix);
-basename_fig=function(figname,sect,sectnum=NULL)
-  filename(figdir,casename_fig(figname,sect,sectnum,where='filename'));
-figname=function(figname,sect,sectnum=NULL,suffix='png')
-  casename_fig(figname,sect,sectnum,where='content')
 filename_tbl=function(tblname,sect,sectnum=NULL,suffix='RData')
   filename(basename_tbl(tblname,sect,sectnum),suffix=suffix);
 basename_tbl=function(tblname,sect,sectnum=NULL)

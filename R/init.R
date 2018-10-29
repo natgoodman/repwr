@@ -387,14 +387,21 @@ init_doc=function(
   outpfx=if(doc=='xperiment'|is.null(subdocx)) NULL else 'S',
   outsfx=if(doc=='xperiment'|is.null(subdocx)) NULL else letters, # used in figure and table blocks
   sectnum=if(doc=='xperiment'|is.null(subdocx)) NULL else T, # add section number to prefix eg, S1
+  ## figures
   figpfx=outpfx,
-  tblpfx=outpfx,
   figsfx=outsfx,
-  tblsfx=outsfx,
   fignum=1,
+  figblk=NULL,                  # index into figsfx if in figure block
+  ## tables
+  tblpfx=outpfx,
+  tblsfx=outsfx,
   tblnum=1,
-  figblk=NULL,                    # index into figsfx if in figure block
-  tblblk=NULL,                    # index into tblsfx if in table block
+  tblblk=NULL,                  # index into tblsfx if in table block
+  ## xtra figures - not included in document
+  xfigpfx='X',
+  xfigsfx=outsfx,
+  xfignum=1,
+  xfigblk=NULL,                 # index into xfigsfx if in figure block
   ## clean, save
   save.out=T,
   save.fig=save.out,            # save figures (when called via dofig)

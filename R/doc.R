@@ -46,12 +46,15 @@ dodoc=
 
 ## --- Document Functions ---
 ## utility functions to make figures and tables for documents
-## run plot function, save if required, label result with function name
+## run plot function, save if required, label result with name
+## title -- can be NULL, string, or function -- if function, call to get actual title
+##   needed to generate correct titles for extra figures
+## extra -- figure is 'extra' - will not be included in document
 ## CAUTION: ... interacts with partial argument matching to cause dofig args to be
-##   matched by plot-function args. eg, 'doc' matched by 'd'. prepending with 'fig'
-##   works only because no plot-function arg matches it
+##   matched by plot-function args. eg, 'd' matches 'doc', 'x' matches 'xtra'
+##   choose argument names carefully!
 dofig=
-  function(figfun,name=NULL,
+  function(figfun,name=NULL,extra=F,title=NULL,
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL),
            ...) {
     file=filename_fig(name,sect,sectnum);
@@ -79,11 +82,11 @@ dofig=
       ## TODO: learn the right way to do this!
       png(filename=file,height=8,width=8,units='in',res=200,pointsize=12);
       dev.png=dev.cur();
-      }
+    }
+    if (is.function(title)) title=wrap_fun(title,...);
+    if (is.null(title)) fignum=figname(name,sect,sectnum);  # set fignum for standard plot title
     ## draw the figure!
-    ## figfun(...,fignum=fig);
-    fignum=figname(name,sect,sectnum);  # set fignum for standard plot functions
-    figfun(...);
+    wrap_fun(figfun,...);
     if (plot.to.file&plot.to.screen) 
       ## png parameters found by trial and error. look reasonable
       ## TODO: learn the right way to do this!
@@ -125,17 +128,22 @@ dotbl=
  }
 
 ## manage figure,table numbers, blocks
-figinc=function() if (!is.null(figblk)) figblk<<-figblk+1 else fignum<<-fignum+1;
+figinc=function(extra=parent(extra,F))
+  if (extra) {
+    if (!is.null(xfigblk)) xfigblk<<-xfigblk+1 else xfignum<<-xfignum+1;
+  } else {
+    if (!is.null(figblk)) figblk<<-figblk+1 else fignum<<-fignum+1;
+  } 
 figblk_start=function() {
   ## if already in block, end it
   if (!is.null(figblk)) fignum<<-fignum+1;
-  figblk<<-1;
+  if (!is.null(xfigblk)) xfignum<<-xfignum+1;
+  figblk<<-1; xfigblk<<-1;
 }
 figblk_end=function() {
   ## do nothing if not in block, else end it
-  if (is.null(figblk)) return();
-  figblk<<-NULL;
-  fignum<<-fignum+1;
+  if (!is.null(figblk)) {figblk<<-NULL; fignum<<-fignum+1;}
+  if (!is.null(xfigblk)) {xfigblk<<-NULL; xfignum<<-xfignum+1;}
 }
 tblinc=function() if (!is.null(tblblk)) tblblk<<-tblblk+1 else tblnum<<-tblnum+1;
 tblblk_start=function() {
