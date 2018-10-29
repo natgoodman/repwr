@@ -47,7 +47,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
     sect.desc=sect.desc.all[sect];
     ## exact fpr
     if (sect=='exact_fpr') {
-      figblk_start();
+      xfigblk_start();
       dofig(plotrate,'n1=020',extra=T,d=0,n1=20,n2=n2,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
@@ -65,7 +65,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
             hline=c(fpr.cutoff,fpr.cutoff,fnr.cutoff),posr.id='sig1_sig1',
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
             title=title_resigsupp,title.rate='fpr',title.legend='n1',legend='topright');
-
+      xfigblk_start();
       xdata=xdata_exact(n1=n,n2=n2,d=0,by='n2');
       dofig(plotratm,'by_n2',extra=T,xdata=xdata,x=cq(n1,d1,d2),col=n2col,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
@@ -75,8 +75,6 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
             hline=c(fpr.cutoff,fpr.cutoff,fnr.cutoff),posr.id='sig1_sig1',
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
             title=title_resigsupp,title.rate='fpr',title.legend='n2',legend='topright');
- 
-
       
       ## confirm that FPR is sig.level/2 and that sdir is what causes FPR factor of 2
       drat.std=data_rate(xdata=expand.grid(n1=n,n2=n,d1=0,d2=0),mesr=cq(sig2))
@@ -94,6 +92,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## boxplots also show no obvious correlation with n1, n2, or mean(n1,n2).
       ## TODO: decide whether to keep boxplots as figures...
       ## figblk_start();
+      xfigblk_start();
       boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
       dofig(plotboxfpr_exact,'box',extra=T,drat=drat.std,posr.id='std',ylim=boxlim);
       dofig(plotboxfpr_exact,'box_nosdir',extra=T,drat=drat.nosdir,posr.id='sig1_sig1',

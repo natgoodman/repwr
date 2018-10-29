@@ -54,7 +54,7 @@ dodoc=
 ##   matched by plot-function args. eg, 'd' matches 'doc', 'x' matches 'xtra'
 ##   choose argument names carefully!
 dofig=
-  function(figfun,name=NULL,extra=F,title=NULL,
+  function(figfun,name=NULL,extra=parent(extra,F),title=NULL,
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL),
            ...) {
     if (extra&!figextra) return();
@@ -135,12 +135,14 @@ figinc=function(extra=parent(extra,F))
   } else {
     if (!is.null(figblk)) figblk<<-figblk+1 else fignum<<-fignum+1;
   } 
-figblk_start=function() {
+figblk_start=function(extra=parent(extra,F)) {
+  if (extra) {xfigblk_start(); return()}
   ## if already in block, end it
   if (!is.null(figblk)) fignum<<-fignum+1;
-  figblk<<-1;
+    figblk<<-1;
 }
-figblk_end=function() {
+figblk_end=function(extra=parent(extra,F)) {
+  if (extra) {xfigblk_end(); return(); }
   ## do nothing if not in block, else end it
   if (!is.null(figblk)) {figblk<<-NULL; fignum<<-fignum+1;}
 }
@@ -166,12 +168,12 @@ tblblk_end=function() {
   tblnum<<-tblnum+1;
 }
 outblk_start=function() {
-  figblk_start();
+  figblk_start(extra=F);
   xfigblk_start();
   tblblk_start();
 }
 outblk_end=function() {
-  figblk_end();
+  figblk_end(extra=F);
   xfigblk_end();
   tblblk_end();
 }
