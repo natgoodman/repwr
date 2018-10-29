@@ -57,6 +57,7 @@ dofig=
   function(figfun,name=NULL,extra=F,title=NULL,
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL),
            ...) {
+    if (extra&!figextra) return();
     file=filename_fig(name,sect,sectnum);
     plot.to.file=((is.na(save.fig)&!file.exists(file))|(!is.na(save.fig)&save.fig));
     plot.to.screen=figscreen;           # for stylistic consistency
@@ -137,12 +138,19 @@ figinc=function(extra=parent(extra,F))
 figblk_start=function() {
   ## if already in block, end it
   if (!is.null(figblk)) fignum<<-fignum+1;
-  if (!is.null(xfigblk)) xfignum<<-xfignum+1;
-  figblk<<-1; xfigblk<<-1;
+  figblk<<-1;
 }
 figblk_end=function() {
   ## do nothing if not in block, else end it
   if (!is.null(figblk)) {figblk<<-NULL; fignum<<-fignum+1;}
+}
+xfigblk_start=function() {
+  ## if already in block, end it
+  if (!is.null(xfigblk)) xfignum<<-xfignum+1;
+  xfigblk<<-1;
+}
+xfigblk_end=function() {
+  ## do nothing if not in block, else end it
   if (!is.null(xfigblk)) {xfigblk<<-NULL; xfignum<<-xfignum+1;}
 }
 tblinc=function() if (!is.null(tblblk)) tblblk<<-tblblk+1 else tblnum<<-tblnum+1;
@@ -159,10 +167,12 @@ tblblk_end=function() {
 }
 outblk_start=function() {
   figblk_start();
+  xfigblk_start();
   tblblk_start();
 }
 outblk_end=function() {
   figblk_end();
+  xfigblk_end();
   tblblk_end();
 }
 

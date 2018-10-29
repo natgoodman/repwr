@@ -48,19 +48,35 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
     ## exact fpr
     if (sect=='exact_fpr') {
       figblk_start();
-      dofig(plotrate,'n1=020',d=0,n1=20,n2=n2,smooth='spline',
+      dofig(plotrate,'n1=020',extra=T,d=0,n1=20,n2=n2,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-            title=title_resig('fpr'),legend=NULL);
+            title=title_resigsupp,title.rate='fpr',legend=NULL);
       dofig(plotrate,'fpr_n1=200',extra=T,d=0,n1=200,n2=n2,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-            title=title_resig('fpr'),legend=NULL);
+            title=title_resigsupp,title.rate='fpr',legend=NULL);
       xdata=xdata_exact(n1=n,n2=n2,d=0,by='n1');
       dofig(plotratm,'by_n1',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
             hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
             vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
-            title=title_resig('fpr'),title.legend='n1',legend='topright');
+            title=title_resigsupp,title.rate='fpr',title.legend='n1',legend='topright');
+      dofig(plotratm,'by_n1_nosdir',xdata=xdata,x=cq(n2,d1,d2),col=n2col,smooth='spline',
+            hline=c(fpr.cutoff,fpr.cutoff,fnr.cutoff),posr.id='sig1_sig1',
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resigsupp,title.rate='fpr',title.legend='n1',legend='topright');
+
+      xdata=xdata_exact(n1=n,n2=n2,d=0,by='n2');
+      dofig(plotratm,'by_n2',extra=T,xdata=xdata,x=cq(n1,d1,d2),col=n2col,smooth='spline',
+            hline=c(fpr.cutoff/2,fpr.cutoff,fnr.cutoff),
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resigsupp,title.rate='fpr',title.legend='n2',legend='topright');
+      dofig(plotratm,'by_n2_nosdir',extra=T,xdata=xdata,x=cq(n1,d1,d2),col=n2col,smooth='spline',
+            hline=c(fpr.cutoff,fpr.cutoff,fnr.cutoff),posr.id='sig1_sig1',
+            vhlty='dashed',vhlwd=c(1,0.5,0.5),vhcol=cq(red,black,black),plot.cutoff=F,
+            title=title_resigsupp,title.rate='fpr',title.legend='n2',legend='topright');
+ 
+
       
       ## confirm that FPR is sig.level/2 and that sdir is what causes FPR factor of 2
       drat.std=data_rate(xdata=expand.grid(n1=n,n2=n,d1=0,d2=0),mesr=cq(sig2))
@@ -78,9 +94,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## boxplots also show no obvious correlation with n1, n2, or mean(n1,n2).
       ## TODO: decide whether to keep boxplots as figures...
       ## figblk_start();
-      ## boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
-      ## dofig(plotboxfpr_exact,'box',drat=drat.std,posr.id='std',ylim=boxlim);
-      ## dofig(plotboxfpr_exact,'box_nosdir',drat=drat.nosdir,posr.id='sig1_sig1',ylim=boxlim);
+      boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
+      dofig(plotboxfpr_exact,'box',extra=T,drat=drat.std,posr.id='std',ylim=boxlim);
+      dofig(plotboxfpr_exact,'box_nosdir',extra=T,drat=drat.nosdir,posr.id='sig1_sig1',
+            ylim=boxlim);
     }
     ## exact fnr
     if (sect=='exact_fnr') {
@@ -135,10 +152,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       xdata.200=xdata_inexact(n1=200,d1=0);
       dofig(plotratm,'fpr_n1=020',xdata=xdata.020,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fpr'),title.legend='d2',legend='topright');
+            title=title_resigsupp,title.rate='fpr',title.legend='d2',legend='topright');
       dofig(plotratm,'fpr_n1=200',xdata=xdata.200,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fpr'),title.legend='d2',legend='topright');
+            title=title_resigsupp,title.rate='fpr',title.legend='d2',legend='topright');
       ## support statement: data are similar but not exactly the same.
       corfprdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfprdata);
@@ -149,10 +166,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       xdata.200=xdata_inexact(n1=200,d1=0.5);
       dofig(plotratm,'fnr_n1=020',xdata=xdata.020,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='d2',x.legend=8.45,y.legend=0.65);
+            title=title_resigsupp,title.rate='fnr',title.legend='d2',x.legend=8.45,y.legend=0.65);
       dofig(plotratm,'fnr_n1=200',xdata=xdata.020,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='d2',x.legend=8.45,y.legend=0.65);
+            title=title_resigsupp,title.rate='fnr',title.legend='d2',x.legend=8.45,y.legend=0.65);
       ## support statement: data are similar but not exactly the same.
       corfnrdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfnrdata);
@@ -165,14 +182,14 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       xdata.020=xdata_rbind(xdata.fpr,xdata.fnr);
       dofig(plotragm,'fpr+fnr_n1=020',xdata=xdata.020,x=cq(n1,n2),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig(cq(fpr,fnr)),
+            title=title_resigsupp,title.rate=cq(fpr,fnr),
             title.legend='d2',x.legend=9.1,y.legend=0.985,cex.legend=0.7);
       xdata.fpr=xdata_inexact(n1=200,d1=0,d2=d2);
       xdata.fnr=xdata_inexact(n1=200,d1=0.5,d2=d2);
       xdata.200=xdata_rbind(xdata.fpr,xdata.fnr);
       dofig(plotragm,'fpr+fnr_n1=200',xdata=xdata.200,x=cq(n1,n2),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig(cq(fpr,fnr)),
+            title=title_resigsupp,title.rate=cq(fpr,fnr),
             title.legend='d2',x.legend=9.1,y.legend=0.985,cex.legend=0.7);
       ## obvious rocm
       xdata=lapply(d,function(d2) xdata=expand.grid(n1=c(20,200),n2=n2,d1=d,d2=d2));
@@ -180,7 +197,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       dofig(plotrocm,'rocm',xdata=xdata,x=cq(n1,n2),col=d2col,
             hline=c(fpr.cutoff,fnr.cutoff),vline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',
             vhlwd=0.5,plot.cutoff=F,
-            title=title_resig(NULL,'False negative vs. false positive rate'),title.legend='d2');
+            title=title_resigsupp,title.rate=NULL,'False negative vs. false positive rate',title.legend='d2');
     }
     ## nearexact
     if (sect=='nearexact') {
@@ -192,10 +209,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       xdata.200=xdata_near(n1=200,n2=n2,d1=0,near=near);
       dofig(plotragm,'fpr_n1=020',xdata=xdata.020,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             rate='fpr',hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fpr'),title.legend='near',legend='topright');
+            title=title_resigsupp,title.rate='fpr',title.legend='near',legend='topright');
       dofig(plotragm,'fpr_n1=200',xdata=xdata.200,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             rate='fpr',hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fpr'),title.legend='near',legend='topright');
+            title=title_resigsupp,title.rate='fpr',title.legend='near',legend='topright');
       ## support statement: data are similar but not exactly the same.
       corfprdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfprdata);
@@ -206,10 +223,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       xdata.200=xdata_near(n1=200,n2=n2,d1=0.5,near=near);
       dofig(plotragm,'fnr_n1=020',xdata=xdata.020,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             rate='fnr',hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='near',legend='topright');
+            title=title_resigsupp,title.rate='fnr',title.legend='near',legend='topright');
       dofig(plotragm,'fnr_n1=200',xdata=xdata.200,x=cq(n1,n2,d1),col=d2col,smooth='spline',
             rate='fnr',hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='near',legend='topright');
+            title=title_resigsupp,title.rate='fnr',title.legend='near',legend='topright');
        ## support statement: data are similar but not exactly the same.
       corfnrdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfnrdata);
@@ -225,7 +242,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
         figname=paste(sep='_','fnr',paste_nv(n1),paste_nv(n2,n2x));
         dofig(plotragm,figname,xdata=xdata,x=cq(n1,n2,d1),rate='fnr',col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig('fnr'),title.legend='near',legend='topright');
+            title=title_resigsupp,title.rate='fnr',title.legend='near',legend='topright');
       }
       ## fpr+fnr
       xdata.fpr=xdata_near(n1=20,n2=n2,d1=0,near=near);
@@ -233,13 +250,13 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       xdata.020=xdata_rbind(xdata.fpr,xdata.fnr);
       dofig(plotragm,'fpr+fnr_n1=020',xdata=xdata.020,x=cq(n1,n2),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig(cq(fpr,fnr)),title.legend='near',legend='topright');
+            title=title_resigsupp,title.rate=cq(fpr,fnr),title.legend='near',legend='topright');
       xdata.fpr=xdata_near(n1=200,n2=n2,d1=0,near=near);
       xdata.fnr=xdata_near(n1=200,n2=n2,d1=0.5,near=near);
       xdata.200=xdata_rbind(xdata.fpr,xdata.fnr);
       dofig(plotragm,'fpr+fnr_n1=200',xdata=xdata.200,x=cq(n1,n2),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-            title=title_resig(cq(fpr,fnr)),title.legend='near',legend='topright');
+            title=title_resigsupp,title.rate=cq(fpr,fnr),title.legend='near',legend='topright');
       ## do it systematically for all values of near, several values of n1, d1
       near=d;
       n1=c(20,200);
@@ -254,7 +271,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
           figname=paste(sep='_','fpr+fnr',paste_nv(n1,n1x),paste_nv(d1,d1x));
           dofig(plotragm,figname,xdata=xdata,x=cq(n1,n2),col=d2col,smooth='spline',
                 hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-                title=title_resig(cq(fpr,fnr),title.desc=paste_nv(d1,d1x)),
+                title=title_resigsupp,title.rate=cq(fpr,fnr),title.desc=paste_nv(d1,d1x),
                 title.legend='near',legend='topright');
           }}
       ## obvious rocm
@@ -263,7 +280,8 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       dofig(plotrocm,'rocm',xdata=xdata,x=cq(n1,n2),col=d2col,
             hline=c(fpr.cutoff,fnr.cutoff),vline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',
             vhlwd=0.5,plot.cutoff=F,
-            title=title_resig(NULL,'False negative vs. false positive rate'),title.legend='near');
+            title=title_resigsupp,title.rate=NULL,
+            title.desc='False negative vs. false positive rate',title.legend='near');
     }
     sect;
   })

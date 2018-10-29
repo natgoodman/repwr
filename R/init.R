@@ -414,6 +414,7 @@ init_doc=function(
   figscreen=if(doc=='readme') T else !save.fig,
                                  # plot figures on screen
   fignew=figscreen,              # plot each figure in new window
+  figextra=T,                    # plot extra figures, too
   ## doc generation function
   docfun=get(paste(collapse='',c('doc_',doc,subdocx))),
   docsect=NULL,                  # all document sections. set by docfun

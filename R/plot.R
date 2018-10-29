@@ -87,7 +87,7 @@ plotrate=
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            doc=parent(doc,'readme'),
-           legend.where='bottomright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           legend='bottomright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
     ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
@@ -160,12 +160,12 @@ plotrate=
           ## only one x-point. draw points instead of lines. nothing to smooth obviously
           matpoints(x,ydata,col=col,pch=19,cex=cex.single);
       }});
-    ## mesr_legend(ydata,where=legend.where,x=x.legend,y=y.legend);
-    if (!is.null(legend.where))
-      mesr_legend(mesr,where=legend.where,x=x.legend,y=y.legend);
+    ## mesr_legend(ydata,where=legend,x=x.legend,y=y.legend);
+    if (!is.null(legend))
+      mesr_legend(mesr,where=legend,x=x.legend,y=y.legend);
     if (plot.cutoff) abline(h=cutoff,lty='dashed',lwd=0.5);
     ## plot extra lines if desired. nop if vline, hline NULL
-abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
+    abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
     dev.cur();
   }
 heatrate=
@@ -180,7 +180,7 @@ heatrate=
            smooth=c(cq(auto,none),0,1,TRUE,FALSE),
            title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NULL,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
-           legend.where='farright',x.legend=NULL,y.legend=NULL,cex.legend=0.75) {
+           legend='farright',x.legend=NULL,y.legend=NULL,cex.legend=0.75) {
     ## init(must.exist=T);            # make sure environment initialized
     rate.rule=match.arg(rate.rule);
     rate.type=match.arg(rate.type);
@@ -253,7 +253,7 @@ plotratm=
            plot.points=F,plot.lines=T,cex.points=0.75,cex.single=1,lwd=2,lty='solid',
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
            title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,ylab=NULL,xlab=NA,
-           legend.where='right',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           legend='right',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            title.legend='d',
            xlim=NULL,ylim=c(0,1)) {
     rate.rule=match.arg(rate.rule);
@@ -326,9 +326,9 @@ plotratm=
     if (plot.points) matpoints(x,y,col=col,pch=16,cex=cex.points);
     grid();
     cutoff=c(fpr.cutoff,fnr.cutoff);
-    if (!is.null(legend.where))
+    if (!is.null(legend))
       ratm_legend(names(xdata),col=col,lwd=lwd,lty=lty,
-                  where=legend.where,x=x.legend,y=y.legend,title=title.legend);
+                  where=legend,x=x.legend,y=y.legend,title=title.legend);
     if (plot.cutoff) abline(h=cutoff,lty='dashed',lwd=0.5);
     ## plot extra lines if desired. nop if vline, hline NULL
     abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
@@ -387,7 +387,7 @@ plotroc=
            plot.points=T,plot.lines=F,pch=16,cex.points=1,
            title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
-           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           legend='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=c(0,1),ylim=c(0,1)) {
     rate.rule=match.arg(rate.rule);
     check_mesr();
@@ -410,8 +410,8 @@ plotroc=
     grid();
     if (plot.cutoff) abline(v=rate_cutoff(xrate),h=rate_cutoff(yrate),lty='dashed',lwd=0.5);
     ## abline(a=0,b=1,lty='dashed',lwd=0.5);
-    if (!is.null(legend.where))
-      mesr_legend(mesr,where=legend.where,x=x.legend,y=y.legend,plot.points=T);
+    if (!is.null(legend))
+      mesr_legend(mesr,where=legend,x=x.legend,y=y.legend,plot.points=T);
     ## plot extra lines if desired. nop if vline, hline NULL
     abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
     dev.cur();
@@ -430,7 +430,7 @@ plotrocm=
            plot.points=T,plot.lines=F,pch=16,cex.points=1,
            title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
-           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           legend='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            title.legend='replication type',
            xlim=c(0,1),ylim=c(0,1)) {
     rate.rule=match.arg(rate.rule);
@@ -461,8 +461,8 @@ plotrocm=
     grid();
     if (plot.cutoff) abline(v=rate_cutoff(xrate),h=rate_cutoff(yrate),lty='dashed',lwd=0.5);
     ## abline(a=0,b=1,lty='dashed',lwd=0.5);
-    if (!is.null(legend.where))
-      rocm_legend(names(xdata),col=col,where=legend.where,x=x.legend,y=y.legend,title=title.legend,
+    if (!is.null(legend))
+      rocm_legend(names(xdata),col=col,where=legend,x=x.legend,y=y.legend,title=title.legend,
                   plot.points=T);
     ## plot extra lines if desired. nop if vline, hline NULL
     abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
@@ -483,7 +483,7 @@ plotrag=
            plot.points=F,plot.lines=T,
            title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,xlab=NULL,ylab='rate',
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
-           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           legend='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            xlim=NULL,ylim=c(0,1)) {
     rate.rule=match.arg(rate.rule);
     check_mesr();
@@ -532,8 +532,8 @@ plotrag=
       rate.cutoff=sapply(rate,rate_cutoff);
       abline(h=rate.cutoff,lty='dashed',lwd=0.5);
     }
-    if (!is.null(legend.where))
-      rag_legend(mesr,rate,rate.lty=lty,where=legend.where,x=x.legend,y=y.legend);
+    if (!is.null(legend))
+      rag_legend(mesr,rate,rate.lty=lty,where=legend,x=x.legend,y=y.legend);
     ## plot extra lines if desired. nop if vline, hline NULL
     abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
     dev.cur();
@@ -553,7 +553,7 @@ plotragm=
            title=NULL,fignum=parent(fignum,NULL),title.desc=NULL,cex.title=0.9,xlab=NULL,
            ylab=if(length(rate)==1) rate2lab(rate) else 'rate',
            vline=NULL,hline=NULL,vhlty='solid',vhcol='black',vhlwd=1,
-           legend.where='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
+           legend='topright',x.legend=NULL,y.legend=NULL,cex.legend=0.8,
            title.legend='replication type',
            xlim=NULL,ylim=c(0,1)) {
     rate.rule=match.arg(rate.rule);
@@ -627,9 +627,9 @@ plotragm=
       rate.cutoff=sapply(rate,rate_cutoff);
       abline(h=rate.cutoff,lty='dashed',lwd=0.5);
     }
-    if (!is.null(legend.where))
+    if (!is.null(legend))
       ragm_legend(names(xdata),rate,col=col,lty=lty,
-                  where=legend.where,x=x.legend,y=y.legend,title=title.legend);
+                  where=legend,x=x.legend,y=y.legend,title=title.legend);
     ## plot extra lines if desired. nop if vline, hline NULL
     abline(v=vline,h=hline,lty=vhlty,col=vhcol,lwd=vhlwd); 
     dev.cur();

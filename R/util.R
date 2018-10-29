@@ -83,6 +83,7 @@ assign_parent=function(what,value) {
 }
 ## NG 18-10-24: wrap function - propogate locals and ... then call function
 ##   morefun are additional functions called by fun with ... args
+## TODO: handle partial matching of ... params
 ## adapted from stackoverflow.com/questions/4124900
 wrap_fun=function(fun,morefun=NULL,...) {
   env=parent.frame(n=1);
@@ -109,9 +110,10 @@ pmatch_choice=function(arg,choices,several.ok=T,none.ok=F) {
 cq=function(...) {
  dots=match.call(expand.dots=FALSE)$...
  if (length(dots) &&
-     !all(vapply(dots,function(x) is.symbol(x) || is.character(x),NA,USE.NAMES=FALSE))) 
-   stop("... must contain names or character strings");
-return(vapply(dots,as.character,""));
+     !all(vapply(dots,function(x) is.atomic(x)||is.symbol(x)||is.character(x),
+                 NA,USE.NAMES=FALSE))) 
+   stop("... must contain atomic data like names or character strings");
+ return(vapply(dots,as.character,""));
 }
 ## upper case first letter of word. like Perl's ucfirst
 ## from https://stackoverflow.com/questions/18509527/first-letter-to-upper-case/18509816

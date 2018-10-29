@@ -90,24 +90,26 @@ color_n=
     hi.col=colorRampPalette(RColorBrewer::brewer.pal(9,hi.palette))(2*hi.steps)[-(1:hi.steps)];
     setNames(c(lo.col,mid.col,hi.col),n);
   }
-## generate title for doc_resig. simpler and shorter than general case
-title_resig=
-  function(rate.type=parent(rate.type,'error'),title.desc=parent(title.desc,NULL),
+## generate title for doc_resigsupp. simpler and shorter than general case
+## like title_resig but puts Figure XXX on separate line
+title_resigsupp=
+  function(title.rate=parent(title.rate,'error'),title.desc=parent(title.desc,NULL),
+           extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL),
            posr.id=parent(posr.id,'std')) {
-    if (is.null(rate.type)) rate.desc=NULL
+    if (is.null(title.rate)) rate.desc=NULL
     else {
-      rate.desc=sapply(rate.type,function(rate.type) 
-        switch(rate.type,
+      rate.desc=sapply(title.rate,function(title.rate) 
+        switch(title.rate,
                pos='positive',neg='negative',error='error',correct='correct',
                fpr='false positive',fnr='false negative',
                tpr='true positive',tnr='true negative',
                roc='rate vs rate',rag='mean',ragm='mean'));
       rate.desc=paste(collapse=' and ',rate.desc);
-      if (all(rate.type %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
+      if (all(title.rate %notin% cq(roc,ragm))) rate.desc=paste(sep=' ',rate.desc,'rate');
     }
     posr.desc=if (posr.id=='std') NULL else 'w/o same-direction';
-    fig=paste(sep='','Figure ',figname(name,sect,sectnum),'.');
+    fig=paste(sep='','Figure ',figname(name,sect,sectnum),"\n");
     paste(collapse=' ',c(fig,sect.desc,rate.desc,title.desc,posr.desc));
   }
 ## --- Generate Analytic Tables ---
@@ -260,9 +262,10 @@ rw_fnr=function(fpr=0.05,fnr=0.2,prop.true=.5) {
 ## plot boxplots of fpr vs.n1
 plotboxfpr_exact=
   function(drat,posr.id='std',cex.title=0.9,ylim=c(0,0.1),
+           extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     boxplot(sig2~n1,data=drat,notch=F,xlab='n1',ylab='false positive rate',ylim=ylim,
-            main=title_resig('fpr','vs. n1'),
+            main=title_resigsupp('fpr','vs. n1'),
             cex.main=cex.title);
     cutoff=if(posr.id=='std') 0.025 else 0.05;
     abline(h=c(cutoff,mean(drat$sig2)),col='red',lty=cq(dashed,solid));
@@ -272,11 +275,12 @@ plotboxfpr_exact=
 ## plot fnr rates with 1-power overlaid
 plotfnr_exact=
   function(xdata,posr.id='std',col=parent(col),power.n2=parent(power.n2),cex.title=0.9,
+           extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     ## plot simulated results
     plotratm(xdata=xdata,posr.id=posr.id,x=cq(n1,n2),col=col,smooth='spline',
              hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-             title=title_resig('fnr'),title.legend='d',x.legend=8.45,y.legend=0.65);
+             title=title_resigsupp('fnr'),title.legend='d',x.legend=8.45,y.legend=0.65);
     ## plot theoretical values
     x.smooth=power.n2$n2.smooth/50;       # scale n2 to x-axis. CAUTION: not general
     y.smooth=power.n2$y.smooth;
@@ -302,7 +306,7 @@ plotfnrpwr_exact=
     ## plot(1-pwr2,drat$sig2,col=n2col[as.character(drat$n1)],pch=19,cex=0.75,
     plot(1-drat$pwr2,drat$sig2,col=col,pch=19,cex=0.75,
          xlab='1-power2 (theory)',ylab='false negative rate (simulated)',
-         main=title_resig('fnr','vs. 1-power2'),cex.main=cex.title);
+         main=title_resigsupp('fnr','vs. 1-power2'),cex.main=cex.title);
     abline(a=0,b=1,col='red');
     grid();
   }
@@ -326,7 +330,7 @@ plotfnrcutoff_exact=
     col=cq(red,red,blue,blue);
     lty=cq(solid,dashed,solid,dashed);
     matplot(n2.smooth,y.smooth,type='l',col=col,lty=lty,xlab='n2',ylab='d2',
-            main=title_resig(NULL,'d2 vs. n2 for FNR cutoff=0.05, 0.20'),cex.main=cex.title);
+            main=title_resigsupp(NULL,'d2 vs. n2 for FNR cutoff=0.05, 0.20'),cex.main=cex.title);
     legend=sapply(strsplit(colnames(y.smooth),'\\.'),
                   function(row) {
                     n2=as.numeric(row[2]);
