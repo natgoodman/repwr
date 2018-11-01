@@ -59,9 +59,7 @@ Figures S7 and S8 plots FNR vs. $1-power2$ across the entire dataset with same-d
 
 The correlation of FNR and $1-power2$ across the entire dataset is 0.9997737 and 0.9999019 resp. with same-direction on and off.  When limiting to small values of $d2_{pop}$, $d2_{pop}\le0.2$, the correlations are 0.9989049 and 0.9995707.
 
-```{r}
-knitr::knit_exit()
-```
+`r knitr::knit_exit()`
 
 #### Inexact replications
 
