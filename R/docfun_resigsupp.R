@@ -300,6 +300,7 @@ power_n2=function(n2=parent(n2),d.nonzro=parent(d.nonzro)) {
 ## plot fnr vs 1-power2
 plotfnrpwr_exact=
   function(xdata,posr.id='std',cex.title=0.9,
+           extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     drat=dratfnrpwr_exact(xdata,posr.id);
     ## n2col=setNames(colorRampPalette(cq(grey75,black))(11),n);
@@ -321,6 +322,7 @@ dratfnrpwr_exact=function(xdata,posr.id='std') {
 ## plot fnr cutoffs
 plotfnrcutoff_exact=
   function(fnr_d2byn2,cex.title=0.9,
+           extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     data=merge(subset(fnr_d2byn2,subset=(cutoff==0.05)),subset(fnr_d2byn2,subset=(cutoff==0.20)),
                by='n2',suffixes=cq('.05','.20'));
