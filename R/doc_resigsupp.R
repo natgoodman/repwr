@@ -117,12 +117,18 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       names(xdata.200)=as.character(d.nonzro);
       ## plots using std posr - includes sdir
       figblk_start();
-      dofig(plotfnr_exact,'n1=020',xdata=xdata.020)
-      dofig(plotfnr_exact,'n1=200',xdata=xdata.200);
+      dofig(plotfnr_exact,'n1=020',xdata=xdata.020,col=d2col)
+      dofig(plotfnr_exact,'n1=200',xdata=xdata.200,col=d2col);
       ## plots using sig1_sig1 posr - omits sdir
       figblk_start();
-      dofig(plotfnr_exact,'nosdir_n1=020',xdata=xdata.020,posr.id='sig1_sig1')
-      dofig(plotfnr_exact,'nosdir_n1=200',xdata=xdata.200,posr.id='sig1_sig1');
+      dofig(plotfnr_exact,'nosdir_n1=020',xdata=xdata.020,col=d2col,posr.id='sig1_sig1')
+      dofig(plotfnr_exact,'nosdir_n1=200',xdata=xdata.200,col=d2col,posr.id='sig1_sig1');
+      ## plot fnr vs n1, n2 aggregating over d
+      xdata=xdata_exact(n1=n,n2=n2,d=d,by='n1');
+      dofig(plotragm,'mean_d',xdata=xdata,x='n2',rate='fnr',col=n2col,smooth='spline',
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,vhcol='red',plot.cutoff=F,
+            title=title_resigsupp,title.rate='fnr',title.desc='vs. n2,n1,mean(d)',
+            title.legend='n1',legend='topright');
       ## remaining figures are extra
       extra=T;
       ## These two extra figures plot FNR vs. $1-power2$ across the entire dataset

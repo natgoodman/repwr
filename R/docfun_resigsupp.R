@@ -271,17 +271,16 @@ plotboxfpr_exact=
     abline(h=c(cutoff,mean(drat$sig2)),col='red',lty=cq(dashed,solid));
     grid();
   }
-    
 ## plot fnr rates with 1-power overlaid
 plotfnr_exact=
-  function(xdata,posr.id='std',d2col=parent(d2col),n2col=parent(n2col),
-           power.n2=parent(power.n2),cex.title=0.9,
-           extra=parent(extra,F),
+  function(xdata,posr.id='std',col=parent(d2col),
+           power.n2=parent(power.n2),cex.title=0.9,extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     ## plot simulated results
     plotratm(xdata=xdata,posr.id=posr.id,x=cq(n1,n2),col=col,smooth='spline',
              hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
-             title=title_resigsupp('fnr'),title.legend='d',x.legend=8.45,y.legend=0.65);
+             title=title_resigsupp('fnr','vs. n2,d'),
+             title.legend='d',x.legend=8.45,y.legend=0.65);
     ## plot theoretical values
     x.smooth=power.n2$n2.smooth/50;       # scale n2 to x-axis. CAUTION: not general
     y.smooth=power.n2$y.smooth;
@@ -299,8 +298,7 @@ power_n2=function(n2=parent(n2),d.nonzro=parent(d.nonzro)) {
 }
 ## plot fnr vs 1-power2
 plotfnrpwr_exact=
-  function(xdata,posr.id='std',cex.title=0.9,
-           extra=parent(extra,F),
+  function(xdata,posr.id='std',cex.title=0.9,extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
     drat=dratfnrpwr_exact(xdata,posr.id);
     ## n2col=setNames(colorRampPalette(cq(grey75,black))(11),n);

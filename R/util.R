@@ -69,6 +69,7 @@ parent=function(what,default) {
   if (!missing(default)) return(default);
   stop(paste(sep='',"object '",what,"' not found"));
 }
+
 ## copy local variables to global - to simplify init
 assign_global=function() {
   env=parent.frame(n=1);
