@@ -51,13 +51,20 @@ For $n1=20$ (Figure S2-1a), the simulated FNR is a bit greater than theory predi
 I get worried when my simulated results differ consistently from theory, even when the discrepancy is small.  So I explored.  It turns out the difference is due to the same-direction requirement; when power is low, same-direction has a large enough effect to increase FNR noticeably. Figures S2-2a and S2-2b repeat the figures with same-direction switched off. Theory and simulation now agree quite well for both values of $n1$.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02002a_exact_fnr_nosdir_n1=020.png');
-knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02002b_exact_fnr_nosdir_n1=200.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02002a_exact_fnr_n1=020_nosdir.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02002b_exact_fnr_n1=200_nosdir.png');
 ```
 
-Figures S7 and S8 plots FNR vs. $1-power2$ across the entire dataset with same-direction switched on (Figure S7) and off (Figure S8). The dots are color-coded by $power1$, the power of the original study (smaller power has lighter dots). The points fall nicely along the diagonal in both cases, with less scatter without same-direction, as expected.
-
 The correlation of FNR and $1-power2$ across the entire dataset is 0.9997737 and 0.9999019 resp. with same-direction on and off.  When limiting to small values of $d2_{pop}$, $d2_{pop}\le0.2$, the correlations are 0.9989049 and 0.9995707.
+
+What about the full range of $n1$? Once we correct for same-direction, theory says that FNR is independent of $n1$. Figure S2-3a confirms this. It plots FNR vs. $n1$ and $n2$, with $n2$ on the x-axis, different colored lines for $n1$, and with FNR aggregated over $d$; this means that FNR as plotted is the $mean(FNR)$ over all non-zero values of $d$.
+
+When I thought about it a little more, I wondered about the second order effect of $n1$ on the distribution of significant $d1_{pop}$. This matters because the only replicas that make it into the FNR calculation are ones where the original study was significant. Intuitively, when $n1$ is small, the distribution of significant $d1_{pop}$ should be shifted up, which in turn increases the chances that the replica will be significant, leading to smaller FNR. Figure S2-3b shows this effect. It seems this may be an important observaton, but I have not yet followed it up. 
+
+```{r out.width="50%",echo=FALSE,fig.show='asis'}
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02003a_exact_fnr_mean_d.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02003b_exact_fnr_mean_d_bias1.png');
+```
 
 `r knitr::knit_exit()`
 

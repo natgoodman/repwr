@@ -314,7 +314,7 @@ plotfnr_exact_bias1=
     x=sort(unique(posr$n2));
     y=1-do.call(cbind,lapply(posr.mean.byn1,function(posr) posr$wt.mean[order(posr$n2)]));
     plot(x=NULL,y=NULL,type='n',xlab=NA,ylab='false negative rate',
-         main=title_resigsupp('fnr','vs. n2,n1,mean(d) w/ sig1 bias'),cex.main=cex.title,
+         main=title_resigsupp('fnr','vs. n2,n1, agg d w/ sig1 bias'),cex.main=cex.title,
          xlim=range(x),ylim=c(0,1),xaxt='n');
     xaxis(at=x,labels=data.frame(n2=x));
     col=col[colnames(y)];
