@@ -111,6 +111,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## compute 1-power2 vs. n2 - specialized for plotfnr!
       power.n2=power_n2();
       ## construct xdata lists for n1=20 and n1=200
+      if (F) {
       xdata.020=lapply(d.nonzro,function(d) xdata=expand.grid(n1=20,n2=n2,d1=d,d2=d));
       names(xdata.020)=as.character(d.nonzro);
       xdata.200=lapply(d.nonzro,function(d) xdata=expand.grid(n1=200,n2=n2,d1=d,d2=d));
@@ -123,12 +124,14 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       figblk_start();
       dofig(plotfnr_exact,'nosdir_n1=020',xdata=xdata.020,col=d2col,posr.id='sig1_sig1')
       dofig(plotfnr_exact,'nosdir_n1=200',xdata=xdata.200,col=d2col,posr.id='sig1_sig1');
+      }
       ## plot fnr vs n1, n2 aggregating over d
       xdata=xdata_exact(n1=n,n2=n2,d=d,by='n1');
       dofig(plotragm,'mean_d',xdata=xdata,x='n2',rate='fnr',col=n2col,smooth='spline',
-            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,vhcol='red',plot.cutoff=F,
+            hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resigsupp,title.rate='fnr',title.desc='vs. n2,n1,mean(d)',
             title.legend='n1',legend='topright');
+      dofig(plotfnr_exact_bias1,'mean_d_bias1',xdata=xdata,col=n2col);
       ## remaining figures are extra
       extra=T;
       ## These two extra figures plot FNR vs. $1-power2$ across the entire dataset

@@ -296,6 +296,39 @@ power_n2=function(n2=parent(n2),d.nonzro=parent(d.nonzro)) {
   colnames(y.smooth)=d.nonzro;
   list(n2.smooth=n2.smooth,y.smooth=y.smooth);
 }
+## plot fnr vs. n2,n1,mean(d) taking sig1 bias into account 
+plotfnr_exact_bias1=
+  function(xdata,posr.id='std',col=parent(n2col),cex.title=0.9,extra=parent(extra,F),
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
+    xdata=do.call(rbind,xdata);
+    posr=get_posr(posr.id);
+    posr=posr_select(posr,xdata=xdata,mesr=cq(sig1,sig2));
+    posr.byx=split(posr,with(posr,paste(n1,n2)));
+    posr.mean=do.call(rbind,lapply(posr.byx,function(posr) {
+      mean=mean(posr$sig2);             # compute mean for sanity
+      wt.mean=weighted.mean(posr$sig2,posr$sig1);
+      with(posr,data.frame(n1=n1[1],n2=n2[1],mean,wt.mean))
+    }));
+    posr.mean.byn1=split(posr.mean,posr.mean$n1);
+    ## mean=do.call(cbind,lapply(posr.mean.byn1,function(posr) posr$mean[order(posr$n2)]));
+    x=sort(unique(posr$n2));
+    y=1-do.call(cbind,lapply(posr.mean.byn1,function(posr) posr$wt.mean[order(posr$n2)]));
+    plot(x=NULL,y=NULL,type='n',xlab=NA,ylab='false negative rate',
+         main=title_resigsupp('fnr','vs. n2,n1,mean(d) w/ sig1 bias'),cex.main=cex.title,
+         xlim=range(x),ylim=c(0,1),xaxt='n');
+    xaxis(at=x,labels=data.frame(n2=x));
+    col=col[colnames(y)];
+    ## smooth
+    x.smooth=seq(min(x),max(x),len=100);
+    y.smooth=splinem(x,y,xout=x.smooth)
+    ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
+    y.smooth=apply(y.smooth,1:2,function(y) if (!is.na(y)) max(min(y,1),0) else y);
+    matlines(x.smooth,y.smooth,col=col,lty='solid');
+    grid();
+    ragm_legend(colnames(y),col=col,lty='solid',where='topright',rate='fnr',title='n1');
+    abline(h=c(fpr.cutoff,fnr.cutoff),lty='dashed',lwd=0.5,col='black');
+  }
+
 ## plot fnr vs 1-power2
 plotfnrpwr_exact=
   function(xdata,posr.id='std',cex.title=0.9,extra=parent(extra,F),
