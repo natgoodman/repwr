@@ -1,7 +1,7 @@
 ---
 title: "Revision history for repwr repository"
 author: "Nathan (Nat) Goodman"
-date: "September 3, 2018"
+date: "November 7, 2018"
 output:
   pdf_document: default
   github_document:
@@ -12,13 +12,31 @@ urlcolor: blue
 ---
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
+## Release 1.30 2018-11-10
+
+Supports [supplementary material](https://natgoodman.github.io/repwr/resigsupp.stable.html) (`resigsupp.Rmd`) for the shortened blog post with results that didn't fit in the published post for reasons of space or pedagogy
+
+New files
+
+-	`R/doc_resigsupp.R` generates figures and tables for resig supplement
+- `R/docfun_resig.R` contains functions used by `doc_resig`; extracted from `R/doc_resig.R`
+-	`R/docfun_resigsupp.R` contains functions used by `doc_resigsupp`; adapted from `R/docfun_resig.R`
+
+Deleted files
+
+- `R/doc_xperiment.R` was just a stub that became obsolete
+
+Code changes
+
+
+
 ## Release 1.21 2018-09-27
 
 Fixed typos and restored code accidentally deleted in version 1.20
 
 ## Release 1.20 2018-09-26
 
-Supports shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`).
+Supports shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`), kindly posted by Bob Reed on [The Replication Network](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/)
 
 New files
 

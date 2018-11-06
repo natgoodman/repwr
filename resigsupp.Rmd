@@ -22,7 +22,7 @@ This document contains supplementary material for the blog post [Systematic Repl
 
 A replication is *exact* if the two studies are sampling the same population; this means $d1_{pop}=d2_{pop}$. For this ideal case, replication works as intuition predicts.
 
-Theory tell us that FPR is the significance level divided by 2 (the factor of 2 because the effect sizes must have the same direction) and $FNR=1-power2$, where $power2$ is the power of the replica study. As we'll see, the simulated FPR is dead-on, but the simulated FNR is not as good, esp. when $n1$ and $d$ are small. The discrepancy is due to the same-direction requirment.
+Theory tell us that FPR is the significance level divided by 2 (the factor of 2 because the effect sizes must have the same direction) and $FNR=1-power2$, where $power2$ is the power of the replica study. As we'll see, the simulated FPR is dead-on, but the simulated FNR is not as good, esp. when $n1$ and $d$ are small. The discrepancy is due to the same-direction requirement.
 
 #### False positive rate
 
@@ -59,7 +59,7 @@ The correlation of FNR and $1-power2$ across the entire dataset is 0.9997737 and
 
 What about the full range of $n1$? Once we correct for same-direction, theory says that FNR is independent of $n1$. Figure S2-3a confirms this. It plots FNR vs. $n1$ and $n2$, with $n2$ on the x-axis, different colored lines for $n1$, and with FNR aggregated over $d$; this means that FNR as plotted is the $mean(FNR)$ over all non-zero values of $d$.
 
-When I thought about it a little more, I wondered about the second order effect of $n1$ on the distribution of significant $d1_{pop}$. This matters because the only replicas that make it into the FNR calculation are ones where the original study was significant. Intuitively, when $n1$ is small, the distribution of significant $d1_{pop}$ should be shifted up, which in turn increases the chances that the replica will be significant, leading to smaller FNR. Figure S2-3b shows this effect. It seems this may be an important observaton, but I have not yet followed it up. 
+When I thought about it a little more, I wondered about the second order effect of $n1$ on the distribution of significant $d1_{pop}$. This matters because the only replicas that make it into the FNR calculation are ones where the original study was significant. Intuitively, when $n1$ is small, the distribution of significant $d1_{pop}$ should be shifted up, which in turn increases the chances that the replica will be significant, leading to smaller FNR. Figure S2-3b shows this effect. It seems this may be an important observation, but I have not yet followed it up. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02003a_exact_fnr_mean_d.png');
