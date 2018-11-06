@@ -247,6 +247,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## near=round(c(0,0.01,0.05,0.1,0.2),digits=5);
       near=seq(0.1,0.5,by=0.1);
       ## fpr
+      figblk_start();
       xdata.020=xdata_near(n1=20,n2=n2,d1=0,near=near);
       xdata.200=xdata_near(n1=200,n2=n2,d1=0,near=near);
       dofig(plotragm,'fpr_n1=020',xdata=xdata.020,x=cq(n1,n2,d1),col=d2col,smooth='spline',
@@ -258,8 +259,8 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## support statement: data are similar but not exactly the same.
       corfprdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfprdata);
-      ## plot shows similarity. TODO: decide whether to add as figure
-      ## drat_plotsig2(xdata.020,xdata.200)
+      ## extra plot shows similarity
+      dofig(drat_plotsig2,'fpr_sigsig',xdata1=xdata.020,xdata2=xdata.200,extra=T);
       ## fnr
       xdata.020=xdata_near(n1=20,n2=n2,d1=0.5,near=near);
       xdata.200=xdata_near(n1=200,n2=n2,d1=0.5,near=near);
@@ -272,21 +273,21 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
        ## support statement: data are similar but not exactly the same.
       corfnrdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfnrdata);
-      ## plot shows similarity. TODO: decide whether to add as figure
-      ## drat_plotsig2(xdata.020,xdata.200)
-      ## plot fnr for single values of n1, n2, multiple d1
+      ## extra plot shows similarity
+      dofig(drat_plotsig2,'fnr_sigsig',xdata1=xdata.020,xdata2=xdata.200,extra=T);
+      ## these extra figures plot fnr for single values of n1, n2, multiple d1
+      extra=T; xfigblk_start();
       n1=20;
-      ## TODO: 'caution' probably obsolete
-      ## CAUTION: must use loop, NOT sapply, for scoping of fignum to work!
-      ## Hmmm... not sure it makes sense to do all these figures
-      for (n2x in c(100,200,300,400)) {
+      sapply(c(100,200,300,400),function(n2x) {
         xdata=xdata_near(n1=n1,n2=n2x,d1=d.nonzro,near=near);
         figname=paste(sep='_','fnr',paste_nv(n1),paste_nv(n2,n2x));
         dofig(plotragm,figname,xdata=xdata,x=cq(n1,n2,d1),rate='fnr',col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resigsupp,title.rate='fnr',title.legend='near',legend='topright');
-      }
+      });
+      extra=F;
       ## fpr+fnr
+      figblk_start();
       xdata.fpr=xdata_near(n1=20,n2=n2,d1=0,near=near);
       xdata.fnr=xdata_near(n1=20,n2=n2,d1=0.5,near=near);
       xdata.020=xdata_rbind(xdata.fpr,xdata.fnr);
@@ -299,14 +300,19 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       dofig(plotragm,'fpr+fnr_n1=200',xdata=xdata.200,x=cq(n1,n2),col=d2col,smooth='spline',
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resigsupp,title.rate=cq(fpr,fnr),title.legend='near',legend='topright');
-      ## do it systematically for all values of near, several values of n1, d1
+      ## extra plot shows similarity
+      dofig(drat_plotsig2,'fpr+fnr_sigsig',xdata1=xdata.020,xdata2=xdata.200,extra=T);
+      ## these extra figures do it systematically for all values of near, several values of n1, d1
+      extra=T; xfigblk_start();
       near=d;
       n1=c(20,200);
       d1=c(0.2,0.5,0.8);
       ## CAUTION: must use loop, NOT sapply, for scoping of fignum to work!
       ## Hmmm... not sure it makes sense to do all these figures
-      for (n1x in c(20,200)) {
-        for (d1x in c(0.2,0.5,0.8)) {
+      ## for (n1x in c(20,200)) {
+      ##   for (d1x in c(0.2,0.5,0.8)) {
+      sapply(c(20,200),function(n1x) {
+        sapply(c(0.2,0.5,0.8),function(d1x) {
           xdata.fpr=xdata_near(n1=n1x,n2=n2,d1=0,near=near);
           xdata.fnr=xdata_near(n1=n1x,n2=n2,d1=d1x,near=near);
           xdata=xdata_rbind(xdata.fpr,xdata.fnr);
@@ -315,8 +321,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
                 hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
                 title=title_resigsupp,title.rate=cq(fpr,fnr),title.desc=paste_nv(d1,d1x),
                 title.legend='near',legend='topright');
-          }}
+        })})
+      extra=F;
       ## obvious rocm
+      figblk_end();
       near=d;
       xdata=xdata_near(n1=c(20,200),n2=n2,d1=d,near=near);
       dofig(plotrocm,'rocm',xdata=xdata,x=cq(n1,n2),col=d2col,
