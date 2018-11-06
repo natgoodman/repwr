@@ -118,12 +118,14 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       names(xdata.200)=as.character(d.nonzro);
       ## plots using std posr - includes sdir
       figblk_start();
-      dofig(plotfnr_exact,'n1=020',xdata=xdata.020,col=d2col)
-      dofig(plotfnr_exact,'n1=200',xdata=xdata.200,col=d2col);
+      dofig(plotfnr_exact,'n1=020',xdata=xdata.020,col=d2col,power.n2=power.n2)
+      dofig(plotfnr_exact,'n1=200',xdata=xdata.200,col=d2col,power.n2=power.n2);
       ## plots using sig1_sig1 posr - omits sdir
       figblk_start();
-      dofig(plotfnr_exact,'n1=020_nosdir',xdata=xdata.020,col=d2col,posr.id='sig1_sig1')
-      dofig(plotfnr_exact,'n1=200_nosdir',xdata=xdata.200,col=d2col,posr.id='sig1_sig1');
+      dofig(plotfnr_exact,'n1=020_nosdir',xdata=xdata.020,col=d2col,power.n2=power.n2,
+            posr.id='sig1_sig1')
+      dofig(plotfnr_exact,'n1=200_nosdir',xdata=xdata.200,col=d2col,power.n2=power.n2,
+            posr.id='sig1_sig1');
       ## plot fnr vs n1, n2 aggregating over d
       figblk_start();
       xdata=xdata_exact(n1=n,n2=n2,d=d,by='n1');

@@ -1,12 +1,12 @@
 ---
-title: "Systematic Replication May Make Many Mistakes: Supplementary Material"
+title: 'Systematic Replication May Make Many Mistakes: Supplementary Material'
 author: "Nathan (Nat) Goodman"
-date: "November 15, 2018"
+date: "November 7, 2018"
 output:
+  pdf_document: default
   html_document:
     css: css/html_document.css
     highlight: kate
-  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue

@@ -396,7 +396,8 @@ drat_cor=function(xdata1,xdata2,x=cq(n2,d1,d2)) {
 ## plot sig2 vs sig2 for 2 drats
 ## TODO: this is very crude...
 drat_plotsig2=
-  function(xdata1,xdata2,x=cq(n2,d1,d2),lab1='n1=20',lab2='n1=200',rate.type='error',
+  function(xdata1,xdata2,x=cq(n2,d1,d2),lab1='n1=20',lab2='n1=200',
+           rate.rule='nonzro',rate.type='error',
            col.points='black',pch=16,cex.points=0.5,col.line='red',
            posr.id='std',cex.title=0.9,extra=parent(extra,F),
            sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
