@@ -42,10 +42,11 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
     if (!is.null(sectnum)) {
       ## compute section number. from stackoverflow.com/questions/5577727
       sectnum=which(sect==sect.all)[1];
-      fignum<<-1;
+      fignum<<-1; xfignum<<-1;
     }
     sect.desc=sect.desc.all[sect];
-    extra=F;                            # start each section with extra off
+    extra=F;                         # start each section with extra off 
+    figblk<<-NULL; xfigblk<<-NULL;   #   and blk off
     ## exact fpr
     if (sect=='exact_fpr') {
       ## these figures show the main point: FPR=sig.level/2 independent of n1, n2
@@ -182,8 +183,8 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
     }
     ## inexact
     if (sect=='inexact') {
-      ## sect.desc='Inexact replication';
       ## fpr
+      figblk_start();
       xdata.020=xdata_inexact(n1=20,d1=0);
       xdata.200=xdata_inexact(n1=200,d1=0);
       dofig(plotratm,'fpr_n1=020',xdata=xdata.020,x=cq(n1,n2,d1),col=d2col,smooth='spline',
@@ -195,8 +196,8 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## support statement: data are similar but not exactly the same.
       corfprdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfprdata);
-      ## plot shows similarity. TODO: decide whether to add as figure
-      ## drat_plotsig2(xdata.020,xdata.200)
+      ## extra plot shows similarity
+      dofig(drat_plotsig2,'fpr_sigsig',xdata1=xdata.020,xdata2=xdata.200,extra=T);
       ## fnr
       xdata.020=xdata_inexact(n1=20,d1=0.5);
       xdata.200=xdata_inexact(n1=200,d1=0.5);
@@ -209,9 +210,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
       ## support statement: data are similar but not exactly the same.
       corfnrdata=drat_cor(xdata.020,xdata.200);
       dotbl(corfnrdata);
-      ## plot shows similarity. TODO: decide whether to add as figure
-      ## drat_plotsig2(xdata.020,xdata.200)
+      ## extra plot shows similarity
+      dofig(drat_plotsig2,'fnr_sigsig',xdata1=xdata.020,xdata2=xdata.200,extra=T);
       ## fpr+fnr
+      figblk_start();
       d2=c(0,0.1,0.2,0.5,1)
       xdata.fpr=xdata_inexact(n1=20,d1=0,d2=d2);
       xdata.fnr=xdata_inexact(n1=20,d1=0.5,d2=d2);
@@ -227,13 +229,17 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
             hline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',vhlwd=0.5,plot.cutoff=F,
             title=title_resigsupp,title.rate=cq(fpr,fnr),
             title.legend='d2',x.legend=9.1,y.legend=0.985,cex.legend=0.7);
+      ## extra plot shows similarity
+      dofig(drat_plotsig2,'fpr+fnr_sigsig',xdata1=xdata.020,xdata2=xdata.200,extra=T);
       ## obvious rocm
+      figblk_end();
       xdata=lapply(d,function(d2) xdata=expand.grid(n1=c(20,200),n2=n2,d1=d,d2=d2));
       names(xdata)=as.character(d);
       dofig(plotrocm,'rocm',xdata=xdata,x=cq(n1,n2),col=d2col,
             hline=c(fpr.cutoff,fnr.cutoff),vline=c(fpr.cutoff,fnr.cutoff),vhlty='dashed',
             vhlwd=0.5,plot.cutoff=F,
-            title=title_resigsupp,title.rate=NULL,'False negative vs. false positive rate',title.legend='d2');
+            title=title_resigsupp,
+            title.rate=NULL,title.desc='False negative vs. false positive rate',title.legend='d2');
     }
     ## nearexact
     if (sect=='nearexact') {

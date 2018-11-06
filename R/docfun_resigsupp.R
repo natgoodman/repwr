@@ -395,7 +395,11 @@ drat_cor=function(xdata1,xdata2,x=cq(n2,d1,d2)) {
 }
 ## plot sig2 vs sig2 for 2 drats
 ## TODO: this is very crude...
-drat_plotsig2=function(xdata1,xdata2,x=cq(n2,d1,d2)) {
+drat_plotsig2=
+  function(xdata1,xdata2,x=cq(n2,d1,d2),lab1='n1=20',lab2='n1=200',rate.type='error',
+           col.points='black',pch=16,cex.points=0.5,col.line='red',
+           posr.id='std',cex.title=0.9,extra=parent(extra,F),
+           sect=parent(sect,NULL),sectnum=parent(sectnum,NULL),sect.desc=parent(sect.desc,NULL)) {
   if (!is.data.frame(xdata1)) xdata1=do.call(rbind,xdata1);
   if (!is.data.frame(xdata2)) xdata2=do.call(rbind,xdata2);
   if (any(dim(xdata1)!=dim(xdata2)))
@@ -403,10 +407,16 @@ drat_plotsig2=function(xdata1,xdata2,x=cq(n2,d1,d2)) {
                'nrow(xdata1)=',nrow(xdata1),'; ','nrow(xdata2)=',nrow(xdata2)));
   drat1=data_rate(xdata=xdata1,mesr='sig2');
   drat2=data_rate(xdata=xdata2,mesr='sig2');
-  drat=merge(drat1,drat2,by=x,suffixes=c('1','2'))
+  drat=merge(drat1,drat2,by=x,suffixes=c('1','2'));
+  rate.type=rate_type(true.dd=c(drat1$true.dd,drat2$true.dd));
+  rate.desc=if(rate.type %notin% cq(fpr,fnr,tpr,tnr)) paste(sep=' ',rate.type,'rate')
+  else rate2lab(rate.type);
+  xlab=paste(sep=' ',rate.desc,'for',lab1);
+  ylab=paste(sep=' ',rate.desc,'for',lab2);
   x1=drat$sig21;
   x2=drat$sig22;
-  plot(x1,x2,pch=16,cex=0.5);
+  plot(x=x1,y=x2,xlab=xlab,ylab=ylab,col=col.points,pch=pch,cex=cex.points,
+       main=title_resigsupp(rate.type,paste(sep=' ','for',lab1,'vs',lab2)),cex.main=cex.title);
   grid();
-  abline(a=0,b=1,col='red');
+  abline(a=0,b=1,col=col.line);
 }

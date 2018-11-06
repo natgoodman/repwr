@@ -31,8 +31,8 @@ For this simple case, only two parameters vary: $n1$ and $n2$. The effect sizes 
 With only two parameters, I can show the whole picture in a single graph. Figure S1-1 shows FPR vs. $n1$ and $n2$, with $n2$ on the x-axis and different colored lines for $n1$. The lines fall on top of each other and are essentially constant illustrating that the sample sizes have no effect on the results. There's a dashed red horizontal line at $sig.level/2=0.025$ (just barely visible through the solid lines depicting FPR). The factor of 2 is due to requiring the effect sizes to have the same direction. Figure S1-2 confirms this explanation by replotting the results with the same-direction filter turned off.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/resig/supp/m=1e4/figure_S01001_exact_fpr_by_n2.png');
-knitr::include_graphics('figure/resig/supp/m=1e4/figure_S01002_exact_fpr_by_n2_nosdir.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S01001_exact_fpr_by_n1.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S01002_exact_fpr_by_n1_nosdir.png');
 ```
 
 #### False negative rate
@@ -66,19 +66,17 @@ knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02003a_exact_fnr_mean_d
 knitr::include_graphics('figure/resig/supp/m=1e4/figure_S02003b_exact_fnr_mean_d_bias1.png');
 ```
 
-`r knitr::knit_exit()`
-
 #### Inexact replications
 
 A replication is *inexact* if the two studies are sampling very different populations, meaning $d1_{pop}$ and $d2_{pop}$ can vary independently. This seems unreasonably pessimistic for a well-run replication project but serves to illustrate what happens as we vary the parameters.
 
-Figures S10-S13 show FPR and FNR for two values of $n1$ (20, 200), $n2$ varying from 50 to 500, $d1_{pop}=0$ for the FPR plots and 0.5 (a medium effect size) for the FNR plots, and $d2_{pop}$ ranging from 0 to 1. 
+Figures S3-1 (a-d) show FPR and FNR for two values of $n1$ (20, 200), $n2$ varying from 50 to 500, $d1_{pop}=0$ for the FPR plots and 0.5 (a medium effect size) for the FNR plots, and $d2_{pop}$ ranging from 0 to 1. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/resig/m=1e4/figure_S010_inexact_fpr_n1=020.png');
-knitr::include_graphics('figure/resig/m=1e4/figure_S011_inexact_fpr_n1=200.png');
-knitr::include_graphics('figure/resig/m=1e4/figure_S012_inexact_fnr_n1=020.png');
-knitr::include_graphics('figure/resig/m=1e4/figure_S013_inexact_fnr_n1=200.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S03001a_inexact_fpr_n1=020.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S03001b_inexact_fpr_n1=200.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S03001c_inexact_fnr_n1=020.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S03001d_inexact_fnr_n1=200.png');
 ```
 
 The main point is that FPR and FNR vary in opposite directions. FPR is good for small values of $d2_{pop}$ and $n2$ and gets worse as $d2_{pop}$ and $n2$ increase. FNR is bad when $d2_{pop}$ and $n2$ are small and gets better as these parameters increase. This is the same behavior we saw in the main blog near-exact case. 
@@ -87,21 +85,23 @@ Another point is that the graphs for the two values of $n1$ (20, 200) are nearly
 
 The opposing behavior of FPR and FNR as $n2$ changes is worrisome. It suggests that balancing the error rates may be tricky.
 
-The next two figures plot FPR and FNR on the same graph for $n1=20$ (Figure S14) and $n1=200$ (Figure S15). $n2$ and $d1$ are the same as above: $n2$ varies from 50 to 500, $d1_{pop}=0$ for FPR and 0.5 for FNR. $d2_{pop}$ ranges from 0 to 1 but with some of the values omitted so the graph will be legible. 
+The next two figures plot FPR and FNR on the same graph for $n1=20$ (Figure S3-2a) and $n1=200$ (Figure S3-2b). $n2$ and $d1$ are the same as above: $n2$ varies from 50 to 500, $d1_{pop}=0$ for FPR and 0.5 for FNR. $d2_{pop}$ ranges from 0 to 1 but with some of the values omitted so the graph will be legible. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/resig/m=1e4/figure_S014_inexact_fpr+fnr_n1=020.png');
-knitr::include_graphics('figure/resig/m=1e4/figure_S015_inexact_fpr+fnr_n1=200.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S03002a_inexact_fpr+fnr_n1=020.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S03002b_inexact_fpr+fnr_n1=200.png');
 ```
 
-So far so good, but I've only shown data for a few values of $d1$. To see more conditions, Figure S16 uses a *rate-vs-rate scatter plot*, inspired by *receiver operating characteristic (ROC)* curves, to plot false negative vs. false positive rates for a large range of conditions. 
+So far so good, but I've only shown data for a few values of $d1$. To see more conditions, Figure S3-3 uses a *rate-vs-rate scatter plot*, inspired by *receiver operating characteristic (ROC)* curves, to plot false negative vs. false positive rates for a large range of conditions. 
 The data in this figure extends the cases shown above by letting $d1_{pop}$ vary across the entire range. Each point shows the mean false negative vs. mean false positive rate for these conditions grouped by $n1,n2$. The rationale for grouping by $n1,n2$ is they are the only observable parameters.
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/resig/m=1e4/figure_S016_inexact_rocm.png');
+knitr::include_graphics('figure/resig/supp/m=1e4/figure_S03003_inexact_rocm.png');
 ```
 
 The figure shows the opposing behavior of FPR and FNR in stark terms.  For inexact replications, there seems little hope of balancing the error rates effectively.  Good thing this isn't a realistic scenario!
+
+`r knitr::knit_exit()`
 
 #### Near exact replications
 
