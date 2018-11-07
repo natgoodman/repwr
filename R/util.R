@@ -83,17 +83,16 @@ assign_parent=function(what,value) {
   assign(what,value,envir=parent.frame(n=2));
 }
 ## NG 18-10-24: wrap function - propogate locals and ... then call function
-##   morefun are additional functions called by fun with ... args
+##   funfun are additional functions called by fun with ... args
 ## TODO: handle partial matching of ... params
 ## adapted from stackoverflow.com/questions/4124900
-wrap_fun=function(fun,morefun=NULL,...) {
+wrap_fun=function(fun,funfun=NULL,...) {
   env=parent.frame(n=1);
   x=ls(envir=env);
-  fx=do.call(c,lapply(c(fun,morefun),function(fun) names(formals(fun))));
+  fx=do.call(c,lapply(c(fun,funfun),function(fun) names(formals(fun))));
   args=sapply(x[x%in%fx],function(x) get(x,envir=env),simplify=F);
   dots=list(...);
   args=c(args,dots[names(dots)%in%fx]);
-  ## print(">>> in wrap_fun"); BREAKPOINT();
   do.call(fun,args);
 }
 
