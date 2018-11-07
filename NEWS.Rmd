@@ -3,9 +3,10 @@ title: "Revision history for repwr repository"
 author: "Nathan (Nat) Goodman"
 date: "November 7, 2018"
 output:
-  pdf_document: default
+  html_document: default
   github_document:
     html_preview: no
+  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
@@ -26,22 +27,65 @@ Deleted files
 
 - `R/doc_xperiment.R` was just a stub that became obsolete
 
-Code changes
+Major code changes
 
-- New mechanism for generating figure and table numbers that may have document-specific prefix, be section-specific, and occur in blocks with incrementing suffixes (e.g., S2-1a); code also handles figure numbers for 'extra' figures, ones that don't appear in the document
-    - `dofig` and `dotbl` functions in `R/doc.R` use new mechanism for generating figure and table numbers
-    - functions `figinc`, `tblinc` and so forth in `R/doc.R` manage figure and table numbers
-    - functions `filename_fig`, `figname`, `filename_tbl`, `tblname` implement the guts of the new number scheme
-- New scheme for choosing sections to run in `doc_XXX` functions: runs sections in `sapply` loop to allow uniform per-section initialization and setup
-- Changes to `doc_resig` in `R/doc_resig.R` to use new scheme for choosing sections to run and new mechanism for generating figure and table numbers
-
-
+- New mechanism for generating figure and table names
+    - names may have document-specific prefix, be section-specific, and occur in blocks with incrementing suffixes (e.g., S2-1a)
+    - also handles names for 'extra' figures, ie, ones that don't appear in the document
+ - New scheme for running sections in `doc_XXX` functions
+     - runs sections in `sapply` loop to allow uniform per-section initialization and setup
+     - supports new figure and table names
 - Doc-specific initialization moved from `init` to `init_doc` in `R/init.R`
-- `dodoc` in `R/doc.R` uses `wrapfun` to parcel parameters between `init`, `init_doc`, and the `doc_XXX` function
 
-new scheme for choosing sections to run in `doc_XXX` functions, and new mechanism for generating figure and table numbers; figure and table numbers may have document-specific prefix, may be section-specific, and may occur in blocks with incrementing suffixes (e.g., S2-1a); code also handles figure numbers for 'extra' figures, ones that don't appear in the document
-    - `dodoc` in `R/doc.R` uses `wrapfun` to parcel parameters between `init`, `init_doc`, and the `doc_XXX` function
-- Changes to all `doc_XXX` functions (in files `R/doc_XXX.R` and R/Xperiment/*.R`) to match new mechanisms in `R/doc.R`
+Changed files
+
+- `R/datman.R`
+    - `filename_fig`, `figname`, `filename_tbl`, `tblname` implement new figure and table names 
+    - extends `filename` to handle NULL components
+
+- `R/doc.R`
+    - `dodoc` uses `wrap_fun` to parcel parameters between `init`, `init_doc`, `doc_XXX` function
+    - `dofig` and `dotbl` use new figure and table names
+    - `figinc`, `tblinc`, etc. manage figure and table names
+    - `dofig` uses `wrap_fun` to pass correct parameters to `figfun`
+
+- `R/doc_readme.R`, `R/doc_repwr.R`, 
+    - uses new scheme for running sections
+
+- `R/doc_resig.R`
+    - uses new scheme for running sections
+    - uses `xdata_near` to generate data for nearexact case
+    - removed code for functions called by `doc_resig` - moved to `R/docfun_resig.R`
+    - removed code for supplement - moved to `R/doc_resigsupp.R`
+
+- `R/init.R`
+    - moved doc-specific initialization from `init` to `init_doc`
+    - `init_doc` includes initialization for new figure and table names
+
+- `R/plot.R`
+    - renamed `legend.where` to `legend` throughout - that's what `doc_XXX` functions call it
+    - when called the old way, `legend` matched `legend.where` and all was good. 
+    - with `wrap_fun` doesn’t happen because code looks for exact parameter name
+    - change arguments to all top-level functions for new figure names
+    - fix recurrent bugs that cause matrices to become vectors when selecting single row or column
+    - fix bug in `ragm_legend` that caused labels to misalign
+
+- `R/repwr.R`, `R/resig.R`
+    - `run` uses `wrap_fun` to parcel parameters between `init`, `dodata`, `dodoc`
+
+- `R/sim_resig.R`
+    - `doposr` creates `bias1 posr` needed by resig supplement
+
+- `R/util.R`
+    - `wrap_fun` propagates locals and dots (...) to called function
+    - `ucfirst` upper-cases first letter of string
+    - extends `cq` to handle more atomic types
+
+- `R/Xperiment/detl_conditional.R`, `R/Xperiment/detl_handcrafted.R`
+    - port to new `run`, `init` schemes
+
+- `R/Xperiment/hack_proptrue.R`, `R/Xperiment/uri_answer01.R`
+    - port to new `run`, `init`, section-running schemes
 
 ## Release 1.21 2018-09-27
 
