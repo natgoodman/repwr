@@ -179,7 +179,7 @@ data_agg=
            x.empty=parent(x.empty,'error'),y.empty=parent(y.empty,'error'),
            rate.empty=parent(rate.empty,rep(c(x.empty,y.empty),len=length(rate))),
            n1=parent(n1),n2=parent(n2),d1=parent(d1),d2=parent(d2),
-           xdata=parent(xdata,NULL),mesr=parent(mesr),wt.sig1=T) {
+           xdata=parent(xdata,NULL),mesr=parent(mesr)) {
     if (is.null(posr)) posr=get_posr(posr.id);
     names(rate.empty)=rate;
     rate.empty=sapply(rate.empty,function(y.empty) 
