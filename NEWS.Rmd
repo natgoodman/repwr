@@ -28,7 +28,20 @@ Deleted files
 
 Code changes
 
+- New mechanism for generating figure and table numbers that may have document-specific prefix, be section-specific, and occur in blocks with incrementing suffixes (e.g., S2-1a); code also handles figure numbers for 'extra' figures, ones that don't appear in the document
+    - `dofig` and `dotbl` functions in `R/doc.R` use new mechanism for generating figure and table numbers
+    - functions `figinc`, `tblinc` and so forth in `R/doc.R` manage figure and table numbers
+    - functions `filename_fig`, `figname`, `filename_tbl`, `tblname` implement the guts of the new number scheme
+- New scheme for choosing sections to run in `doc_XXX` functions: runs sections in `sapply` loop to allow uniform per-section initialization and setup
+- Changes to `doc_resig` in `R/doc_resig.R` to use new scheme for choosing sections to run and new mechanism for generating figure and table numbers
 
+
+- Doc-specific initialization moved from `init` to `init_doc` in `R/init.R`
+- `dodoc` in `R/doc.R` uses `wrapfun` to parcel parameters between `init`, `init_doc`, and the `doc_XXX` function
+
+new scheme for choosing sections to run in `doc_XXX` functions, and new mechanism for generating figure and table numbers; figure and table numbers may have document-specific prefix, may be section-specific, and may occur in blocks with incrementing suffixes (e.g., S2-1a); code also handles figure numbers for 'extra' figures, ones that don't appear in the document
+    - `dodoc` in `R/doc.R` uses `wrapfun` to parcel parameters between `init`, `init_doc`, and the `doc_XXX` function
+- Changes to all `doc_XXX` functions (in files `R/doc_XXX.R` and R/Xperiment/*.R`) to match new mechanisms in `R/doc.R`
 
 ## Release 1.21 2018-09-27
 
