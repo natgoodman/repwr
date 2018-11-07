@@ -1,9 +1,74 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-September 3, 2018
+November 7, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.30 2018-11-07
+-----------------------
+
+Supports [supplementary material](https://natgoodman.github.io/repwr/resigsupp.stable.html) (`resigsupp.Rmd`) for the shortened blog post with results that didn't fit in the published post for reasons of space or pedagogy
+
+New files
+
+-   `R/doc_resigsupp.R` generates figures and tables for resig supplement
+-   `R/docfun_resig.R` contains functions used by `doc_resig`; extracted from `R/doc_resig.R`
+-   `R/docfun_resigsupp.R` contains functions used by `doc_resigsupp`; adapted from `R/docfun_resig.R`
+
+Deleted files
+
+-   `R/doc_xperiment.R` was just a stub that became obsolete
+
+Major code changes
+
+-   New mechanism for generating figure and table names
+    -   names may have document-specific prefix, be section-specific, and occur in blocks with incrementing suffixes (e.g., S2-1a)
+    -   also handles names for 'extra' figures, ie, ones that don't appear in the document
+-   New scheme for running sections in `doc_XXX` functions
+    -   runs sections in `sapply` loop to allow uniform per-section initialization and setup
+    -   supports new figure and table names
+-   Doc-specific initialization moved from `init` to `init_doc` in `R/init.R`
+
+Changed files
+
+-   `R/datman.R`
+    -   `filename_fig`, `figname`, `filename_tbl`, `tblname` implement new figure and table names
+    -   extends `filename` to handle NULL components
+-   `R/doc.R`
+    -   `dodoc` uses `wrap_fun` to parcel parameters between `init`, `init_doc`, `doc_XXX` function
+    -   `dofig` and `dotbl` use new figure and table names
+    -   `figinc`, `tblinc`, etc. manage figure and table names
+    -   `dofig` uses `wrap_fun` to pass correct parameters to `figfun`
+-   `R/doc_readme.R`, `R/doc_repwr.R`,
+    -   uses new scheme for running sections
+-   `R/doc_resig.R`
+    -   uses new scheme for running sections
+    -   uses `xdata_near` to generate data for nearexact case
+    -   removed code for functions called by `doc_resig` - moved to `R/docfun_resig.R`
+    -   removed code for supplement - moved to `R/doc_resigsupp.R`
+-   `R/init.R`
+    -   moved doc-specific initialization from `init` to `init_doc`
+    -   `init_doc` includes initialization for new figure and table names
+-   `R/plot.R`
+    -   renamed `legend.where` to `legend` throughout - that's what `doc_XXX` functions call it
+    -   when called the old way, `legend` matched `legend.where` and all was good.
+    -   with `wrap_fun` doesn’t happen because code looks for exact parameter name
+    -   change arguments to all top-level functions for new figure names
+    -   fix recurrent bugs that cause matrices to become vectors when selecting single row or column
+    -   fix bug in `ragm_legend` that caused labels to misalign
+-   `R/repwr.R`, `R/resig.R`
+    -   `run` uses `wrap_fun` to parcel parameters between `init`, `dodata`, `dodoc`
+-   `R/sim_resig.R`
+    -   `doposr` creates `bias1 posr` needed by resig supplement
+-   `R/util.R`
+    -   `wrap_fun` propagates locals and dots (...) to called function
+    -   `ucfirst` upper-cases first letter of string
+    -   extends `cq` to handle more atomic types
+-   `R/Xperiment/detl_conditional.R`, `R/Xperiment/detl_handcrafted.R`
+    -   port to new `run`, `init` schemes
+-   `R/Xperiment/hack_proptrue.R`, `R/Xperiment/uri_answer01.R`
+    -   port to new `run`, `init`, section-running schemes
+
 Release 1.21 2018-09-27
 -----------------------
 
@@ -12,7 +77,7 @@ Fixed typos and restored code accidentally deleted in version 1.20
 Release 1.20 2018-09-26
 -----------------------
 
-Supports shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`).
+Supports shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`), kindly posted by Bob Reed on [The Replication Network](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/)
 
 New files
 

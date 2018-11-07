@@ -1,7 +1,7 @@
 Replication Power
 ================
 Nathan (Nat) Goodman
-September 21, 2018
+November 7, 2018
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 *A collection of R scripts and documents exploring the power of replication to detect bad science. I treat replication as a statistical test, simulate proposed replication methods across a wide range of conditions, and estimate error rates for conditions of interest. The main point is that replication is a poor statistical test with high error rates under most conditions. It works as a validation test only when the original and replica studies are sampling nearly identical populations. Methods for testing whether the populations are similar work poorly under all conditions analyzed.*
@@ -125,7 +125,9 @@ Documents discussing the approach and results are available on the [GitHub Pages
 
 -   working paper discussing the approach and results in some detail: [html](https://natgoodman.github.io/repwr/repwr.stable.html), [pdf](https://natgoodman.github.io/repwr/repwr.stable.pdf)
 
--   shorter blog post looking only at *sig2* and the *non-zero* correctness criterion: [html](https://natgoodman.github.io/repwr/resig.stable.html), [pdf](https://natgoodman.github.io/repwr/resig.stable.pdf)
+-   shorter blog post looking only at *sig2* and the *non-zero* correctness criterion: [html](https://natgoodman.github.io/repwr/resig.stable.html), [pdf](https://natgoodman.github.io/repwr/resig.stable.pdf), and kindly posted by Bob Reed on [The Replication Network](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/)
+
+-   supplementary material for the shorter blog post with results that didn't fit in the published post for reasons of space or pedagogy: [html](https://natgoodman.github.io/repwr/resigsupp.stable.html), [pdf](https://natgoodman.github.io/repwr/resigsupp.stable.pdf)
 
 Author
 ------

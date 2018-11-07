@@ -13,7 +13,7 @@ urlcolor: blue
 ---
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
-## Release 1.30 2018-11-10
+## Release 1.30 2018-11-07
 
 Supports [supplementary material](https://natgoodman.github.io/repwr/resigsupp.stable.html) (`resigsupp.Rmd`) for the shortened blog post with results that didn't fit in the published post for reasons of space or pedagogy
 
