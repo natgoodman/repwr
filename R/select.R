@@ -56,7 +56,7 @@ data_rate=
     rate.cvt=if (is.logical(rate.cvt)) if (rate.cvt) 'data_rate' else 'drat_order'
              else match.arg(rate.cvt);
     posr=posr_select();
-   if (is.function(rate.rule)) true.dd=rate.rule(posr,rate.tol)
+    if (is.function(rate.rule)) true.dd=rate.rule(posr,rate.tol)
     else true.dd=true_dd(posr,rate.rule,rate.tol);
     if (rate.cvt=='data_rate') {
       ## convert rate here instead of in drat_order
@@ -177,10 +177,11 @@ data_agg=
            xrate=parent(xrate,'fpr'),yrate=parent(yrate,'fnr'),
            rate=parent(rate,c(xrate,yrate)),
            x.empty=parent(x.empty,'error'),y.empty=parent(y.empty,'error'),
-           rate.empty=parent(rate.empty,rep(c(x.empty,y.empty),len=length(rate))),
+           rate.empty=parent(rate.empty,c(x.empty,y.empty)),
            n1=parent(n1),n2=parent(n2),d1=parent(d1),d2=parent(d2),
            xdata=parent(xdata,NULL),mesr=parent(mesr)) {
     if (is.null(posr)) posr=get_posr(posr.id);
+    rate.empty=rep(rate.empty,len=length(rate));
     names(rate.empty)=rate;
     rate.empty=sapply(rate.empty,function(y.empty) 
       if  (is.numeric(y.empty)) y.empty else match.arg(y.empty,cq(error,warning,nan)));
