@@ -1,0 +1,2 @@
+cor.n1	cor.n2	cor.n1n2
+NA	NA	NA

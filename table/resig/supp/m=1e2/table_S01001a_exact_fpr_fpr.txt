@@ -1,0 +1,2 @@
+fpr.std	fpr.nosdir
+NA	0.0385674931129477
