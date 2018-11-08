@@ -1,0 +1,2 @@
+fpr-sig.level/2	cor(fnr,1-power)
+NA	0.985264047375287
