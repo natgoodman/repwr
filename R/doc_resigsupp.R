@@ -35,9 +35,10 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
   if (is.null(sect)) sect=sect.all else sect=pmatch_choice(sect,sect.all);
   ## doc-wide variables
   d.nonzro=d[d!=0];
-  n2=n[n>=50];                       # standard n2: exclude 20
-  d2col=color_d();                   # colors keyed by d
-  n2col=color_n();                   # colors keyed by n
+  n2=n[n>=50];                   # standard n2: exclude 20
+  d2col=color_d();               # colors keyed by d
+  n2col=color_n();               # colors keyed by n
+  if (m==1e2) rate.empty<<-1;    # with m=1e2, many agg cases empty. set to 1 so don't bomb
   sapply(sect,function(sect) {
     if (!is.null(sectnum)) {
       ## compute section number. from stackoverflow.com/questions/5577727
@@ -101,8 +102,7 @@ doc_resigsupp=function(sect=parent(sect,NULL)) {
             title=title_resigsupp,title.rate='fpr',title.legend='n2',legend='topright');
       ## boxplots also show no obvious correlation with n1, n2, or mean(n1,n2).
       xfigblk_start();
-      xfigblk_start();
-      boxlim=range(c(range(drat.std$sig2),range(drat.nosdir$sig2)));
+      boxlim=range(c(range(drat.std$sig2,na.rm=T),range(drat.nosdir$sig2,na.rm=T)));
       dofig(plotboxfpr_exact,'box',extra=T,drat=drat.std,posr.id='std',ylim=boxlim);
       dofig(plotboxfpr_exact,'box_nosdir',extra=T,drat=drat.nosdir,posr.id='sig1_sig1',
             ylim=boxlim);
