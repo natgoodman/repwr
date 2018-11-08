@@ -1,7 +1,7 @@
 ---
 title: "Revision history for repwr repository"
 author: "Nathan (Nat) Goodman"
-date: "November 7, 2018"
+date: "November 8, 2018"
 output:
   html_document: default
   github_document:
@@ -13,9 +13,15 @@ urlcolor: blue
 ---
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
+## Release 1.31 2018-11-08
+
+- Fix bugs revealed by generating document with m=1e2
+- Add figures and tables for m=1e2 and m=1e3, and ones inadvertently omitted for m=1e4
+- Add data files needed to generate document: `mesr.*`, `smry.*`, `posr/*`
+
 ## Release 1.30 2018-11-07
 
-Supports [supplementary material](https://natgoodman.github.io/repwr/resigsupp.stable.html) (`resigsupp.Rmd`) for the shortened blog post with results that didn't fit in the published post for reasons of space or pedagogy
+Support [supplementary material](https://natgoodman.github.io/repwr/resigsupp.stable.html) (`resigsupp.Rmd`) for the shortened blog post with results that didn't fit in the published post for reasons of space or pedagogy
 
 New files
 
@@ -89,11 +95,11 @@ Changed files
 
 ## Release 1.21 2018-09-27
 
-Fixed typos and restored code accidentally deleted in version 1.20
+Fix typos and restore code accidentally deleted in version 1.20
 
 ## Release 1.20 2018-09-26
 
-Supports shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`), kindly posted by Bob Reed on [The Replication Network](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/)
+Support shortened blog post, [Systematic Replication May Make Many Mistakes](https://natgoodman.github.io/repwr/resig.stable.html) (`resig.Rmd`), kindly posted by Bob Reed on [The Replication Network](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/)
 
 New files
 
@@ -116,56 +122,56 @@ Code changes
 
 Bug fixes
 
-- Fixed bug due to `apply` converting single row matrix into vector. sigh... Bug was present in several functions
+- Fix bug due to `apply` converting single row matrix into vector. sigh... Bug was present in several functions
 
 ## Release 1.11 2018-08-31
 
-Supports third draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
+Support third draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
 
 Document changes
 
 - Blog post (`repwr.Rmd`)
-    - Added reference to new systematic replication study just published in Nature Human Behavior
-    - Deleted final paragraph with Oprah Winfrey quote: not really on-target
-    - Added words on posting comments using GitHub Issue Tracker
+    - Add reference to new systematic replication study just published in Nature Human Behavior
+    - Delete final paragraph with Oprah Winfrey quote: not really on-target
+    - Add words on posting comments using GitHub Issue Tracker
 
 ## Release 1.10 2018-08-22
 
-Supports second draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
+Support second draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html) (`repwr.Rmd`).
 
 Document changes
 
 - Blog post (`repwr.Rmd`)
-    - Changed title and added words in the Abstract, Introduction, and Discussion to clarify that the post is about *systematic* replications
-    - Added references suggested by readers
-    - Added more emphasis to David Colquhoun's point about taking into account the prior probability that studies are true 
-    - Added terms suggested by readers: *direct replication*, *conceptual replication*, *study heterogeneity*
-    - Added sentence noting that "measures answer different questions, but all appear in papers or posts as tests to accept or reject replications" as suggested by reader
+    - Change title and added words in the Abstract, Introduction, and Discussion to clarify that the post is about *systematic* replications
+    - Add references suggested by readers
+    - Add more emphasis to David Colquhoun's point about taking into account the prior probability that studies are true 
+    - Add terms suggested by readers: *direct replication*, *conceptual replication*, *study heterogeneity*
+    - Add sentence noting that "measures answer different questions, but all appear in papers or posts as tests to accept or reject replications" as suggested by reader
 
 - README
     - Reflect changes to `dodata` and `dodoc` interfaces and `clean` default
-    - Removed mention of technical notes document - no point making promises I may not keep
-    - Added mention of previous version (1.00) of blog post
+    - Remove mention of technical notes document - no point making promises I may not keep
+    - Add mention of previous version (1.00) of blog post
 
 Design changes
 
-- Refactored data aggregation code into `data_agg` function and `drag` data type
-- Added support for experimental sandbox code, mainly to document sandbox projects
-- Improved `dodata`, `dodoc` interfaces. These are top-level functions called by `run`. May also be called directly
-    - Moved processing of default values to `init`
-    - Moved `figscreen`, `fignew` parameters from `dodoc` to `init` because they depend on `doc` which is not fully set until `init`
+- Refactor data aggregation code into `data_agg` function and `drag` data type
+- Add support for experimental sandbox code, mainly to document sandbox projects
+- Improve `dodata`, `dodoc` interfaces. These are top-level functions called by `run`. May also be called directly
+    - Move processing of default values to `init`
+    - Move `figscreen`, `fignew` parameters from `dodoc` to `init` because they depend on `doc` which is not fully set until `init`
     - In `dodoc`, set default for `docfun` after `init` for same reason
     - In `dodoc`, prefix match xperiment `doc` for same reason
-    - Added `need.init` parameter to avoid rerunning `init` when called from run
+    - Add `need.init` parameter to avoid rerunning `init` when called from run
     - Set default for `need.init` to `TRUE` so top-level calls will run `init` 
-- Moved `rate.type` conversion from `drat_order` to `data_rate`; this is the natural place where I expect it to be
-- Added ability to save figures to files without first plotting to screen; much faster!
+- Move `rate.type` conversion from `drat_order` to `data_rate`; this is the natural place where I expect it to be
+- Add ability to save figures to files without first plotting to screen; much faster!
 
 Changes to directory and repo organization
 
-- Added version-specific copies of blog post documents
-- Removed data files from repo. I was only storing files needed to draw figures which seemed like good idea but interacts poorly with caching scheme. With the data files gone, user has to generate data before drawing figures
-- Generated figures for non-default values of `m`; just for completeness
+- Add version-specific copies of blog post documents
+- Remove data files from repo. I was only storing files needed to draw figures which seemed like good idea but interacts poorly with caching scheme. With the data files gone, user has to generate data before drawing figures
+- Generate figures for non-default values of `m`; just for completeness
 
 Bug fixes 
 
@@ -176,19 +182,19 @@ Bug fixes
 
 Code cleanup
 
-- Added `vhlty` parameter to plot functions to set line type for extra vertical and horizontal lines; quick hack, not very general
-- Consolidated documentation (still just in comments, sorry) for all aggregate plot functions
-- Changed default for 'smooth' in aggregate plots to `aspline`
-- Required xperiment (experimental sandbox) `doc` types to explicitly set `n`, `d`, `m` to support multiple experimental sandboxes
-- Changed `clean.figure` to `clean.fig` for stylistic consistency in `init`
-- Changed calls to `filename` function to `file.path` for stylistic consistency
+- Add `vhlty` parameter to plot functions to set line type for extra vertical and horizontal lines; quick hack, not very general
+- Consolidate documentation (still just in comments, sorry) for all aggregate plot functions
+- Change default for 'smooth' in aggregate plots to `aspline`
+- Require xperiment (experimental sandbox) `doc` types to explicitly set `n`, `d`, `m` to support multiple experimental sandboxes
+- Change `clean.figure` to `clean.fig` for stylistic consistency in `init`
+- Change calls to `filename` function to `file.path` for stylistic consistency
 - Set default for `clean` to `FALSE` for all `doc` types; setting it `TRUE` for `doc=readme` simplified README document but complicated interactive use
 - Set default for `clean.memlist` to `TRUE`; setting it based on `clean` led to hard-to-find bugs caused by stale data in memlist cache
-- Removed ability for a single `figfun` call to draw multiple figures; doesn't work with new scheme for saving figures and I no longer use this feature
+- Remove ability for a single `figfun` call to draw multiple figures; doesn't work with new scheme for saving figures and I no longer use this feature
 
 ## Release 1.00 2018-07-27
 
-Supports first draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/doc.nnn/repwr.1.00.html) (`repwr.Rmd`) sent to external readers for feedback.
+Support first draft blog post [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/doc.nnn/repwr.1.00.html) (`repwr.Rmd`) sent to external readers for feedback.
 
 
 ## Release 0.93 2018-07-25
@@ -197,22 +203,22 @@ Release candidate
 
 This version is nearly a complete rewrite of the previous version.  Some highlights are
 
-- Removed obsolete scripts including `R/scope.R` and `R/distr.R`
-- Added `R/repwr.R` and many other scripts
-- For data, added current top-level files needed for analysis and plotting. Did not add data subdirectories as these are huge (261MB for m=1e3, 980MB for m=1e4) and not needed once the simulation is done
+- Remove obsolete scripts including `R/scope.R` and `R/distr.R`
+- Add `R/repwr.R` and many other scripts
+- For data, add current top-level files needed for analysis and plotting. Did not add data subdirectories as these are huge (261MB for m=1e3, 980MB for m=1e4) and not needed once the simulation is done
 
 ## Release 0.92 2018-01-01
 
 ### scope.R
 
-- Added `plot_cross`, `plot_pclose1`
-- Integrated `d2t` probability functions from `distr.R`
-- Systematically precomputed useful data tables: `d1`, `d33`, `dcross`, `dsig`, `dclose`, `dcrit`
+- Add `plot_cross`, `plot_pclose1`
+- Integrate `d2t` probability functions from `distr.R`
+- Systematically precompute useful data tables: `d1`, `d33`, `dcross`, `dsig`, `dclose`, `dcrit`
 
 ### distr.R
 
-- Added `pval2t`, `pval2d` functions
-- Corrected usage of `lower.tail` parameter in `d2t` probability functions
+- Add `pval2t`, `pval2d` functions
+- Correct usage of `lower.tail` parameter in `d2t` probability functions
 
 ## Release 0.91 2017-12-19
 
