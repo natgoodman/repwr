@@ -12,41 +12,27 @@ citecolor: green
 urlcolor: blue
 ---
 
-*Replication seems a sensible way to assess whether a scientific result is right. The intuition is clear: if a a result is right, you should get a similar answer when repeating the work; if it it's wrong, your answer should be quite different. Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. Using simulation, I simulate many of these tests across a range of conditions. For exact replications, simple significance testing works great. When replications diverge from the original studies, no test works well. Much of the replication literature focusses, perhaps unwittingly, on methods for divergent conditions without mentioning the limited power of replication in this case.*
+*Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. I call these tests "measures". Elsewhere I reported results from simulating these tests across a range of conditions. Here I describe the measures themselves and provide implementation details for ones that aren't obvious.*
 
 ## Introduction
 
-The basic replication rationale goes something like this: (1) many published papers are wrong; (2) this is a serious problem the community must fix; and (3) systematic replication is an effective solution. (In recent months, I've seen an uptick in pre-registration as another solution. That's a topic for another day.)  In this post, I focus on the third point and ask: viewed as a statistical test, how well does replication work; how well does it tell the difference between valid and invalid results?
+Various authors have proposed tests for deciding whether a replication succeeds or fails. These include significance testing of the replica study, seeing whether the observed effect size of one study falls in the confidence or prediction interval of the other, checking whether the confidence or prediction intervals of the two studies overlap, significance testing of the studies combined via meta-analysis, and comparing the observed effect size of the repeated study with a "small telescope" threshold deemed to be the smallest true effect size the original study could have plausibly detected. 
+
+I simulated these rules (and more) across many replication conditions and computed false positive and false negative rates for conditions of interest. I reported these results in a working paper, [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post, [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html).
+
+In this document I describe the measures themselves, providing implementation details where appropriate.
+
+## Simulation 
 
 I consider a basic replication scheme in which each original study is repeated once. 
 
-Various authors have proposed tests for deciding whether a replication succeeds or fails. These include significance testing of the repeated study, seeing whether the observed effect size of one study falls in the confidence or prediction interval of the other, checking whether the confidence or prediction intervals of the two studies overlap, significance testing of the studies combined via meta-analysis, and comparing the observed effect size of the repeated study with a "small telescope" threshold deemed to be the smallest true effect size the original study could have plausibly detected. 
+The software first simulates *studys* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, and finally computes true and false positive and negative rates for measures and conditions of interest.
 
-I simulate these rules (and more) across many replication conditions and compute false positive and false negative rates for conditions of interest. The simulations vary the samples size from 10 to more than 5000 and true effect size from 0 to 1; in total, I simulate 12,100 conditions, each with $10^4$ simulated replications, for a grand total of more than 100 million simulated instances.
+The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is from a standard normal distribution with mean $d_{pop}$. When I need to be pedantic, I use the term *study set* for the ensemble of studies for a given combination of $n$ and $d_{pop}$. 
 
-A replication is *exact* if the two studies are sampling the same population. This is an obvious replication scenario. You have a study that you think may be a false positive; to check it out, you repeat the study, typically with a larger sample size, taking care to ensure that the replica closely matches the original.
+To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but this distinction is not baked into the software. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets.
 
-A replication is *inexact* if the two studies are sampling different populations. This scenario seems disconnected from the goal of validating an existing study. Since the populations are different, there's no reason to expect the studies to get similar answers and little basis for declaring a study invalid if the replication fails. What motivates this scenario, I think, is *generalizability* not validity. You have a study that demonstrates an interesting effect in a limited setting, and you want to know whether it generalizes to other settings.
-
-For exact replications, significance testing of the repeated study works fine; the error rates are as predicted by Stats 101. All other test have excessive error rates under most conditions. For inexact replications, if the repeated study differs more than a little from the original, no test has acceptable error rates. 
-
-## Methods
-
-### Simulation 
-
-The software first simulates *studys* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes true and false positive and negative rates for measures and conditions of interest.
-
-The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is from a standard normal distribution with mean $d_{pop}$. I then calculate basic statistics of interest, most notably the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups. The software simulates many studies (default $10^4$) for each combination of $n$ and $d_{pop}$. 
-
-When I need to be pedantic, I use the terms *study instance* for each individual study and *study set* for the ensemble of study instances for a given combination of $n$ and $d_{pop}$.
-
-By default $n$ varies from 10 to 5120 in 10 steps separated by powers of 2 (i.e., $\{10,20,40,...,5120\}$) and $d_{pop}$ varies from 0 to 1 in 11 steps of 0.1. In total, this comes to $1.1\times10^6$ ($10^4\times10\times11$) study instances. When analyzing results, I interpolate to get intermediate values; this is especially important for $n$ since the grid of values is so widely spaced.
-
-To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row to get *pairwise replication instances*. In total, this comes to $1.21\times10^8$ ($10^4\times10\times11\times10\times11$) pairwise replication instances. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but this distinction is not baked into the software. 
-
-A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets. Four variables parameterize each pairwise replication set: $n1$, $n2$, $d1{pop}$, $d2_{pop}$. These are, naturally enough, the sample and population effect sizes for the two study sets.
-
-After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent instances and columns represent measures. 
+After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent replication instances and columns represent measures. 
 
 The code implements 28 measures. This includes all replication rules I found in the literature or blogosphere, plus ones I added to satisfy my sense of completeness, and a few I needed for technical reasons.  The [Measures section below](#measures) has them all, but here a few to give you a flavor.
 
