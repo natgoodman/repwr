@@ -20,7 +20,12 @@ Various authors have proposed tests for deciding whether a replication succeeds 
 
 I simulated these rules (and more) across many replication conditions and computed false positive and false negative rates for conditions of interest. I reported these results in a working paper, [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post, [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html).
 
-In this document I describe the measures themselves, providing implementation details where appropriate.
+In this document I describe the measures themselves, providing implementation details where appropriate. The code implements 28 measures. These include all replication rules I found in the literature or blogosphere that I was able to implement with adequate performance, plus ones I added to satisfy my sense of completeness, and a few I needed for technical reasons.  The [Measures section below](#measures) has them all, but here a few to give you a flavor.
+
+- *sig1* (resp. *sig2*) - the first (resp. second) study of the pair has a significant p-value
+- *d1.c2* (resp. *d2.c1*) - $d1_{sdz}$ (resp. $d2_{sdz}$), the standardized observed effect size (aka Cohen's d) of the first (resp. second) study is in the confidence interval of the second (resp. first) study
+- *d1.p2* (resp. *d2.p1*) - $d1_{sdz}$ (resp. $d2_{sdz}$) is in the prediction interval of the second (resp. first) study
+- *sdir* - the observed effects sizes for the two studies are in the same direction, i.e., have the same sign
 
 ## Simulation 
 
@@ -32,14 +37,9 @@ The studies are simple two group comparisons parameterized by sample size $n$ an
 
 To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but this distinction is not baked into the software. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets.
 
-After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent replication instances and columns represent measures. 
+After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent replication instances and columns represent the measures' results. 
 
-The code implements 28 measures. This includes all replication rules I found in the literature or blogosphere, plus ones I added to satisfy my sense of completeness, and a few I needed for technical reasons.  The [Measures section below](#measures) has them all, but here a few to give you a flavor.
 
-- *sig1* (resp. *sig2*) - the first (resp. second) study of the pair has a significant p-value
-- *d1.c2* (resp. *d2.c1*) - $d1_{sdz}$ (resp. $d2_{sdz}$), the standardized observed effect size (aka Cohen's d) of the first (resp. second) study is in the confidence interval of the second (resp. first) study
-- *d1.p2* (resp. *d2.p1*) - $d1_{sdz}$ (resp. $d2_{sdz}$) is in the prediction interval of the second (resp. first) study
-- *sdir* - the observed effects sizes for the two studies are in the same direction, i.e., have the same sign
 
 The next step sumarizes the results by counting the number of true results for each measure in the replication set. I compute counts for the measures individually and a few combinations of interest.  The combinations are
 
