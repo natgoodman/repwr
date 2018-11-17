@@ -39,8 +39,6 @@ To generate pairwise replications, I consider all (ordered) pairs of study sets.
 
 After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent replication instances and columns represent the measures' results. 
 
-
-
 The next step sumarizes the results by counting the number of true results for each measure in the replication set. I compute counts for the measures individually and a few combinations of interest.  The combinations are
 
 - *sig1* - instances that satisfy the *sig1* measure and each measure, since most authors assume that the original study is significant
@@ -49,7 +47,20 @@ The next step sumarizes the results by counting the number of true results for e
 
 To get pass rates, I divide the counts by the number of instances satisfying some baseline condition.  Usually, the baseline condition is the one called *baseline* above (hence the name), but it can be the null condition (in which case the denominator is the total number of instances per set, i.e., $10^4$ by default) or either of the other named conditions above.
 
-The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, in other words, an explicit statement as to which pairwise replication instances represent replications that should succeed vs. ones that should fail.
+The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, in other words, an explicit statement as to which pairwise replication instances represent replications that should succeed vs. ones that should fail. The [Correctness Criteria section of the working paper](https://natgoodman.github.io/repwr/repwr.stable.html#correctness-criteria).
+
+Here are the precise technical definitions I use in the code.
+
+1. *non-zero* - an instance is *true* if $d1_{pop}$, the population effect size for the first study, is non-zero
+2. *same-effect* - an instance is *true* if $d1_{pop}=d2_{pop}$, i.e., the two population effect sizes are equal
+
+I also consider a modest extension that allows the effect sizes to differ from 0 or each other by a specified *tolerance* $\epsilon$:
+
+1. *non-zero* is *true* if $d1_{pop}\ge\epsilon$
+2. *same-effect* is *true* if $abs(d1_{pop}-d2_{pop})\ge\epsilon$
+
+Note that these criteria depend only on the population effect size.
+
 
 ### Correctness Criteria
 
