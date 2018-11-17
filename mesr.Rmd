@@ -35,7 +35,7 @@ The software first simulates *studys* across a range of conditions, then combine
 
 The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is from a standard normal distribution with mean $d_{pop}$. When I need to be pedantic, I use the term *study set* for the ensemble of studies for a given combination of $n$ and $d_{pop}$. 
 
-To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but this distinction is not baked into the software. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets.
+To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but this distinction is not baked into the software. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets. Four variables parameterize each pairwise replication set: $n1$, $n2$, $d1{pop}$, $d2_{pop}$. These are, naturally enough, the sample and population effect sizes for the two study sets.
 
 After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent replication instances and columns represent the measures' results. 
 
@@ -47,46 +47,12 @@ The next step sumarizes the results by counting the number of true results for e
 
 To get pass rates, I divide the counts by the number of instances satisfying some baseline condition.  Usually, the baseline condition is the one called *baseline* above (hence the name), but it can be the null condition (in which case the denominator is the total number of instances per set, i.e., $10^4$ by default) or either of the other named conditions above.
 
-The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, in other words, an explicit statement as to which pairwise replication instances represent replications that should succeed vs. ones that should fail. The [Correctness Criteria section of the working paper](https://natgoodman.github.io/repwr/repwr.stable.html#correctness-criteria).
+The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, in other words, an explicit statement as to which pairwise replication instances represent replications that should succeed vs. ones that should fail. I call these *correctness criteria*. See the [Correctness Criteria section of the working paper](https://natgoodman.github.io/repwr/repwr.stable.html#correctness-criteria) for a discussion. 
 
-Here are the precise technical definitions I use in the code.
-
-1. *non-zero* - an instance is *true* if $d1_{pop}$, the population effect size for the first study, is non-zero
-2. *same-effect* - an instance is *true* if $d1_{pop}=d2_{pop}$, i.e., the two population effect sizes are equal
-
-I also consider a modest extension that allows the effect sizes to differ from 0 or each other by a specified *tolerance* $\epsilon$:
-
-1. *non-zero* is *true* if $d1_{pop}\ge\epsilon$
-2. *same-effect* is *true* if $abs(d1_{pop}-d2_{pop})\ge\epsilon$
-
-Note that these criteria depend only on the population effect size.
-
-
-### Correctness Criteria
-
-I found no concise, rigorous definition of replication correctness anywhere.  Many authors rely on same variant of "A replication should succeed if my method or methods say so". It's impossible to define error rates with such circular definitions.
-
-I'm not the right person to define really good correctness criteria for replication (or any other substantial statistics problem), but since I need such criteria to proceed with this post, here goes.
-
-Replication researchers seem to study two aspects of correctness.  
-
-1. The most basic concern is that the original study is a false positive. For the simple studies in my simulation, this means the population effect size for the original study is non-zero, but the study's p-value is significant nonetheless.
-
-2. The other concern is that the observed effect sizes are inconsistent with each other. This might mean that the population effect sizes for the two studies are different, or that the one result is an outlier.
-
-The first concern seems totally sensible, or more accurately, as sensible as any other use of the p-value, null hypothesis testing framework. The second concern baffles me: if the two studies are sampling different populations or one is an outlier, why does this invalidate the first study?
-
-I'm tempted to ignore the second concern, but most of the proposed replication methods address it.  Sadly, I'm stuck with it for the time being.
-
-Here are the precise technical definitions I use in the code.
+The correctness criteria relevant to this document are 
 
 1. *non-zero* - an instance is *true* if $d1_{pop}$, the population effect size for the first study, is non-zero
 2. *same-effect* - an instance is *true* if $d1_{pop}=d2_{pop}$, i.e., the two population effect sizes are equal
-
-I also consider a modest extension that allows the effect sizes to differ from 0 or each other by a specified *tolerance* $\epsilon$:
-
-1. *non-zero* is *true* if $d1_{pop}\ge\epsilon$
-2. *same-effect* is *true* if $abs(d1_{pop}-d2_{pop})\ge\epsilon$
 
 Note that these criteria depend only on the population effect size.
 
@@ -95,21 +61,45 @@ Note that these criteria depend only on the population effect size.
 The table below lists the 28 measures implemented by the software. Each measure applies to a pairwise replication instance (although some only depend on one study of the pair). Measures use the following notation.
 
 - *s1* and *s2* refer to the first and second study of the pair; *sm* means the fixed-effect meta-analysis of the two studies
-- $d1_{sdz}$, $d2_{sdz}$, $dm_{sdz}$ mean the standardized observed effect size (aka Cohen’s $d$) of *s1*, *s2*, *sm*
+- *d1*, *d2*, *dm* mean the standardized observed effect size (aka Cohen’s $d$) of *s1*, *s2*, *sm*
 - *c1*, *c2*, *cm* are confidence intervals of *s1*, *s2*, *sm*; my implementation of confidence intervals is based on [Uri's Simonsohn's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) supporting his post [We cannot afford to study effect size in the lab](http://datacolada.org/20)
 - *p1*, *p2* are prediction intervals of *s1*, *s2*; the method is from a [paper by Jeffrey Spence and David Stanley](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) with code adapted from the [Stanley's predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval)
 - *scp1*, *scp2* are small telescopes thresholds of *s1*, *s2*; the method is from Uri's [Small Telescopes paper](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) and post [Accepting the Null: Where to Draw the Line?](http://datacolada.org/42) with code adapted from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada42/%5b42%5d%20-%20Accepting%20the%20Null%20-%20R%20-%20Reproducibility%20project%20small%20telescope%20vs%20bayesian%202015%2010%2026.R) supporting that post
 - *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size; the method arose from my misunderstanding of Uri's method; since I had the code, I decided to include it here
 - *.* combines two statistics to yield a complete measure. For example, *d1.c2* means that $d1_{sdz}$ is contained in *c2*; *c1.c2* means *c1* and *c2* overlap; *d1.scp2* means $d1_{sdz} \ge scp2$
 
-Please see the Technical Note document for a more complete explanation of the measures.
+Performance is critical, because I apply the measures to a large number of replications (more than 100 million in default full runs). The code computes whatever it can on individual studies and further pre-computes values that depend only the replication parameters ($n1$, $n2$, $d1{pop}$, $d2_{pop}$).
 
-| measure |     meaning     | 
-| ------------- | -------------------------------------------- |
-| sig1 | p-value of *s1* significant | 
-| sig2 | p-value of *s2* significant | 
-| sigm | p-value of *sm* significant | 
-| sdir | $d1_{sdz}$ and $d2_{sdz}$ are in same direction, i.e., have same sign | 
+**Computed on individual studies**
+  - `d.sdz` - the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups
+  - `sd` - pooled standard deviation
+  - `pval` - p-value
+  - inverse variance weight for fixed-effect meta-analysis
+  - more TBD
+  - "d.sdz"  "sd"     "pval"   "ci.lo"  "ci.hi"  "d.sign"
+ "d.abs"  "w.meta" "d.meta"
+  - `d.sdz` - the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups- the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups
+  - `sd` - pooled standard deviation
+  - `pval` - p-value from t-test
+  - `ci.lo`, `ci.hi` - lower and upper bounds of 95% confidence interval. Implementation adapted from the [code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) for Uri Simonsohn's blog post [We cannot afford to study effect size in the lab](http://datacolada.org/20). See code below.
+  - `d.sign` - sign of `d.sdz`
+  - `d.abs` - absolute value of `d.sdz`
+  - `w.meta` - inverse variance weight for fixed-effect meta-analysis. see code below
+  - `d.meta` - weighted effect size, `d.sdz * w.meta`
+  
+**Computed from replication parameters**
+  - more TBD
+  
+Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as a function) that operates on the entire set in a single gulp. 
+
+>>> perhaps include some code here <<<
+
+| measure | meaning | notes |
+| ------- | ------- | ----- |
+| sig1 | p-value of *s1* significant | precomputed on *s1* |
+| sig2 | p-value of *s2* significant | precomputed on *s2* |
+| sigm | p-value of *sm* significant | see below |
+| sdir | $d1_{sdz}$ and $d2_{sdz}$ are in same direction, i.e., have same sign | `s1$d.sign==s2$d.sign`
 | d1.c2 | $d1_{sdz}$ contained in confidence interval of *s2* | 
 | d2.c1 | $d2_{sdz}$ contained in confidence interval of *s1* | 
 | d1.cm | $d1_{sdz}$ contained in confidence interval of *sm* | 
