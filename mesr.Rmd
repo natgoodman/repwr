@@ -1,5 +1,5 @@
 ---
-title: "Replication Has Limited Power to Detect Bad Science"
+title: "Measuring Replication Success"
 author: "Nathan (Nat) Goodman"
 date: "November 30, 2018"
 output:
@@ -23,8 +23,7 @@ I simulated these rules (and more) across many replication conditions and comput
 In this document I describe the measures themselves, providing implementation details where appropriate. The code implements 28 measures. These include all replication rules I found in the literature or blogosphere that I was able to implement with adequate performance, plus ones I added to satisfy my sense of completeness, and a few I needed for technical reasons.  The [Measures section below](#measures) has them all, but here a few to give you a flavor.
 
 - *sig1* (resp. *sig2*) - the first (resp. second) study of the pair has a significant p-value
-- *d1.c2* (resp. *d2.c1*) - $d1_{sdz}$ (resp. $d2_{sdz}$), the standardized observed effect size (aka Cohen's d) of the first (resp. second) study is in the confidence interval of the second (resp. first) study
-- *d1.p2* (resp. *d2.p1*) - $d1_{sdz}$ (resp. $d2_{sdz}$) is in the prediction interval of the second (resp. first) study
+- *d1.c2* (resp. *d2.c1*, *d1.p2*, *d2.p1*) - the standardized observed effect size (aka Cohen's d) of the one study is in the confidence interval (resp. prediction interval) of the other study
 - *sdir* - the observed effects sizes for the two studies are in the same direction, i.e., have the same sign
 
 ## Simulation 
@@ -35,7 +34,7 @@ The software first simulates *studys* across a range of conditions, then combine
 
 The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is from a standard normal distribution with mean $d_{pop}$. When I need to be pedantic, I use the term *study set* for the ensemble of studies for a given combination of $n$ and $d_{pop}$. 
 
-To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but this distinction is not baked into the software. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets. Four variables parameterize each pairwise replication set: $n1$, $n2$, $d1{pop}$, $d2_{pop}$. These are, naturally enough, the sample and population effect sizes for the two study sets.
+To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but the software doesn't rely on this distinction. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets. Four variables parameterize each pairwise replication set: $n1$, $n2$, $d1_{pop}$, $d2_{pop}$. These are, naturally enough, the sample and population effect sizes for the two study sets.
 
 After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent replication instances and columns represent the measures' results. 
 
@@ -56,19 +55,21 @@ The correctness criteria relevant to this document are
 
 Note that these criteria depend only on the population effect size.
 
+The software implements a number of related correctness criteria, which I've not purused in detail: *nonz1or2*, either population effect size is non-zero; *nonz1and2*, both population effect sizes are non-zero; *nonz2*, the second population effect size is non-zero; *uni*, the first population effect size is non-zero and the two population effect sizes are equal. The software also allows a modest extension that allows the effect sizes to differ from 0 or each other by a specified *tolerance* $\epsilon$.
+
 ### Measures
 
 The table below lists the 28 measures implemented by the software. Each measure applies to a pairwise replication instance (although some only depend on one study of the pair). Measures use the following notation.
 
 - *s1* and *s2* refer to the first and second study of the pair; *sm* means the fixed-effect meta-analysis of the two studies
 - *d1*, *d2*, *dm* mean the standardized observed effect size (aka Cohen’s $d$) of *s1*, *s2*, *sm*
-- *c1*, *c2*, *cm* are confidence intervals of *s1*, *s2*, *sm*; my implementation of confidence intervals is based on [Uri's Simonsohn's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) supporting his post [We cannot afford to study effect size in the lab](http://datacolada.org/20)
-- *p1*, *p2* are prediction intervals of *s1*, *s2*; the method is from a [paper by Jeffrey Spence and David Stanley](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) with code adapted from the [Stanley's predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval)
+- *c1*, *c2*, *cm* are confidence intervals of *s1*, *s2*, *sm*
+- *p1*, *p2* are prediction intervals of *s1*, *s2*
 - *scp1*, *scp2* are small telescopes thresholds of *s1*, *s2*; the method is from Uri's [Small Telescopes paper](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) and post [Accepting the Null: Where to Draw the Line?](http://datacolada.org/42) with code adapted from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada42/%5b42%5d%20-%20Accepting%20the%20Null%20-%20R%20-%20Reproducibility%20project%20small%20telescope%20vs%20bayesian%202015%2010%2026.R) supporting that post
 - *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size; the method arose from my misunderstanding of Uri's method; since I had the code, I decided to include it here
 - *.* combines two statistics to yield a complete measure. For example, *d1.c2* means that $d1_{sdz}$ is contained in *c2*; *c1.c2* means *c1* and *c2* overlap; *d1.scp2* means $d1_{sdz} \ge scp2$
 
-Performance is critical, because I apply the measures to a large number of replications (more than 100 million in default full runs). The code computes whatever it can on individual studies and further pre-computes values that depend only the replication parameters ($n1$, $n2$, $d1{pop}$, $d2_{pop}$).
+Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes whatever it can on individual studies and further pre-computes values that depend only the replication parameters ($n1$, $n2$, $d1{pop}$, $d2_{pop}$).  Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as a function) that operates on the entire set in a single gulp. 
 
 **Computed on individual studies**
   - `d.sdz` - the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups
@@ -90,7 +91,10 @@ Performance is critical, because I apply the measures to a large number of repli
 **Computed from replication parameters**
   - more TBD
   
-Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as a function) that operates on the entire set in a single gulp. 
+
+; my implementation of confidence intervals is based on [Uri's Simonsohn's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) supporting his post [We cannot afford to study effect size in the lab](http://datacolada.org/20)
+
+; the method is from a [paper by Jeffrey Spence and David Stanley](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) with code adapted from the [Stanley's predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval)
 
 >>> perhaps include some code here <<<
 
