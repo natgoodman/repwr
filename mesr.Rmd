@@ -57,19 +57,68 @@ Note that these criteria depend only on the population effect size.
 
 The software implements a number of related correctness criteria, which I've not purused in detail: *nonz1or2*, either population effect size is non-zero; *nonz1and2*, both population effect sizes are non-zero; *nonz2*, the second population effect size is non-zero; *uni*, the first population effect size is non-zero and the two population effect sizes are equal. The software also allows a modest extension that allows the effect sizes to differ from 0 or each other by a specified *tolerance* $\epsilon$.
 
-### Measures
+## Measures
 
-The table below lists the 28 measures implemented by the software. Each measure applies to a pairwise replication instance (although some only depend on one study of the pair). Measures use the following notation.
+The table below lists the 28 measures implemented by the software. Each measure applies to a pairwise replication instance (although some only depend on one study of the pair). Measures and the subsequent discussion use the following notation.
 
 - *s1* and *s2* refer to the first and second study of the pair; *sm* means the fixed-effect meta-analysis of the two studies
 - *d1*, *d2*, *dm* mean the standardized observed effect size (aka Cohen’s $d$) of *s1*, *s2*, *sm*
+- *pval1*, *pval2*, *pvalm* mean the p-value of *s1*, *s2*, *sm*
+- *sig1*, *sig2*, *sigm* mean *pval1*, *pval2*, *pvalm* is significant
 - *c1*, *c2*, *cm* are confidence intervals of *s1*, *s2*, *sm*
-- *p1*, *p2* are prediction intervals of *s1*, *s2*
-- *scp1*, *scp2* are small telescopes thresholds of *s1*, *s2*; the method is from Uri's [Small Telescopes paper](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) and post [Accepting the Null: Where to Draw the Line?](http://datacolada.org/42) with code adapted from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada42/%5b42%5d%20-%20Accepting%20the%20Null%20-%20R%20-%20Reproducibility%20project%20small%20telescope%20vs%20bayesian%202015%2010%2026.R) supporting that post
-- *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size; the method arose from my misunderstanding of Uri's method; since I had the code, I decided to include it here
+- *p1*, *p2* are prediction intervals of *s1*, *s2*; I don't have *pm* because I didn't find a definition in the literature
+- *scp1*, *scp2* are Uri Simonsohn's small telescopes thresholds of *s1*, *s2*
+- *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size
 - *.* combines two statistics to yield a complete measure. For example, *d1.c2* means that $d1_{sdz}$ is contained in *c2*; *c1.c2* means *c1* and *c2* overlap; *d1.scp2* means $d1_{sdz} \ge scp2$
 
-Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes whatever it can on individual studies and further pre-computes values that depend only the replication parameters ($n1$, $n2$, $d1{pop}$, $d2_{pop}$).  Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as a function) that operates on the entire set in a single gulp. 
+>>> mention notational ambiguity of *d* - in measures it means $d_{sdz}$, in figures it generally means $d_{pop}$
+
+| measure | meaning |
+| ------- | ------- | ----- |
+| sig1 | *pval1* is significant | 
+| sig2 | *pval2* is significant | 
+| sigm | *pvalm* is significant | 
+| sdir | *d1* and *d2* are in same direction, i.e., have same sign | 
+| d1.c2 | *d1* contained in *c2* | 
+| d2.c1 | *d2* contained in *c1* | 
+| d1.cm | *d1* contained in *cm* | 
+| d2.cm | *d2* contained in *cm* | 
+| dm.c1 | *dm* contained in *c1* | 
+| dm.c2 | *dm* contained in *c2* | 
+| c1.c2 | *c1* and *c2* overlap | 
+| c1.cm | *c1* and *cm* overlap |
+| c2.cm | *c2* and *cm* overlap | 
+| d1.p2 | *d1* contained in *p2* | 
+| d2.p1 | *d2* contained in *p1* | 
+| dm.p1 | *dm* contained in *p1* | 
+| dm.p2 | *dm* contained in *p2* | 
+| p1.p2 | *p1* and *p2* overlap | 
+| d1.scp2 | *d1* exceeds *scp2* | 
+| d2.scp1 | *d2* exceeds *scp1*; note that Uri's published small telescope method is this one and requires that *sig2* also hold | 
+| dm.scp2 | *dm* exceeds *scp2* | 
+| dm.scp1 | *dm* exceeds *scp1* | 
+| d1.scpd2 | *d1* exceeds *scpd2* | 
+| d2.scpd1 | *d2* exceeds *scpd1* | 
+| dm.scpd2 | *dm* exceeds *scpd2* | 
+| dm.scpd1 | *dm* exceeds *scpd1* | 
+| big1 | $d1 \ge d2$ | 
+| big2 | $d2 \ge d1$ | 
+
+TODO maybe: explain which measures we use in the analysis, for plots and heats. explain that we look separately at scopes since they assume *sig2*
+
+
+Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes whatever it can on individual studies and further pre-computes values that depend only the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$).  Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
+
+### Implementation notes for specific statistics
+
+  - *d1*, *d2* (standardized observed effect size, aka *Cohen’s d*, for the two studies): mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.<br/>
+The standard formula for pooled standard deviation when the two groups have the same sample size $n$ and standard deviations $sd0$ and $sd1$ is $\sqrt{((n-1)sd0^2+(n-1)sd1^2)/(2n -2))}$. This simplifies to $\sqrt{(sd0^2+sd1^2)/2}$ which is the formula I use. Note that this formula is independent of $n$.
+  
+
+
+
+
+
 
 **Computed on individual studies**
   - `d.sdz` - the *standardized observed effect size* $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups
@@ -96,40 +145,12 @@ Performance is critical, because I apply the measures to many, many replications
 
 ; the method is from a [paper by Jeffrey Spence and David Stanley](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) with code adapted from the [Stanley's predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval)
 
+; the method is from Uri's [Small Telescopes paper](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) and post [Accepting the Null: Where to Draw the Line?](http://datacolada.org/42) with code adapted from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada42/%5b42%5d%20-%20Accepting%20the%20Null%20-%20R%20-%20Reproducibility%20project%20small%20telescope%20vs%20bayesian%202015%2010%2026.R) supporting that post
+
+- *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size; the method arose from my misunderstanding of Uri's method; since I had the code, I decided to include it here
+
 >>> perhaps include some code here <<<
 
-| measure | meaning | notes |
-| ------- | ------- | ----- |
-| sig1 | p-value of *s1* significant | precomputed on *s1* |
-| sig2 | p-value of *s2* significant | precomputed on *s2* |
-| sigm | p-value of *sm* significant | see below |
-| sdir | $d1_{sdz}$ and $d2_{sdz}$ are in same direction, i.e., have same sign | `s1$d.sign==s2$d.sign`
-| d1.c2 | $d1_{sdz}$ contained in confidence interval of *s2* | 
-| d2.c1 | $d2_{sdz}$ contained in confidence interval of *s1* | 
-| d1.cm | $d1_{sdz}$ contained in confidence interval of *sm* | 
-| d2.cm | $d2_{sdz}$ contained in confidence interval of *sm* | 
-| dm.c1 | $dm_{sdz}$ contained in confidence interval of *s1* | 
-| dm.c2 | $dm_{sdz}$ contained in confidence interval of *s2* | 
-| c1.c2 | confidence intervals of *s1* and *s2* overlap | 
-| c1.cm | confidence intervals of *s1* and *sm* overlap |
-| c2.cm | confidence intervals of *s2* and *sm* overlap | 
-| d1.p2 | $d1_{sdz}$ contained in prediction interval of *s2* | 
-| d2.p1 | $d2_{sdz}$ contained in prediction interval of *s1* | 
-| dm.p1 | $dm_{sdz}$ contained in prediction interval of *s1* | 
-| dm.p2 | $dm_{sdz}$ contained in prediction interval of *s2* | 
-| p1.p2 | prediction intervals of *s1* and *s2* overlap | 
-| d1.scp2 | $d1_{sdz}$ exceeds small telescope threshold for *s2* | 
-| d2.scp1 | $d2_{sdz}$ exceeds small telescope threshold for *s1*; note that Uri's published small telescope method is this one and requires that *sig2* also hold | 
-| dm.scp2 | $dm_{sdz}$ exceeds small telescope threshold for *s2* | 
-| dm.scp1 | $dm_{sdz}$ exceeds small telescope threshold for *s1* | 
-| d1.scpd2 | $d1_{sdz}$ exceeds threshold from my extension to small telescope method for *s2* | 
-| d2.scpd1 | $d2_{sdz}$ exceeds threshold from my extension to small telescope method for *s1* | 
-| dm.scpd2 | $dm_{sdz}$ exceeds threshold from my extension to small telescope method for *s2* | 
-| dm.scpd1 | $dm_{sdz}$ exceeds threshold from my extension to small telescope method for *s1* | 
-| big1 | $d1_{sdz} \ge d2_{sdz}$ | 
-| big2 | $d2_{sdz} \ge d1_{sdz}$ | 
-
-TODO: explain which measures we use in the analysis, for plots and heats. explain that we look separately at scopes since they assume *sig2*
 
 ## Nomenclature
 
