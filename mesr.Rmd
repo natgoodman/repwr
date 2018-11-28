@@ -114,11 +114,9 @@ I now turn to specific measures and statistics used by measures.
 
 #### Standardized effect size, aka *Cohen’s d*
 
-Notation: *d1*, *d2*
+Notation: $d.sdz$
 
-Meaning: standardized observed effect sizes, aka *Cohen’s d*, for the two studies
-
-Definition: mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.
+Definition: Mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.
 
 Math: The standard formula for pooled standard deviation when the two groups have the same sample size $n$ and standard deviations $sd0$ and $sd1$ is 
 $$\begin{aligned}
@@ -133,37 +131,56 @@ d.sdz&=d.raw/pooled.sd \\
 
 R:
 ``` {r eval=FALSE}
-pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2);
-d.raw=mean(group0)-mean(group1);
-d.sdz=d.raw/pooled_sd(sd(group0),sd(group1));
+pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2)
+d.raw=mean(group0)-mean(group1)
+d.sdz=d.raw/pooled_sd(sd(group0),sd(group1))
 ```
 
-#### *pval1*, *pval2* 
+####  P-value computed from t-distribution 
 
-P-value from t-distribution of *d1*, *d2*: computed from *n*, *d1*, *d2* by the standard formulae
+Notation: $pval$
+
+Math: computed from *n*, *d.sdz* by the standard formulae
 $$\begin{aligned}
-t&=d\sqrt{n^2/2n} \\
+t&=d_{sdz} \times \sqrt{n^2/2n} \\
 pval&=2 \times pt(-abs(t),df=2(n-1))
 \end{aligned}$$
 
-The R code is
+R:
 ``` {r eval=FALSE}
-## Cohen's d to p-value
-d2pval=function(n,d) t2pval(n,d2t(n,d))
 ## Cohen's d to t statistic
-d2t=function(n,d) d*sqrt(n^2/(2*n))
+d2t=function(n,d.sdz) d.sdz*sqrt(n^2/(2*n))
 ## t statistic to p-value
 t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
+## Cohen's d to p-value
+d2pval=function(n,d.sdz) t2pval(n,d2t(n,d.sdz))
 ```
 
+####  Pre-computed values for fixed-effect meta-analysis
+
+Notation: $w.meta$, $d.meta$. These are the inverse variance weight and weighted effect size of an individual study. 
+
+Definition: The variance in question is the sampling variance of the estimated effect size ($d.sdz$), not the variance of the data! The sampling distribution of $d.sdz$ is a non-central t-distribution centered on $d.sdz$ and with 
+
+with sd=sd_d2t(n,d.sdz)
+- [+] the estimated meta d.sdz apparently follows a normal distribution with sd as calculated in the code
 
 
-`r knitr::knit_exit()`
+
+These values are computed on individual studies, then combined to yield meta-effect size, etc.
+
+``` {r eval=FALSE}
+## inverse variance weight
+w.meta=with(simr,1/sd_d2t(n,d.sdz)^2);
+d.meta=with(simr,d.sdz*w.meta)
+```
+
 
 >>> meta-analysis
   - *dm* 
   - *dm* (standardized observed effect size for fixed-effect meta-analysis): 
 
+`r knitr::knit_exit()`
 
 
 
