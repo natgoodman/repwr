@@ -74,7 +74,7 @@ The table below lists the 28 measures implemented by the software. Each measure 
 **Caution** The notation *d* is potentially ambiguous.  When used in measures it means $d_{sdz}$, the standardized observed effect size (aka Cohen’s $d$). When used in figures it generally means $d_{pop}$, the population effect size. Sorry.
 
 | measure | meaning |
-| ------- | ---------------------------- |
+| ------- | -------------------------------------------------------- |
 | sig1 | *pval1* is significant | 
 | sig2 | *pval2* is significant | 
 | sigm | *pvalm* is significant | 
@@ -112,25 +112,40 @@ I now turn to specific measures and statistics used by measures.
 
 ### Measures and statistics computed on individual studies
 
-  - *d1*, *d2* (standardized observed effect size, aka *Cohen’s d*, for the two studies): mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.
-<br/>
-The standard formula for pooled standard deviation when the two groups have the same sample size $n$ and standard deviations $sd0$ and $sd1$ is 
+#### Standardized effect size, aka *Cohen’s d*
+
+Notation: *d1*, *d2*
+
+Meaning: standardized observed effect sizes, aka *Cohen’s d*, for the two studies
+
+Definition: mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.
+
+Math: The standard formula for pooled standard deviation when the two groups have the same sample size $n$ and standard deviations $sd0$ and $sd1$ is 
 $$\begin{aligned}
 pooled.sd&=\sqrt{((n-1)sd0^2+(n-1)sd1^2)/(2n -2))} \\
-&=\sqrt{(sd0^2+sd1^2)/2}
+&=\sqrt{(sd0^2+sd1^2)/2} \\
 \end{aligned}$$
-<br/>
-The R code is
+The overall formula for standardized effect size is
+$$\begin{aligned}
+d.raw&=mean(group0)-mean(group1) \\
+d.sdz&=d.raw/pooled.sd \\
+\end{aligned}$$
+
+R:
 ``` {r eval=FALSE}
 pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2);
+d.raw=mean(group0)-mean(group1);
+d.sdz=d.raw/pooled_sd(sd(group0),sd(group1));
 ```
 
-  - *pval1*, *pval2* (p-value from t-distribution of *d1*, *d2*): computed from *n*, *d1*, *d2* by the standard formulae
+#### *pval1*, *pval2* 
+
+P-value from t-distribution of *d1*, *d2*: computed from *n*, *d1*, *d2* by the standard formulae
 $$\begin{aligned}
 t&=d\sqrt{n^2/2n} \\
 pval&=2 \times pt(-abs(t),df=2(n-1))
 \end{aligned}$$
-<br/>
+
 The R code is
 ``` {r eval=FALSE}
 ## Cohen's d to p-value
@@ -140,6 +155,8 @@ d2t=function(n,d) d*sqrt(n^2/(2*n))
 ## t statistic to p-value
 t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
 ```
+
+
 
 `r knitr::knit_exit()`
 
