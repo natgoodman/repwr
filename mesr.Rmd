@@ -114,7 +114,7 @@ I now turn to specific measures and statistics used by measures.
 
 #### Standardized effect size, aka *Cohen’s d*
 
-Notation: $d.sdz$
+Notation: $d_{sdz}$ (`d.sdz`)
 
 Definition: Mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.
 
@@ -125,8 +125,8 @@ pooled.sd&=\sqrt{((n-1)sd0^2+(n-1)sd1^2)/(2n -2))} \\
 \end{aligned}$$
 The overall formula for standardized effect size is
 $$\begin{aligned}
-d.raw&=mean(group0)-mean(group1) \\
-d.sdz&=d.raw/pooled.sd \\
+d_{raw}&=mean(group0)-mean(group1) \\
+d_{sdz}&=d.raw/pooled.sd \\
 \end{aligned}$$
 
 R:
@@ -140,7 +140,7 @@ d.sdz=d.raw/pooled_sd(sd(group0),sd(group1))
 
 Notation: $pval$
 
-Math: computed from *n*, *d.sdz* by the standard formulae
+Math: Computed from *n*, *d.sdz* by the standard formulae
 $$\begin{aligned}
 t&=d_{sdz} \times \sqrt{n^2/2n} \\
 pval&=2 \times pt(-abs(t),df=2(n-1))
@@ -158,14 +158,23 @@ d2pval=function(n,d.sdz) t2pval(n,d2t(n,d.sdz))
 
 ####  Pre-computed values for fixed-effect meta-analysis
 
-Notation: $w.meta$, $d.meta$. These are the inverse variance weight and weighted effect size of an individual study. 
+Notation: $w_{meta}$ (`w.meta`), $d_{meta}$ (`d.meta`). Inverse variance weight and weighted effect size of an individual study. 
 
-Definition: The variance in question is the sampling variance of the estimated effect size ($d.sdz$), not the variance of the data! The sampling distribution of $d.sdz$ is a non-central t-distribution centered on $d.sdz$ and with 
+Definition: The variance in question is the sampling variance of the estimated effect size ($d_{sdz}$), not the variance of the data! The sampling distribution of $d_{sdz}$ is a noncentral t-distribution centered on $d_{sdz}$ with $2(n-1)$ degrees of freedom. The weighted effect size is simply $d_{sdz}$ divided by the weight.
 
-with sd=sd_d2t(n,d.sdz)
-- [+] the estimated meta d.sdz apparently follows a normal distribution with sd as calculated in the code
+Math: In the usual treatment, the noncentral t-distribution is defined in terms of *degrees of freedom* and *noncentrality parameter*. For the limited context of this simulation, the former is simply $2(n-1)$, and the latter $d_{sdz} \times \sqrt{n/2}$. The standard formula for variance of the noncentral t-distribution produces results in units of $t^2$. I translate these back to $d^2$ units using $d_{sdz}=t \times \sqrt{(2*n)/n^2}$. With these transformations in mind, the formula for variance is
+$$\begin{aligned}
+df&=2(n-1) \\
+ncp&=d_{sdz} \times \sqrt{n/2} \\
+\mu&=\sqrt{df/2} \times ncp \times \Gamma{(df-1)/2}/\Gamma{df/2} \\
+var_{t}&=(1+ncp^2) \times df/(df-2)-\mu^2 \\
+var&=var_{t} \times 2/n
+\end{aligned}$$
 
+R: The code breaks the problem into modular functions. It also deals with known limitations of R's `gamma` function
+``` {r eval=FALSE}
 
+```
 
 These values are computed on individual studies, then combined to yield meta-effect size, etc.
 
