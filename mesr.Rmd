@@ -63,7 +63,7 @@ The table below lists the 28 measures implemented by the software. Each measure 
 
 - *s1* and *s2* refer to the first and second study of the pair; *sm* means the fixed-effect meta-analysis of the two studies
 - *d1*, *d2*, *dm* mean the standardized observed effect size (aka Cohen’s $d$) of *s1*, *s2*, *sm*
-- *pval1*, *pval2*, *pvalm* mean the p-value of *s1*, *s2*, *sm*
+- *pval1*, *pval2*, *pvalm* mean the p-value computed from the t-distribution of *s1*, *s2*, *sm* 
 - *sig1*, *sig2*, *sigm* mean *pval1*, *pval2*, *pvalm* is significant
 - *c1*, *c2*, *cm* are confidence intervals of *s1*, *s2*, *sm*
 - *p1*, *p2* are prediction intervals of *s1*, *s2*; I don't have *pm* because I didn't find a definition in the literature
@@ -71,10 +71,10 @@ The table below lists the 28 measures implemented by the software. Each measure 
 - *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size
 - *.* combines two statistics to yield a complete measure. For example, *d1.c2* means that $d1_{sdz}$ is contained in *c2*; *c1.c2* means *c1* and *c2* overlap; *d1.scp2* means $d1_{sdz} \ge scp2$
 
->>> mention notational ambiguity of *d* - in measures it means $d_{sdz}$, in figures it generally means $d_{pop}$
+**Caution** The notation *d* is potentially ambiguous.  When used in measures it means $d_{sdz}$, the standardized observed effect size (aka Cohen’s $d$). When used in figures it generally means $d_{pop}$, the population effect size. Sorry.
 
 | measure | meaning |
-| ------- | ------- | ----- |
+| ------- | ---------------------------- |
 | sig1 | *pval1* is significant | 
 | sig2 | *pval2* is significant | 
 | sigm | *pvalm* is significant | 
@@ -104,17 +104,48 @@ The table below lists the 28 measures implemented by the software. Each measure 
 | big1 | $d1 \ge d2$ | 
 | big2 | $d2 \ge d1$ | 
 
-TODO maybe: explain which measures we use in the analysis, for plots and heats. explain that we look separately at scopes since they assume *sig2*
-
+## Implementation Notes
 
 Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes whatever it can on individual studies and further pre-computes values that depend only the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$).  Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
 
-### Implementation notes for specific statistics
+I now turn to specific measures and statistics used by measures.
 
-  - *d1*, *d2* (standardized observed effect size, aka *Cohen’s d*, for the two studies): mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.<br/>
-The standard formula for pooled standard deviation when the two groups have the same sample size $n$ and standard deviations $sd0$ and $sd1$ is $\sqrt{((n-1)sd0^2+(n-1)sd1^2)/(2n -2))}$. This simplifies to $\sqrt{(sd0^2+sd1^2)/2}$ which is the formula I use. Note that this formula is independent of $n$.
-  
+### Measures and statistics computed on individual studies
 
+  - *d1*, *d2* (standardized observed effect size, aka *Cohen’s d*, for the two studies): mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.
+<br/>
+The standard formula for pooled standard deviation when the two groups have the same sample size $n$ and standard deviations $sd0$ and $sd1$ is 
+$$\begin{aligned}
+pooled.sd&=\sqrt{((n-1)sd0^2+(n-1)sd1^2)/(2n -2))} \\
+&=\sqrt{(sd0^2+sd1^2)/2}
+\end{aligned}$$
+<br/>
+The R code is
+``` {r eval=FALSE}
+pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2);
+```
+
+  - *pval1*, *pval2* (p-value from t-distribution of *d1*, *d2*): computed from *n*, *d1*, *d2* by the standard formulae
+$$\begin{aligned}
+t&=d\sqrt{n^2/2n} \\
+pval&=2 \times pt(-abs(t),df=2(n-1))
+\end{aligned}$$
+<br/>
+The R code is
+``` {r eval=FALSE}
+## Cohen's d to p-value
+d2pval=function(n,d) t2pval(n,d2t(n,d))
+## Cohen's d to t statistic
+d2t=function(n,d) d*sqrt(n^2/(2*n))
+## t statistic to p-value
+t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
+```
+
+`r knitr::knit_exit()`
+
+>>> meta-analysis
+  - *dm* 
+  - *dm* (standardized observed effect size for fixed-effect meta-analysis): 
 
 
 
