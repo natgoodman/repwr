@@ -231,11 +231,28 @@ sdt=function(df) sqrt(df/(df-2))
 
 ## Implementation Notes
 
-Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes whatever it can on individual studies and further pre-computes values that depend only the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$).  Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
+Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes what it can before doing any simulation, then what it can on each simulated study, then values that depend only the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$), and finally statistics that depend on pairs of studies.  Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
 
 I now turn to specific measures and statistics used by measures.
 
-### Measures and statistics computed on individual studies
+### Values computed before simulation
+
+The values computed before the simulation are Uri Simonsohn's small telescopes thresholds, my extension to Uri's method that takes into account the observed effect size, and con
+
+
+Values computed before the simulation cannot depend on the data, of course. 
+
+#### Small telescope thresholds
+
+#### Effect size dependent small telescope thresholds
+
+#### Confidence intervals
+
+#### Prediction intervals
+
+
+
+### Values computed on individual studies
 
 In the code,
 
@@ -279,6 +296,11 @@ R:
 pval=d2pval(n,d.sdz); 
 ```
 
+#### Confidence interval
+
+"ci.lo"  "ci.hi"
+
+
 #### Absolute value and sign
 
 Notation: $d_{abs}$ (`d.abs`), $d_{sign}$ (`d.sign`)
@@ -300,7 +322,6 @@ R:
 d.abs=abs(d.sdz);
 d.sign=sign(d.sdz);
 ```
-
 
 ####  Pre-computed values for fixed-effect meta-analysis
 
