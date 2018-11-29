@@ -119,7 +119,7 @@ In the following math, the notation is
   - p-value: $pval$
   - noncentrality parameter: $ncp$
 
-$$\begin{aligned}
+\begin{aligned}
 &\bf{\text{sample size to degrees of freedom}} \\
 df&=2(n-1) \\
 
@@ -135,7 +135,8 @@ ncp&=d_{sdz} \sqrt{n/2} \\
 &\bf{\text{p-value to t-statistic and Cohen's d. Note: qt() is from base R, q_d2t() is wrapper for qt().}} \\
 t&=qt(pval/2,df=2*(n-1),lower.tail=F) \\
 d_{sdz}&=q\_d2t(n,q=pval/2,lower.tail=F) \\
-\end{aligned}$$
+\end{aligned}
+
 
 I use these transformations to define a family of `d2t` functions analogous to R's `t` functions, plus a few more. These function are in the file `R/stats.R`. In the code,
 
@@ -236,6 +237,12 @@ I now turn to specific measures and statistics used by measures.
 
 ### Measures and statistics computed on individual studies
 
+In the code,
+
+  - sample size (of each group): `n`
+  - standardized observed effect size: `d.sdz`; I use `d.sdz` in this code to avoid confusion with the population effect size `d.pop`
+  - p-value: `pval`
+
 #### Standardized effect size, aka *Cohen’s d*
 
 Notation: $d_{sdz}$ (`d.sdz`)
@@ -264,7 +271,7 @@ d.sdz=d.raw/pooled_sd(sd(group0),sd(group1))
 
 Notation: $pval$
 
-Math: Computed from *n*, *d.sdz* by the standard formulae
+Math: Computed from *n*, *d.sdz* by the transformations in [Statistical Notes](#statistical-notes)
 $$\begin{aligned}
 t&=d_{sdz} \times \sqrt{n^2/2n} \\
 pval&=2 \times pt(-abs(t),df=2(n-1))
