@@ -62,7 +62,7 @@ The software implements a number of related correctness criteria, which I've not
 The table below lists the 28 measures implemented by the software. Each measure applies to a pairwise replication instance (although some only depend on one study of the pair). Measures and the subsequent discussion use the following notation.
 
 - *s1* and *s2* refer to the first and second study of the pair; *sm* means the fixed-effect meta-analysis of the two studies
-- *d1*, *d2*, *dm* mean the standardized observed effect size (aka Cohen’s $d$) of *s1*, *s2*, *sm*
+- *d1*, *d2*, *dm* mean the standardized observed effect size (aka *Cohen’s d*) of *s1*, *s2*, *sm*
 - *pval1*, *pval2*, *pvalm* mean the p-value computed from the t-distribution of *s1*, *s2*, *sm* 
 - *sig1*, *sig2*, *sigm* mean *pval1*, *pval2*, *pvalm* is significant
 - *c1*, *c2*, *cm* are confidence intervals of *s1*, *s2*, *sm*
@@ -103,6 +103,133 @@ The table below lists the 28 measures implemented by the software. Each measure 
 | dm.scpd1 | *dm* exceeds *scpd1* | 
 | big1 | $d1 \ge d2$ | 
 | big2 | $d2 \ge d1$ | 
+
+## Statistical Notes
+
+The definition of several measures depends on nuances of the t-distribution. I learned the hard way that the classic (*central*) t-distribution only applies when the NULL is true. When the NULL isn't true, the correct sampling distribution is the *noncentral t-distribution*. 
+
+In the usual treatment, the central t-distribution is parameterized by *degrees of freedom*; the noncentral t-distribution also has a *noncentrality parameter*; and both operate on the *t-statistic*. I'm sure there are good reasons for these mysterious concepts, but I prefer the more concrete *sample size* and *standardized observed effect size* (aka *Cohen’s d*). For the limited context of this simulation, it's easy to convert between the concepts. While I'm at it, I define conversions between p-values and both my prefered units and t-statistics.
+
+In the following math, the notation is
+
+  - degrees of freedom: $df$
+  - noncentrality parameter: $ncp$
+  - sample size (of each group): $n$
+  - standardized observed effect size: $d_{sdz}$
+  - p-value: $pval$
+  - t-statistic: $t$
+
+$$\begin{aligned}
+df&=2(n-1) \\
+\end{aligned}$$
+
+**t-statistic to Cohen's d and pval**
+$$\begin{aligned}
+d_{sdz}&=t \sqrt{(2n)/n^2} \\ 
+pval&=2 \times pt(-\lvert t\rvert,df=2*(n-1)) \\
+\end{aligned}$$
+
+**Cohen's d to t statistic, pval, and noncentrality parameter**
+$$\begin{aligned}
+t&=d_{sdz} \sqrt{n^2/2n} \\
+pval&=2 \times pt(-\lvert d_{sdz}\rvert \sqrt{n^2/2n}),df=2*(n-1)) \\
+ncp&=d_{sdz} \sqrt{n/2} \\
+\end{aligned}$$
+
+**pval to t statistic and Cohen's d**. Note: $qt()$ is from base R. $q_d2t()$ is *d2t* wrapper for $qt$
+$$\begin{aligned}
+t&=qt(pval/2,df=2*(n-1),lower.tail=F) \\
+d_{sdz}&=q_d2t(n,q=pval/2,lower.tail=F) \\
+\end{aligned}$$
+
+I use these transformations to define a family of *d2t* functions analogous to R's *t* functions, plus a few more that I needed. These are in the file `R/stats.R`. In the code,
+
+  - sample size (of each group): `n`
+  - standardized observed effect size: `d`
+  - center of noncentral t-distribution in `d` units: `d0`
+  - p-value: `pval`
+
+The first group are basic transformations.
+
+``` {r eval=FALSE}
+## t statistic to Cohen's d & pval
+t2d=function(n,t) t*sqrt((2*n)/n^2)
+t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
+
+## Cohen's d to t statistic, pval, and noncentrality parameter
+d2t=function(n,d) d*sqrt(n^2/(2*n))
+d2pval=function(n,d) t2pval(n,d2t(n,d))
+ncp=function(n,d) sqrt(n/2)*d
+
+## pval to t statistic & Cohen's d
+pval2t=function(n,pval) qt(pval/2,df=2*(n-1),lower.tail=F)
+pval2d=function(n,pval) q_d2t(n,q=pval/2,lower.tail=F)        # see below for q_d2t
+```
+
+The next group are *d2t* wrappers around R's t-distribution functions. They make liberal use of the transformations above.
+
+``` {r eval=FALSE}
+## density function of t-distribution in concrete units (n, d)
+d_d2t=function(n,d,d0=NULL) {
+  df=2*(n-1);
+  t=d2t(n,d);
+  if (!is.null(d0)) suppressWarnings(dt(t,df=df,ncp=ncp(n,d0)))
+  else dt(t,df=df)
+}
+## distribution function of t-distribution in concrete units (n, d)
+p_d2t=function(n,d,d0=NULL,lower.tail=TRUE) {
+  df=2*(n-1);
+  t=d2t(n,d);
+  if (!is.null(d0)) suppressWarnings(pt(t,df=df,ncp=ncp(n,d0),lower.tail=lower.tail))
+    else pt(t,df=df,lower.tail=lower.tail)
+}
+## quantile function of t-distribution in concrete units (n, d)
+q_d2t=function(n,q,d0=NULL,lower.tail=TRUE) {
+  df=2*(n-1);
+  if (!is.null(d0)) t=suppressWarnings(qt(q,df=df,ncp=ncp(n,d0),lower.tail=lower.tail))
+    else t=qt(q,df=df,lower.tail=lower.tail)
+  t2d(n,t);
+}
+## random generation function of t-distribution in concrete units (n, d)
+r_d2t=function(m,n,d0=NULL) {
+  df=2*(n-1);
+  if (!is.null(d0)) t=suppressWarnings(rt(m,df=df,ncp=ncp(n,d0))) else t=rt(m,df=df);
+  t2d(n,t)
+}
+```
+
+The final group compute the mean and standard deviation of the d2t-distribution. I was surprised to learn that base R doesn't provide these functions for the standard t-distribution. 
+
+``` {r eval=FALSE}
+## mean of t-distribution in concrete units (n, d) 
+mean_d2t=function(n,d0=NULL) {
+  df=2*(n-1);
+  if (!is.null(d0)) {
+    ncp=ncp(n,d0);
+    ## NG 18-02-07. gamma blows up when n>100 or so. use lgamma instead
+    ## theo.mean=sqrt(df/2)*ncp*gamma((df-1)/2)/gamma(df/2)
+    theo.mean=sqrt(df/2)*ncp*exp(lgamma((df-1)/2)-lgamma(df/2))
+    t2d(n,theo.mean)
+  } else 0;
+}
+## standard deviation of t-distribution in concrete units (n, d) 
+sd_d2t=function(n,d0=NULL) {
+  df=2*(n-1);
+  if (!is.null(d0)) {
+    ncp=ncp(n,d0);
+    ## NG 18-02-07. gamma blows up when n>100 or so. use lgamma instead
+    ## theo.mean=sqrt(df/2)*ncp*gamma((df-1)/2)/gamma(df/2)
+    theo.mean=sqrt(df/2)*ncp*exp(lgamma((df-1)/2)-lgamma(df/2))
+    theo.var=(1+ncp^2)*df/(df-2)-(theo.mean^2)
+    theo.sd=sqrt(theo.var)
+    t2d(n,theo.sd)
+  } else
+    (sqrt(2*n)/n)*sdt(2*(n-1));
+}
+## standard deviation of central t-distribution in concrete units (n, d)
+sdt=function(df) sqrt(df/(df-2))
+
+```
 
 ## Implementation Notes
 
@@ -184,12 +311,12 @@ w.meta=with(simr,1/sd_d2t(n,d.sdz)^2);
 d.meta=with(simr,d.sdz*w.meta)
 ```
 
+`r knitr::knit_exit()`
 
 >>> meta-analysis
   - *dm* 
   - *dm* (standardized observed effect size for fixed-effect meta-analysis): 
 
-`r knitr::knit_exit()`
 
 
 
