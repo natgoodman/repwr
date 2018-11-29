@@ -113,55 +113,59 @@ In the usual treatment, the central t-distribution is parameterized by *degrees 
 In the following math, the notation is
 
   - degrees of freedom: $df$
-  - noncentrality parameter: $ncp$
   - sample size (of each group): $n$
   - standardized observed effect size: $d_{sdz}$
-  - p-value: $pval$
   - t-statistic: $t$
+  - p-value: $pval$
+  - noncentrality parameter: $ncp$
 
+**sample size to degrees of freedom**
 $$\begin{aligned}
 df&=2(n-1) \\
 \end{aligned}$$
 
-**t-statistic to Cohen's d and pval**
+**t-statistic to Cohen's d and p-value**. Note: $pt()$ is from base R.
 $$\begin{aligned}
 d_{sdz}&=t \sqrt{(2n)/n^2} \\ 
 pval&=2 \times pt(-\lvert t\rvert,df=2*(n-1)) \\
 \end{aligned}$$
 
-**Cohen's d to t statistic, pval, and noncentrality parameter**
+**Cohen's d to t-statistic, p-value, and noncentrality parameter**. Note: $pt()$ is from base R.
 $$\begin{aligned}
 t&=d_{sdz} \sqrt{n^2/2n} \\
 pval&=2 \times pt(-\lvert d_{sdz}\rvert \sqrt{n^2/2n}),df=2*(n-1)) \\
 ncp&=d_{sdz} \sqrt{n/2} \\
 \end{aligned}$$
 
-**pval to t statistic and Cohen's d**. Note: $qt()$ is from base R. $q_d2t()$ is *d2t* wrapper for $qt$
+**p-value to t-statistic and Cohen's d**. Note: $qt()$ is from base R. $q\_d2t()$ is *d2t* wrapper for $qt$
 $$\begin{aligned}
 t&=qt(pval/2,df=2*(n-1),lower.tail=F) \\
-d_{sdz}&=q_d2t(n,q=pval/2,lower.tail=F) \\
+d_{sdz}&=q\_d2t(n,q=pval/2,lower.tail=F) \\
 \end{aligned}$$
 
-I use these transformations to define a family of *d2t* functions analogous to R's *t* functions, plus a few more that I needed. These are in the file `R/stats.R`. In the code,
+I use these transformations to define a family of `d2t` functions analogous to R's `t` functions, plus a few more. These function are in the file `R/stats.R`. In the code,
 
+  - degrees of freedom: `df`
   - sample size (of each group): `n`
-  - standardized observed effect size: `d`
+  - standardized observed effect size: `d`; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity
   - center of noncentral t-distribution in `d` units: `d0`
+  - t-statistic: `t`
   - p-value: `pval`
+  - noncentrality parameter in `t` units: $ncp$
 
 The first group are basic transformations.
 
 ``` {r eval=FALSE}
-## t statistic to Cohen's d & pval
+## t-statistic to Cohen's d & p-value
 t2d=function(n,t) t*sqrt((2*n)/n^2)
 t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
 
-## Cohen's d to t statistic, pval, and noncentrality parameter
+## Cohen's d to t-statistic, p-value, and noncentrality parameter
 d2t=function(n,d) d*sqrt(n^2/(2*n))
 d2pval=function(n,d) t2pval(n,d2t(n,d))
 ncp=function(n,d) sqrt(n/2)*d
 
-## pval to t statistic & Cohen's d
+## p-value to t-statistic & Cohen's d
 pval2t=function(n,pval) qt(pval/2,df=2*(n-1),lower.tail=F)
 pval2d=function(n,pval) q_d2t(n,q=pval/2,lower.tail=F)        # see below for q_d2t
 ```
@@ -206,8 +210,8 @@ mean_d2t=function(n,d0=NULL) {
   df=2*(n-1);
   if (!is.null(d0)) {
     ncp=ncp(n,d0);
-    ## NG 18-02-07. gamma blows up when n>100 or so. use lgamma instead
-    ## theo.mean=sqrt(df/2)*ncp*gamma((df-1)/2)/gamma(df/2)
+    ## Note: gamma blows up when n>100 or so. use lgamma instead
+    ##       theo.mean=sqrt(df/2)*ncp*gamma((df-1)/2)/gamma(df/2)
     theo.mean=sqrt(df/2)*ncp*exp(lgamma((df-1)/2)-lgamma(df/2))
     t2d(n,theo.mean)
   } else 0;
@@ -217,8 +221,8 @@ sd_d2t=function(n,d0=NULL) {
   df=2*(n-1);
   if (!is.null(d0)) {
     ncp=ncp(n,d0);
-    ## NG 18-02-07. gamma blows up when n>100 or so. use lgamma instead
-    ## theo.mean=sqrt(df/2)*ncp*gamma((df-1)/2)/gamma(df/2)
+    ## Note: gamma blows up when n>100 or so. use lgamma instead
+    ##       theo.mean=sqrt(df/2)*ncp*gamma((df-1)/2)/gamma(df/2)
     theo.mean=sqrt(df/2)*ncp*exp(lgamma((df-1)/2)-lgamma(df/2))
     theo.var=(1+ncp^2)*df/(df-2)-(theo.mean^2)
     theo.sd=sqrt(theo.var)
@@ -228,7 +232,6 @@ sd_d2t=function(n,d0=NULL) {
 }
 ## standard deviation of central t-distribution in concrete units (n, d)
 sdt=function(df) sqrt(df/(df-2))
-
 ```
 
 ## Implementation Notes
@@ -275,9 +278,9 @@ pval&=2 \times pt(-abs(t),df=2(n-1))
 
 R:
 ``` {r eval=FALSE}
-## Cohen's d to t statistic
+## Cohen's d to t-statistic
 d2t=function(n,d.sdz) d.sdz*sqrt(n^2/(2*n))
-## t statistic to p-value
+## t-statistic to p-value
 t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
 ## Cohen's d to p-value
 d2pval=function(n,d.sdz) t2pval(n,d2t(n,d.sdz))
