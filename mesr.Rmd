@@ -119,26 +119,20 @@ In the following math, the notation is
   - p-value: $pval$
   - noncentrality parameter: $ncp$
 
-**sample size to degrees of freedom**
 $$\begin{aligned}
+&\bf{\text{sample size to degrees of freedom}} \\
 df&=2(n-1) \\
-\end{aligned}$$
 
-**t-statistic to Cohen's d and p-value**. Note: $pt()$ is from base R.
-$$\begin{aligned}
+&\bf{\text{t-statistic to Cohen's d and p-value. Note: pt() is from base R.}} \\
 d_{sdz}&=t \sqrt{(2n)/n^2} \\ 
 pval&=2 \times pt(-\lvert t\rvert,df=2*(n-1)) \\
-\end{aligned}$$
 
-**Cohen's d to t-statistic, p-value, and noncentrality parameter**. Note: $pt()$ is from base R.
-$$\begin{aligned}
+&\bf{\text{Cohen's d to t-statistic, p-value, and noncentrality parameter. Note: pt() is from base R.}} \\
 t&=d_{sdz} \sqrt{n^2/2n} \\
 pval&=2 \times pt(-\lvert d_{sdz}\rvert \sqrt{n^2/2n}),df=2*(n-1)) \\
 ncp&=d_{sdz} \sqrt{n/2} \\
-\end{aligned}$$
 
-**p-value to t-statistic and Cohen's d**. Note: $qt()$ is from base R. $q\_d2t()$ is *d2t* wrapper for $qt$
-$$\begin{aligned}
+&\bf{\text{p-value to t-statistic and Cohen's d. Note: qt() is from base R, q_d2t() is wrapper for qt().}} \\
 t&=qt(pval/2,df=2*(n-1),lower.tail=F) \\
 d_{sdz}&=q\_d2t(n,q=pval/2,lower.tail=F) \\
 \end{aligned}$$
