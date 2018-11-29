@@ -250,15 +250,15 @@ Notation: $d_{sdz}$ (`d.sdz`)
 Definition: Mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups.
 
 Math: The standard formula for pooled standard deviation when the two groups have the same sample size $n$ and standard deviations $sd0$ and $sd1$ is 
-$$\begin{aligned}
+\begin{aligned}
 pooled.sd&=\sqrt{((n-1)sd0^2+(n-1)sd1^2)/(2n -2))} \\
 &=\sqrt{(sd0^2+sd1^2)/2} \\
-\end{aligned}$$
+\end{aligned}
 The overall formula for standardized effect size is
-$$\begin{aligned}
+\begin{aligned}
 d_{raw}&=mean(group0)-mean(group1) \\
 d_{sdz}&=d.raw/pooled.sd \\
-\end{aligned}$$
+\end{aligned}
 
 R:
 ``` {r eval=FALSE}
