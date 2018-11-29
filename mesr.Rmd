@@ -197,7 +197,7 @@ r_d2t=function(m,n,d0=NULL) {
 }
 ```
 
-The final group compute the mean and standard deviation of the d2t-distribution. I was surprised to learn that base R doesn't provide these functions for the standard t-distribution. 
+The final group compute the mean and standard deviation of the d2t-distribution. I was surprised to learn that base R doesn't provide these functions for the standard t-distribution. Note the comments about R's `gamma` function and the workaround using `lgamma`. I'm sure I didn't devise this workaround on my own but my notes don't say where I found it.  Sorry!
 
 ``` {r eval=FALSE}
 ## mean of t-distribution in concrete units (n, d) 
@@ -262,65 +262,62 @@ d_{sdz}&=d.raw/pooled.sd \\
 
 R:
 ``` {r eval=FALSE}
-pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2)
-d.raw=mean(group0)-mean(group1)
-d.sdz=d.raw/pooled_sd(sd(group0),sd(group1))
+pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2);
+d.raw=mean(group0)-mean(group1);
+d.sdz=d.raw/pooled_sd(sd(group0),sd(group1));
 ```
 
 ####  P-value computed from t-distribution 
 
-Notation: $pval$
+Notation: $pval$ (`pval`)
 
 Math: Computed from *n*, *d.sdz* by the transformations in [Statistical Notes](#statistical-notes)
-$$\begin{aligned}
-t&=d_{sdz} \times \sqrt{n^2/2n} \\
-pval&=2 \times pt(-abs(t),df=2(n-1))
-\end{aligned}$$
 
 R:
 ``` {r eval=FALSE}
-## Cohen's d to t-statistic
-d2t=function(n,d.sdz) d.sdz*sqrt(n^2/(2*n))
-## t-statistic to p-value
-t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
-## Cohen's d to p-value
-d2pval=function(n,d.sdz) t2pval(n,d2t(n,d.sdz))
+## d2pval function in Statistical Notes section
+pval=d2pval(n,d.sdz); 
 ```
+
+#### Absolute value and sign
+
+Notation: $d_{abs}$ (`d.abs`), $d_{sign}$ (`d.sign`)
+
+Definition: $d_{abs}$ is the absolute value of $d_{sdz}$. $d_{sign}$ is the sign of $d_{sdz}$: 1 for positive, -1 for negative, 0 for the very unlikely case that $d_{sdz}$ is exactly 0. The code pre-computes these for a very small performance gain.
+
+Math: 
+\begin{aligned}
+d_{abs}&=\lvert d_{sdz}\rvert \\
+d_{sign}&=\begin{cases}
+1,  & \text{if $d_{sdz}$ > 0} \\
+-1,  & \text{if $d_{sdz}$ < 0} \\
+0, & \text{if $d_{sdz}$ = 0}
+\end{cases}
+\end{aligned}
+
+R:
+``` {r eval=FALSE}
+d.abs=abs(d.sdz);
+d.sign=sign(d.sdz);
+```
+
 
 ####  Pre-computed values for fixed-effect meta-analysis
 
-Notation: $w_{meta}$ (`w.meta`), $d_{meta}$ (`d.meta`). Inverse variance weight and weighted effect size of an individual study. 
+Notation: $w_{meta}$ (`w.meta`), $d_{meta}$ (`d.meta`).  
 
-Definition: The variance in question is the sampling variance of the estimated effect size ($d_{sdz}$), not the variance of the data! The sampling distribution of $d_{sdz}$ is a noncentral t-distribution centered on $d_{sdz}$ with $2(n-1)$ degrees of freedom. The weighted effect size is simply $d_{sdz}$ divided by the weight.
+Definition: Inverse variance weight and weighted effect size of an individual study. The variance in question is the sampling variance of the estimated effect size ($d_{sdz}$), not the variance of the data! The sampling distribution of $d_{sdz}$ is a noncentral t-distribution centered on $d_{sdz}$ with $2(n-1)$ degrees of freedom. The weighted effect size is simply $d_{sdz}$ divided by the weight. The code pre-computes these values for each study, then combines them to yield the final meta-analytic statistics for pairs of studies.
 
-Math: In the usual treatment, the noncentral t-distribution is defined in terms of *degrees of freedom* and *noncentrality parameter*. For the limited context of this simulation, the former is simply $2(n-1)$, and the latter $d_{sdz} \times \sqrt{n/2}$. The standard formula for variance of the noncentral t-distribution produces results in units of $t^2$. I translate these back to $d^2$ units using $d_{sdz}=t \times \sqrt{(2*n)/n^2}$. With these transformations in mind, the formula for variance is
-$$\begin{aligned}
-df&=2(n-1) \\
-ncp&=d_{sdz} \times \sqrt{n/2} \\
-\mu&=\sqrt{df/2} \times ncp \times \Gamma{(df-1)/2}/\Gamma{df/2} \\
-var_{t}&=(1+ncp^2) \times df/(df-2)-\mu^2 \\
-var&=var_{t} \times 2/n
-\end{aligned}$$
+Math: The standard deviation is computed from $n$ and $d_{sdz}$ by the $sd\_d2t$ function in [Statistical Notes](#statistical-notes). The variance is the square of this.
 
-R: The code breaks the problem into modular functions. It also deals with known limitations of R's `gamma` function
+R: 
 ``` {r eval=FALSE}
-
-```
-
-These values are computed on individual studies, then combined to yield meta-effect size, etc.
-
-``` {r eval=FALSE}
-## inverse variance weight
-w.meta=with(simr,1/sd_d2t(n,d.sdz)^2);
-d.meta=with(simr,d.sdz*w.meta)
+## sd_d2t function in Statistical Notes section
+w.meta=1/(sd_d2t(n,d.sdz)^2);
+d.meta=d.sdz*w.meta;
 ```
 
 `r knitr::knit_exit()`
-
->>> meta-analysis
-  - *dm* 
-  - *dm* (standardized observed effect size for fixed-effect meta-analysis): 
-
 
 
 
