@@ -137,13 +137,12 @@ t&=qt(pval/2,df=2*(n-1),lower.tail=F) \\
 d_{sdz}&=q\_d2t(n,q=pval/2,lower.tail=F) \\
 \end{aligned}
 
-
 I use these transformations to define a family of `d2t` functions analogous to R's `t` functions, plus a few more. These function are in the file `R/stats.R`. In the code,
 
   - degrees of freedom: `df`
   - sample size (of each group): `n`
   - standardized observed effect size: `d`; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity
-  - center of noncentral t-distribution in `d` units: `d0`
+  - noncentrality parameter in `d` units: `d0`
   - t-statistic: `t`
   - p-value: `pval`
   - noncentrality parameter in `t` units: $ncp$
@@ -197,7 +196,7 @@ r_d2t=function(m,n,d0=NULL) {
 }
 ```
 
-The final group compute the mean and standard deviation of the d2t-distribution. I was surprised to learn that base R doesn't provide these functions for the standard t-distribution. Note the comments about R's `gamma` function and the workaround using `lgamma`. I'm sure I didn't devise this workaround on my own but my notes don't say where I found it.  Sorry!
+The third group compute the mean and standard deviation of the d2t-distribution. I was surprised to learn that base R doesn't provide these functions for the standard t-distribution. Note the comments about R's `gamma` function and the workaround using `lgamma`. I'm sure I didn't devise this workaround on my own but my notes don't say where I found it.  Sorry!
 
 ``` {r eval=FALSE}
 ## mean of t-distribution in concrete units (n, d) 
@@ -229,6 +228,43 @@ sd_d2t=function(n,d0=NULL) {
 sdt=function(df) sqrt(df/(df-2))
 ```
 
+The final group calculate confidence and prediction intervals for the d2t-distribution. I adapted the confidence interval function from [Uri Simonsohn's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) and the prediction interval function from [Spence and Stanley's paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) and [Stanleys predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval/).
+
+In the following math, the notation is
+
+  - sample size (of each group): $n$
+  - standardized observed effect size: $d_{sdz}$
+  - lower and upper bounds of confidence interval: $d_{lo}$, $d_{hi}$; these are *population* effect sizes
+  - noncentrality parameter in $d$ units: $d0$
+  - t-statistic: $t$
+  - p-value: $pval$
+  - noncentrality parameter: $ncp$
+
+The bounds of the confidence interval are resp. the smallest and largest *population* effect sizes for which $d_{sdz}$ would be significant.
+
+
+
+
+``` {r eval=FALSE}
+## adapted from http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R
+ci_d2t=function(n,d,conf.level=0.95) {
+  p0=(1-conf.level)/2; p1=1-p0;
+  ci.lo=suppressWarnings(
+    uniroot(function(d0) p_d2t(n,d,d0,lower.tail=F)-p0,interval=c(-10,10))$root);
+  ci.hi=suppressWarnings(
+    uniroot(function(d0) p_d2t(n,d,d0,lower.tail=F)-p1,interval=c(-10,10))$root);
+  c(ci.lo,ci.hi);
+}
+## adapted from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/ and predictionInterval package
+pi_d2t=function(n1,n2,d,ci1=NULL,ci2=NULL,pred.level=0.95) {
+  if (is.null(ci1)) ci1=ci_d2t(n1,d);
+  if (is.null(ci2)) ci2=ci_d2t(n2,d);
+  l1=ci1[1]; u1=ci1[2];
+  l2=ci2[1]; u2=ci2[2];
+  c(d-sqrt((d-l1)^2+(u2-d)^2),d+sqrt((d-l2)^2+(u1-d)^2));
+}
+```
+
 ## Implementation Notes
 
 Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes what it can before doing any simulation, then what it can on each simulated study, then values that depend only the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$), and finally statistics that depend on pairs of studies.  Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
@@ -237,10 +273,11 @@ I now turn to specific measures and statistics used by measures.
 
 ### Values computed before simulation
 
-The values computed before the simulation are Uri Simonsohn's small telescopes thresholds, my extension to Uri's method that takes into account the observed effect size, and con
+Values computed before the simulation cannot depend on the data, of course. In addition to values that truly do not on the data, I pre-compute expensive statistics on a parameter grid, then later interpolate to get the values for a specific study or replication. 
+
+The values computed before the simulation are Uri Simonsohn's small telescopes thresholds, my extension to Uri's method that takes into account the observed effect size, 
 
 
-Values computed before the simulation cannot depend on the data, of course. 
 
 #### Small telescope thresholds
 
