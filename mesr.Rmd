@@ -3,10 +3,10 @@ title: "Measuring Replication Success"
 author: "Nathan (Nat) Goodman"
 date: "November 30, 2018"
 output:
+  pdf_document: default
   html_document:
     css: css/html_document.css
     highlight: kate
-  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
@@ -316,7 +316,7 @@ Uri Simonsohn's small telescope thresholds depend only on the sameple sizes of t
 
 The method first computes the smallest population effect size that would confer 33% power to the original study; Uri calls this $d_{33\%}$. Then it computes the smallest observed effect size that the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{scope}$. If the replica observes an effect size $\lt d_{scope}$, the method concludes that the population effect size is too small to have been really detected by the original study.
 
-**Notation: $math$ (`code`)**
+**Notation:** $math$ (`code`)
 
   - sample sizes of the two studies: $n1$ (`n1`), $n2$ (`n2`)
   - required power of original study: $pwr$ (`scope.power`); Uri fixes this at 33%
