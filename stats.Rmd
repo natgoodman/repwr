@@ -1,7 +1,7 @@
 ---
-title: "Measuring Replication Success"
+title: "Noncentral d2t-Distribution Applied to Measures of Replication Success"
 author: "Nathan (Nat) Goodman"
-date: "November 30, 2018"
+date: "December 02, 2018"
 output:
   pdf_document: default
   html_document:
@@ -12,103 +12,33 @@ citecolor: green
 urlcolor: blue
 ---
 
-*Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. I call these tests "measures". Elsewhere I reported results from simulating these tests across a range of conditions. Here I describe the measures themselves and provide implementation details for ones that aren't obvious.*
+*Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. I call these tests "measures". Elsewhere I report results from simulating these tests and describe the measures in detail. Here I discuss nuances of the noncentral t-distribution that underlie many replication measures.*
 
 ## Introduction
 
-Various authors have proposed tests for deciding whether a replication succeeds or fails. These include significance testing of the replica study, seeing whether the observed effect size of one study falls in the confidence or prediction interval of the other, checking whether the confidence or prediction intervals of the two studies overlap, significance testing of the studies combined via meta-analysis, and comparing the observed effect size of the repeated study with a "small telescope" threshold deemed to be the smallest true effect size the original study could have plausibly detected. 
+Various authors have proposed tests for deciding whether a replication succeeds or fails. I simulated many of rules across a range of replication conditions and reported results in a working paper [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html). I described the measures themselves in a working paper [Measures of Replication Success](https://natgoodman.github.io/repwr/mesr.stable.html).
 
-I simulated these rules (and more) across many replication conditions and computed false positive and false negative rates for conditions of interest. I reported these results in a working paper, [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post, [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html).
+Several measures depends on nuances of the *noncentral t-distribution*. Introductory statistics material usually parameterize the central t-distribution by *degrees of freedom*; the noncentral t-distribution also has a *noncentrality parameter*; and both operate on the *t-statistic*. I prefer to work with more concrete parameters: *sample size* and *standardized observed effect size* (aka *Cohen’s d*). For the limited context of my simulation, it's easy to convert between the concepts.
 
-In this document I describe the measures themselves, providing implementation details where appropriate. The code implements 28 measures. These include all replication rules I found in the literature or blogosphere that I was able to implement with adequate performance, plus ones I added to satisfy my sense of completeness, and a few I needed for technical reasons.  The [Measures section below](#measures) has them all, but here a few to give you a flavor.
-
-- *sig1* (resp. *sig2*) - the first (resp. second) study of the pair has a significant p-value
-- *d1.c2* (resp. *d2.c1*, *d1.p2*, *d2.p1*) - the standardized observed effect size (aka Cohen's d) of the one study is in the confidence interval (resp. prediction interval) of the other study
-- *sdir* - the observed effects sizes for the two studies are in the same direction, i.e., have the same sign
+Here I represent my software for the noncentral t-distribution parameterized by sample size and effect size. I call this the *d2t-distribution*. I must emphasize that the d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution.
 
 ## Simulation 
 
 I consider a basic replication scheme in which each original study is repeated once. 
 
-The software first simulates *studys* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, and finally computes true and false positive and negative rates for measures and conditions of interest.
+The software first simulates *studys* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (the *measures*) for deciding which pairwise replications pass, and finally computes true and false positive and negative rates for measures and conditions of interest.
 
 The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is from a standard normal distribution with mean $d_{pop}$. When I need to be pedantic, I use the term *study set* for the ensemble of studies for a given combination of $n$ and $d_{pop}$. 
 
-To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. It is often convenient to think of the first study of the pair as the *original* and the second as the *replication*, but the software doesn't rely on this distinction. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets. Four variables parameterize each pairwise replication set: $n1$, $n2$, $d1_{pop}$, $d2_{pop}$. These are, naturally enough, the sample and population effect sizes for the two study sets.
+To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row. A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets. Four variables parameterize each pairwise replication set: $n1$, $n2$, $d1_{pop}$, $d2_{pop}$. These are, naturally enough, the sample and population effect sizes for the two study sets.
 
-After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent replication instances and columns represent the measures' results. 
+After forming the pairwise replications, I apply the measures. The result is a boolean matrix whose rows represent replication instances and columns represent the measures' results.
 
-The next step sumarizes the results by counting the number of true results for each measure in the replication set. I compute counts for the measures individually and a few combinations of interest.  The combinations are
-
-- *sig1* - instances that satisfy the *sig1* measure and each measure, since most authors assume that the original study is significant
-- *baseline* - instances that also satisfy *sdir*, because most authors assume that the observed effect size are in the same direction
-- *sig2* - instances that also satisfy the *sig2* measure, because Uri's small telescope rule requires this
-
-To get pass rates, I divide the counts by the number of instances satisfying some baseline condition.  Usually, the baseline condition is the one called *baseline* above (hence the name), but it can be the null condition (in which case the denominator is the total number of instances per set, i.e., $10^4$ by default) or either of the other named conditions above.
-
-The final step is to convert pass rates into true positive, false positive, true negative, and false negative rates. This requires a definition of *true* and *false* instances, in other words, an explicit statement as to which pairwise replication instances represent replications that should succeed vs. ones that should fail. I call these *correctness criteria*. See the [Correctness Criteria section of the working paper](https://natgoodman.github.io/repwr/repwr.stable.html#correctness-criteria) for a discussion. 
-
-The correctness criteria relevant to this document are 
-
-1. *non-zero* - an instance is *true* if $d1_{pop}$, the population effect size for the first study, is non-zero
-2. *same-effect* - an instance is *true* if $d1_{pop}=d2_{pop}$, i.e., the two population effect sizes are equal
-
-Note that these criteria depend only on the population effect size.
-
-The software implements a number of related correctness criteria, which I've not purused in detail: *nonz1or2*, either population effect size is non-zero; *nonz1and2*, both population effect sizes are non-zero; *nonz2*, the second population effect size is non-zero; *uni*, the first population effect size is non-zero and the two population effect sizes are equal. The software also allows a modest extension that allows the effect sizes to differ from 0 or each other by a specified *tolerance* $\epsilon$.
-
-## Measures
-
-The table below lists the 28 measures implemented by the software. Each measure applies to a pairwise replication instance (although some only depend on one study of the pair). Measures and the subsequent discussion use the following notation.
-
-- *s1* and *s2* refer to the first and second study of the pair; *sm* means the fixed-effect meta-analysis of the two studies
-- *d1*, *d2*, *dm* mean the standardized observed effect size (aka *Cohen’s d*) of *s1*, *s2*, *sm*
-- *pval1*, *pval2*, *pvalm* mean the p-value computed from the t-distribution of *s1*, *s2*, *sm* 
-- *sig1*, *sig2*, *sigm* mean *pval1*, *pval2*, *pvalm* is significant
-- *c1*, *c2*, *cm* are confidence intervals of *s1*, *s2*, *sm*
-- *p1*, *p2* are prediction intervals of *s1*, *s2*; I don't have *pm* because I didn't find a definition in the literature
-- *scp1*, *scp2* are Uri Simonsohn's small telescopes thresholds of *s1*, *s2*
-- *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size
-- *.* combines two statistics to yield a complete measure. For example, *d1.c2* means that $d1_{sdz}$ is contained in *c2*; *c1.c2* means *c1* and *c2* overlap; *d1.scp2* means $d1_{sdz} \ge scp2$
-
-**Caution** The notation *d* is potentially ambiguous.  When used in measures it means $d_{sdz}$, the standardized observed effect size (aka Cohen’s $d$). When used in figures it generally means $d_{pop}$, the population effect size. Sorry.
-
-| measure | meaning |
-| ------- | -------------------------------------------------------- |
-| sig1 | *pval1* is significant | 
-| sig2 | *pval2* is significant | 
-| sigm | *pvalm* is significant | 
-| sdir | *d1* and *d2* are in same direction, i.e., have same sign | 
-| d1.c2 | *d1* contained in *c2* | 
-| d2.c1 | *d2* contained in *c1* | 
-| d1.cm | *d1* contained in *cm* | 
-| d2.cm | *d2* contained in *cm* | 
-| dm.c1 | *dm* contained in *c1* | 
-| dm.c2 | *dm* contained in *c2* | 
-| c1.c2 | *c1* and *c2* overlap | 
-| c1.cm | *c1* and *cm* overlap |
-| c2.cm | *c2* and *cm* overlap | 
-| d1.p2 | *d1* contained in *p2* | 
-| d2.p1 | *d2* contained in *p1* | 
-| dm.p1 | *dm* contained in *p1* | 
-| dm.p2 | *dm* contained in *p2* | 
-| p1.p2 | *p1* and *p2* overlap | 
-| d1.scp2 | *d1* exceeds *scp2* | 
-| d2.scp1 | *d2* exceeds *scp1*; note that Uri's published small telescope method is this one and requires that *sig2* also hold | 
-| dm.scp2 | *dm* exceeds *scp2* | 
-| dm.scp1 | *dm* exceeds *scp1* | 
-| d1.scpd2 | *d1* exceeds *scpd2* | 
-| d2.scpd1 | *d2* exceeds *scpd1* | 
-| dm.scpd2 | *dm* exceeds *scpd2* | 
-| dm.scpd1 | *dm* exceeds *scpd1* | 
-| big1 | $d1 \ge d2$ | 
-| big2 | $d2 \ge d1$ | 
-
-## Statistical Preliminaries
+## Noncentral d2t-Distribution
 
 The definition of several measures depends on nuances of the t-distribution. I learned the hard way that the classic (*central*) t-distribution only applies when the NULL is true. When the NULL isn't true, the correct sampling distribution is the *noncentral t-distribution*. 
 
-In the usual treatment, the central t-distribution is parameterized by *degrees of freedom*; the noncentral t-distribution also has a *noncentrality parameter*; and both operate on the *t-statistic*. I'm sure there are good reasons for these mysterious concepts, but I prefer the more concrete *sample size* and *standardized observed effect size* (aka *Cohen’s d*). For the limited context of this simulation, it's easy to convert between the concepts. While I'm at it, I define conversions between p-values and both my prefered units and t-statistics.
+The usual treatment parameterizes the central t-distribution by *degrees of freedom*; the noncentral t-distribution also has a *noncentrality parameter*; and both operate on the *t-statistic*. I'm sure there are good reasons for these mysterious concepts, but I prefer the more concrete parameters *sample size* and *standardized observed effect size* (aka *Cohen’s d*). For the limited context of this simulation, it's easy to convert between the concepts. While I'm at it, I define conversions between p-values and both my prefered units and t-statistics.
 
 In the following math, the notation is
 
@@ -118,6 +48,21 @@ In the following math, the notation is
   - t-statistic: $t$
   - p-value: $pval$
   - noncentrality parameter: $ncp$
+
+**Notation when working with am individual study:** $math$ (`code`)
+
+
+
+  - sample sizes of the two studies: $n1$ (`n1`), $n2$ (`n2`)
+  - required power of original study: $pwr$ (`scope.power`); Uri fixes this at 33%
+  - minimum significant effect size for a sample size of $n1$: $d_{sig}$ (`d.sig`)
+  - significance level: $\alpha$ (`scope.alpha`)
+  - minimum population effect size that would confer $pwr$ power to the original study: $d_{pwr}$ (`d.pwr`); Uri calls this $d_{33\%}$
+  - minimum acceptable observed effect size in the replica: $d_{scope}$ (`d.scope`)
+  - noncentrality parameter in $d$ units: $d0$ (`d0`)
+
+
+
 
 \begin{aligned}
 &\bf{\text{sample size to degrees of freedom}} \\
