@@ -42,16 +42,37 @@ The usual treatment parameterizes the central t-distribution by *degrees of free
 
 In the following math, the notation is
 
-  - degrees of freedom: $df$
-  - sample size (of each group): $n$
+  - degrees of freedom: $df$ (`df`)
+  - sample size: $n$ (`n`)
   - standardized observed effect size: $d_{sdz}$
   - t-statistic: $t$
   - p-value: $pval$
   - noncentrality parameter: $ncp$
 
-**Notation when working with am individual study:** $math$ (`code`)
+**Notation when working with individual studies**
+
+| math | code | meaning |
+| ------- | ------- | -------------------------------------------------------- |
+| $df$ | `df` | degrees of freedom |
+| $n$ | `n` | sample size |
+| $d_{sdz}$ | `d` | standardized observed effect size, aka *Cohen’s d*; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
+| $t$ | `t` | t-statistic |
+| $pval$ | `pval` | p-value |
+| $ncp$ | `ncp` | noncentrality parameter expressed in $t$ units |
+| $d0$ | `d0` | noncentrality parameter expressed in $d_{sdz}$ units |
+| $\alpha$ | `sig.level` | significance level | 
+| $c$ | `conf.level` | confidence level for confidence intervals | 
+| $p$ | `pred.level` | confidence level for prediction intervals | 
+| $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n$ |
 
 
+
+**Additional notation when working with pairs of studies, i.e., replications**
+
+| $c$ | `conf.level` | confidence level for confidence intervals | 
+
+
+**Specialized notation for Uri Simonsohn's small telescope method**
 
   - sample sizes of the two studies: $n1$ (`n1`), $n2$ (`n2`)
   - required power of original study: $pwr$ (`scope.power`); Uri fixes this at 33%
