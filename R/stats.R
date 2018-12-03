@@ -115,8 +115,8 @@ ci_d2t=function(n,d,conf.level=0.95) {
 ## my adaptation of prediction interval function from
 ## https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/ and predictionInterval pacakge
 pi_d2t=function(n1,n2,d,ci1=NULL,ci2=NULL,pred.level=0.95) {
-  if (is.null(ci1)) ci1=ci_d2t(n1,d);
-  if (is.null(ci2)) ci2=ci_d2t(n2,d);
+  if (is.null(ci1)) ci1=ci_d2t(n1,d,pred.level);
+  if (is.null(ci2)) ci2=ci_d2t(n2,d,pred.level);
   l1=ci1[1]; u1=ci1[2];
   l2=ci2[1]; u2=ci2[2];
   c(d-sqrt((d-l1)^2+(u2-d)^2),d+sqrt((d-l2)^2+(u1-d)^2));
