@@ -42,18 +42,19 @@ This section defines basic notation that I use throughout. Later sections define
 
 **Notation when working with individual studies**
 
-| math | code | meaning |
-| ------- | ------- | -------------------------------------------------------- |
-| $n$ | `n` | sample size |
-| $d_{pop}$ | `d.pop` | population effect size; this arises in discussion but not the software |
-| $d_{sdz}$ | `d` | standardized observed effect size, aka *Cohen’s d*; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
-| $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n$ |
-| $d0$ | `d0` | noncentrality parameter expressed in $d_{sdz}$ units; this is the presumed population effect size |
-| $pval$ | `pval` | p-value |
-| $df$ | `df` | degrees of freedom |
-| $t$ | `t` | t-statistic |
-| $ncp$ | `ncp` | noncentrality parameter expressed in $t$ units |
-| $\alpha$ | `sig.level` | significance level | 
+| variable | meaning |
+| ------- | -------------------------------------------------------- |
+| `n` | sample size |
+| `d.pop` | population effect size; this arises in discussion but not the software |
+| `d` | standardized observed effect size, aka *Cohen’s d*; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
+| `d.sig` | minimum significant effect size for a sample size of $n$ |
+| `d0` | noncentrality parameter expressed in $d_{sdz}$ units; this is the presumed population effect size |
+| `pval` | p-value |
+| `df` | degrees of freedom |
+| `t` | t-statistic |
+| `ncp` | noncentrality parameter expressed in $t$ units |
+| `sig.level` | significance level | 
+
 
 **Notation for base R t-distribution and d2t-distribution functions**
 
@@ -68,9 +69,9 @@ My d2t-distribution repackages the t-distribution functions from base R.
 
 **Additional notation when working with pairs of studies, i.e., replications**
 
-The suffixes "1" and "2" denote the two studies in both math and code, e.g, $n1$ (`n1`), $n2$ (`n2`) are the sample sizes of the two studies. It is often convenient to think of study "1" as the original and "2" the replica but this isn't baked into the math or code.
+The suffixes `1` and `2` denote the two studies, e.g, `n1`, `n2` are the sample sizes of the two studies. It is often convenient to think of study `1` as the original and `2` the replica but this isn't baked into the software.
 
-## Transformations between *t*, *d *, *pval*
+## Transformations between `t`, `d `, `pval`
 
 For the limited context of my simulation, it's easy to convert between the t-statistic, standardized effect size, and p-value.
 
@@ -91,7 +92,7 @@ pval2d=function(n,pval) q_d2t(n,q=pval/2,lower.tail=F)        # see below for q_
 
 ## d2t-Distribution Functions
 
-I use the transformations above to define a family of d2t-distribution functions analogous to R's t-distribution functions, plus a few more. 
+I use the transformations above to define a family of d2t-distribution functions analogous to R's t-distribution functions.
 
 ``` {r eval=FALSE}
 ## density function of d2t-distribution
@@ -125,7 +126,7 @@ r_d2t=function(m,n,d0=NULL) {
 
 ## Mean and Standard Deviation of d2t-Distribution
 
-I was surprised to learn that base R doesn't provide mean and standard deviation functions for even the central t-distribution, so I had to dig it all out from references on the web, mostly **References TBD**. 
+I was surprised to learn that base R doesn't provide mean and standard deviation functions for even the central t-distribution, so I had to dig it all out from references on the web: **References TBD**. 
 
 Note the comments about R's `gamma` function and the workaround using `lgamma`. I'm sure I didn't devise this workaround on my own but my notes don't say where I found it.  Sorry!
 
@@ -161,52 +162,40 @@ sd_d2t=function(n,d0=NULL) {
 sdt=function(df) sqrt(df/(df-2))
 ```
 
-## Confidence Intervals of d2t-Distribution
+## Confidence and Prediction Intervals of d2t-Distribution
 
-The final group calculate confidence and prediction intervals for the d2t-distribution.
+**Additional notation for confidence and predictions intervals**
 
-| math | code | meaning |
+| variable | math symbol | meaning |
 | ------- | ------- | -------------------------------------------------------- |
-| $c$ | `conf.level` | confidence level for confidence intervals | 
-| $p$ | `pred.level` | confidence level for prediction intervals | 
+| `d.lo`, `d.hi` |  $d_{lo}$, $d_{hi}$ | lower and upper bounds of interval |
+| `p.lo`, `p.hi` |  $p_{lo}$, $p_{hi}$ | lower and upper probability cutoffs for interval |
+| `conf.level`, `pred.level` | $c$ | confidence level for confidence or prediction interval; I use the same math symbol for both kinds of interval, since no ambiguity is possible | 
 
+### Confidence intervals
 
-**Confidence intervals**
+The bounds of the confidence interval are the smallest and largest *population* effect sizes for which the observed effect size $d_{sdz}$ would be significant. I started out using the confidence intervals from base R's `t.test` function but later learned these are for raw, not standardized, effect sizes.  I learned about confidence intervals for standardized effect sizes from Uri Simonsohn's blogpost [We cannot afford to study effect size in the lab](http://datacolada.org/20) and adapted the confidence interval function from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) accompanying that post.
 
-The bounds of the confidence interval are the smallest and largest *population* effect sizes for which the observed effect size $d_{sdz}$ would be significant. I learned about confidence intervals for Cohen's d from Uri Simonsohn's blogpost [We cannot afford to study effect size in the lab](http://datacolada.org/20) and adapted the confidence interval function from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) accompanying that post.
+Note that $p\_d2t()$ used in the math (`p_dt` in the code) is the cumulative probability function for the d2t-distribution defined above; it's a wrapper for base R's `pt` function.
 
-In the following math, the notation is
-
-  - sample size (of each group): $n$
-  - standardized observed effect size: $d_{sdz}$
-  - lower and upper bounds of confidence interval: $d_{lo}$, $d_{hi}$; these are the smallest and largest *population* effect sizes for which $d_{sdz}$ would be significant
-  - lower and upper probability cutoffs for confidence interval: $p_{lo}$, $p_{hi}$
-  - noncentrality parameter in $d$ units: $d0$
-  - confidence level: $c$
-  - $p_d2t()$ is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units.
+**Math**
 
 \begin{aligned}
-p0&=c/2 \\
-p1&=1-p0 \\
-d_{lo}&=d0 \mid p_d2t(n,d_{sdz},d0)=p_{lo} \\
-d_{hi}&=d0 \mid p_d2t(n,d_{sdz},d0)=p_{hi} \\
+p_{lo}&=c/2 \\
+p_{hi}&=1-p_{lo} \\
+d_{lo}&=d0 \mid p\_d2t(n,d_{sdz},d0)=p_{lo} \\
+d_{hi}&=d0 \mid p\_d2t(n,d_{sdz},d0)=p_{hi} \\
 \end{aligned}
 
-In the code,
+**Code**
 
-  - sample size (of each group): `n`
-  - standardized observed effect size: `d`; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity
-  - lower and upper bounds of confidence interval: `d.lo`, `d.hi`
-  - lower and upper probability cutoffs for confidence interval: `p.lo`, `p.hi`
-  - noncentrality parameter in `d` units: `d0`
-  - confidence level: `conf.level`
-
-The code uses R's `uniroot` function to solve the equations for $d_{lo}$ and $d_{hi}$.
+The code uses R's `uniroot` function to solve the equations for $d_{lo}$ and $d_{hi}$. The call to `suppressWarnings` is to shut up an annoying warning from pt about possibly not attaining full precision.
   
 ``` {r eval=FALSE}
 ## adapted from http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R
 ci_d2t=function(n,d,conf.level=0.95) {
-  p.lo=(1-conf.level)/2; p.hi=1-p.lo;
+  p.lo=(1-conf.level)/2; 
+  p.hi=1-p.lo;
   d.lo=suppressWarnings(
     uniroot(function(d0) p_d2t(n,d,d0,lower.tail=F)-p.lo,interval=c(-10,10))$root);
   d.hi=suppressWarnings(
@@ -217,25 +206,39 @@ ci_d2t=function(n,d,conf.level=0.95) {
 
 **Prediction intervals**
 
-A prediction interval indicates the range of likely effect sizes in a replication, given the sample sizes of the original and replica studies and the observed effect size in the original study.
+A prediction interval indicates the range of effect sizes we're likely to observe in a replication, given the sample sizes of the original and replica studies and the observed effect size in the original study.
 
-I adapted the prediction interval function from [Spence and Stanley's paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) and [Stanleys predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval/). The code seems to work, but I have no intuition why.
+I adapted the prediction interval function from [Spence and Stanley's paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) and [Stanleys predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval/). The method seems to work, but I have no intuition why.
 
-In the code, 
+Note that $ci\_d2t()$ used in the math (`ci_dt` in the code) is the confidence interval function for the d2t-distribution defined above.
 
-  - suffixes `1` and `2` denote the original and replica studies, respectively
-  - sample sizes of the two studies: `n1`, `n2`
-  - standardized observed effect size in the original study: `d`; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity
-  - confidence intervals for the two studies, assuming the replica observes the same effect size as the original: `ci1`, `ci2`
+
+The code seems to work, but I have no intuition why.
+
+**Math**
+
+\begin{aligned}
+ci1&=ci\_d2t(n1,d) \\ 
+ci2&=ci\_d2t(n2,d) \\ 
+d_{lo}&=d0 \mid p\_d2t(n,d_{sdz},d0)=p_{lo} \\
+d_{hi}&=d0 \mid p\_d2t(n,d_{sdz},d0)=p_{hi} \\
+\end{aligned}
+
+
+**Code**
 
 ``` {r eval=FALSE}
 ## adapted from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/ and predictionInterval package
 pi_d2t=function(n1,n2,d,ci1=NULL,ci2=NULL,pred.level=0.95) {
   if (is.null(ci1)) ci1=ci_d2t(n1,d);
   if (is.null(ci2)) ci2=ci_d2t(n2,d);
-  l1=ci1[1]; u1=ci1[2];
-  l2=ci2[1]; u2=ci2[2];
-  c(d-sqrt((d-l1)^2+(u2-d)^2),d+sqrt((d-l2)^2+(u1-d)^2));
+  d.lo1=ci1[1]; 
+  d.hi1=ci1[2];
+  d.lo2=ci2[1]; 
+  d.hi2=ci2[2];
+  d.lo=d-sqrt((d-d.lo1)^2+(d.hi2-d)^2);
+  d.hi=d+sqrt((d-d.lo2)^2+(d.hi1-d)^2);
+  c(d.lo,d.hi);
 }
 ```
 
