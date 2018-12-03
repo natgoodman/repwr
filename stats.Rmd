@@ -3,26 +3,25 @@ title: "Noncentral d2t-Distribution Applied to Measures of Replication Success"
 author: "Nathan (Nat) Goodman"
 date: "December 02, 2018"
 output:
-  pdf_document: default
   html_document:
     css: css/html_document.css
     highlight: kate
+  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
 ---
-
-*Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. I call these tests "measures". Elsewhere I report results from simulating these tests and describe the measures in detail. Here I discuss nuances of the noncentral t-distribution that underlie many replication measures.*
+*Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. I call these tests "measures". Elsewhere I report results from simulating these tests and describe the measures in detail. The noncentral t-distribution underlies many replication measures. Here I describe my software for the noncentral t-distribution that repackages R's built-in functions to operate on sample size (instead of degrees of freedom), population effect size (instead of the noncentrality parameter), and observed effect size (instead of the t-statistic). I call this the d2t-distribution.*
 
 ## Introduction
 
-Various authors have proposed tests for deciding whether a replication succeeds or fails. I call these tests "measures". I simulated many of these tests across a range of replication conditions and reported results in a working paper [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html). I described the measures themselves in a working paper [Measures of Replication Success](https://natgoodman.github.io/repwr/mesr.stable.html).
+Various authors have proposed tests for deciding whether a replication succeeds or fails. I call these tests "measures". I simulated many of these tests across a range of replication conditions and report results in a working paper [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html). I describe the measures themselves in a working paper [Measures of Replication Success](https://natgoodman.github.io/repwr/mesr.stable.html).
 
 Several measures depends on nuances of the *noncentral t-distribution*. I learned the hard way that the classic (*central*) t-distribution only applies when the NULL is true. When the NULL isn't true, the correct sampling distribution is the *noncentral t-distribution*. 
 
-Introductory statistics lessons usually parameterize the noncentral t-distribution by *degrees of freedom* and a *noncentrality parameter*, and the distribution operates on the *t-statistic*. I prefer to work with more concrete notions: *sample size*, *(presumed) population effect size*, and *standardized observed effect size* (aka *Cohen’s d*). For the limited context of my simulation, it's easy to convert between the concepts.
+Introductory statistics lessons usually parameterize the noncentral t-distribution by *degrees of freedom* and a *noncentrality parameter*, and the distribution operates on the *t-statistic*. I prefer to work with more concrete notions: *sample size* (instead of degrees of freedom), *(presumed) population effect size* (instead of the noncentrality parameter), and *standardized observed effect size* aka *Cohen’s d* (instead of the t-statistic). For the limited context of my simulation, it's easy to convert between the concepts.
 
-Here I represent my software for the noncentral t-distribution parameterized by sample size, population effect size, and observed effect size. I call this the *d2t-distribution*.  The code is in the file `R/stats.R`. I must emphasize that the d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution.
+Here I present my software for the noncentral t-distribution parameterized by sample size, population effect size, and observed effect size. I call this the *noncentral d2t-distribution*.  The code is in the file `R/stats.R`. I must emphasize that the d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution.
 
 ## Simulation Scenario
 
@@ -54,7 +53,6 @@ This section defines basic notation that I use throughout. Later sections define
 | `t` | t-statistic |
 | `ncp` | noncentrality parameter expressed in $t$ units |
 | `sig.level` | significance level | 
-
 
 **Notation for base R t-distribution and d2t-distribution functions**
 
@@ -204,7 +202,7 @@ ci_d2t=function(n,d,conf.level=0.95) {
 }
 ```
 
-**Prediction intervals**
+### Prediction intervals
 
 A prediction interval indicates the range of effect sizes we're likely to observe in a replication, given the sample sizes of the original and replica studies and the observed effect size in the original study.
 
@@ -232,26 +230,8 @@ pi_d2t=function(n1,n2,d,ci1=NULL,ci2=NULL,pred.level=0.95) {
 
 ## Discussion
 
-I started with the question, “Is science broken?” and segued to the more specific question of “Are most (or, at least many) published results wrong?”  I then reported the claim that "Yes, most (or many) results must be wrong unless most hypotheses are *a priori* true", because the science-wise false discovery rate (repwr) makes it so. Do the results here support the claim?
+The noncentral t-distribution underlies many statistical tests (*measures*) for deciding whether a replication passes or fails. In this document I describe my software for the *noncentral d2t-distribution*; this software wraps R's built-in t-distribution functions to operate on sample size (instead of degrees of freedom), population effect size (instead of the noncentrality parameter), and observed effect size (instead of the t-statistic). The code is in the file `R/stats.R`. The d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution.
 
-It depends on *prop.true*, so we’d better be clear about what it represents.
+I describe the measures themselves in a working paper [Measures of Replication Success](https://natgoodman.github.io/repwr/mesr.stable.html) which relies heavily on the d2t functions in the present document. I describe the results of the simulation in another working paper [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html).
 
-* [David Colquhoun's paper](http://rsos.royalsocietypublishing.org/content/1/3/140216) seems to suggest that it refers to early stage experiments. At one point the paper says, “[I]magine that we are testing a lot of candidate drugs, one at a time. It is sadly likely that many of them would not work, so let us imagine that 10% of them work and the rest are inactive." In the on-line post-publication discussion, Dr. Colquhoun is even more explicit: “To postulate a prevalence greater than 0.5 is tantamount to saying that you were confident that your hypothesis was right before you did the experiment.”
 
-* [Felix Schönbrodt's blog post](http://www.nicebread.de/whats-the-probability-that-a-significant-p-value-indicates-a-true-effect/) has a similar statement: “It’s certainly not near 100% – in this case only trivial and obvious research questions would be investigated, which is obviously not the case.”
-
-I think this interpretation is dead-wrong. Hypotheses exist at many stages of research from vague ideas flitting through students' heads to precise claims in published papers. Since we’re reasoning about the validity of **published** results, *prop.true* (and other parameters like *d*) must refer to hypotheses late in the research process, ones that are far enough along to be considered for publication. Presumably, the research process weeds out many incorrect hypotheses; ones that make it this far are more likely to be true. I don’t know what the right number is, but it must be higher than the estimates proposed by Colquhoun and Schönbrodt.
-
-What happens to the incorrect hypotheses that make it to the near-publication stage? I see three possibilities:
-
-1. By (bad) luck, the study yielded a significant p-value, and the happy but hapless investigators proceed to publication.
-2. The lab chief thinks the negative finding is correct and publishes the negative result or abandons the work. Sadly, this happens rarely, as we know too well.
-3. The lab chief is unconvinced and sends the student back to the lab for more experiments or to the computer for more analyses. This is p-hacking and will likely repeat until the student gets a positive result or the professor gives up.
-
-Ignoring the rare case #2, all false hypotheses that make it this far will eventually yield positive results and be published. This makes the work we’ve done simulating FDR totally irrelevant. The FDR we get will be close to whatever value we assume for the proportion of false hypotheses. In other words, $FDR \approx 1-prop.true$. Rather obvious, I think, and completely pointless.
-
-I’ve seen plenty of bad science up close and personal and am thoroughly convinced that many published results in my field are rubbish. But I don’t buy the arguments based on repwr. The problem is p-hacking, both experimental and computational.
-
-It's really just another consequence of "Publish or Perish".  Those who can, publish good science; those who can't, p-hack.  No amount of statistical cleverness can change this basic dynamic. If you replace the much-maligned p-value by some other statistic *s*, p-hackers will become s-hackers, and the overall quality of science will remain unchanged. 
-
-Good science drives the field forward; bad science is ephemeral. I know it's aggravating to see so much dreck get published, but it's even more aggravating to see good statisticians and data scientists agonizing over the ordure and spending so much effort trying to root out bad science. We will do more good by helping good scientists do good science than by trying to slow down the bad ones. Quoting the sage Oprah Winfrey ([from BrainyQuote](https://www.brainyquote.com/quotes/quotes/o/oprahwinfr163087.html)), "Be thankful for what you have; you'll end up having more. If you concentrate on what you don't have, you will never, ever have enough." 
