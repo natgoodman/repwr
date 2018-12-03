@@ -316,6 +316,17 @@ Uri Simonsohn's small telescope thresholds depend only on the sameple sizes of t
 
 The method first computes the smallest population effect size that would confer 33% power to the original study; Uri calls this $d_{33\%}$. Then it computes the smallest observed effect size that the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{scope}$. If the replica observes an effect size $\lt d_{scope}$, the method concludes that the population effect size is too small to have been really detected by the original study.
 
+**Specialized notation for Uri Simonsohn's [small telescope method](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf)**
+
+| math | code | meaning |
+| ------- | ------- | -------------------------------------------------------- |
+| $pwr$ | `scope.pwr` | required power of original study; Uri fixes this at 33% |
+| $d_{pwr}$ | `d.pwr` | minimum population effect size that would confer $pwr$ power to the original study; Uri calls this $d_{33\%}$ |
+| $d_{scope}$ | `d.scope` | minimum acceptable observed effect size in the replica |
+
+
+
+
 **Notation:** $math$ (`code`)
 
   - sample sizes of the two studies: $n1$ (`n1`), $n2$ (`n2`)
