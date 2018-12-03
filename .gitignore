@@ -13,3 +13,4 @@ data.local/
 .fuse*
 .RData*
 .Rhistory*
+.Rproj.user

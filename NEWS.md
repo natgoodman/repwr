@@ -1,9 +1,16 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-November 8, 2018
+December 3, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.40 2018-12-03
+-----------------------
+
+Support document on [d2t-distribution functions](https://natgoodman.github.io/repwr/stats.stable.html) (`stats.Rmd`)
+
+Fixed latent bug in `pi_d2t` function in `R/stats.R`. Code wasn't propogating `pred.level` to `ci_d2t`. Bug never triggered, because `pred.level` and `conf.level` have same default (0.95)
+
 Release 1.31 2018-11-08
 -----------------------
 

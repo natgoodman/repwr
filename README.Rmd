@@ -1,7 +1,7 @@
 ---
 title: "Replication Power"
 author: "Nathan (Nat) Goodman"
-date: "November 7, 2018"
+date: "December 3, 2018"
 output:
   github_document:
     html_preview: no
@@ -160,6 +160,8 @@ Documents discussing the approach and results are available on the [GitHub Pages
 - shorter blog post looking only at *sig2* and the *non-zero* correctness criterion: [html](https://natgoodman.github.io/repwr/resig.stable.html), [pdf](https://natgoodman.github.io/repwr/resig.stable.pdf), and kindly posted by Bob Reed on [The Replication Network](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/) 
 
 - supplementary material for the shorter blog post with results that didn't fit in the published post for reasons of space or pedagogy: [html](https://natgoodman.github.io/repwr/resigsupp.stable.html), [pdf](https://natgoodman.github.io/repwr/resigsupp.stable.pdf)
+
+- discussion of d2t-distribution statistical functions: [html](https://natgoodman.github.io/repwr/stats.stable.html), [pdf](https://natgoodman.github.io/repwr/stats.stable.pdf)
 
 ## Author
 
