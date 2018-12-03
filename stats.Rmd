@@ -5,7 +5,7 @@ date: "December 3, 2018"
 output:
   pdf_document: default
   html_document:
-    css: css/html_tech.css
+    css: css/html_stats.css
     highlight: kate
 linkcolor: cyan
 citecolor: green
@@ -19,9 +19,11 @@ Various authors have proposed tests for deciding whether a replication succeeds 
 
 Several measures depends on nuances of the *noncentral t-distribution*. I learned the hard way that the classic (*central*) t-distribution only applies when the NULL is true. When the NULL isn't true, the correct sampling distribution is the *noncentral t-distribution*. 
 
-Introductory statistics lessons usually parameterize the noncentral t-distribution by *degrees of freedom* and a *noncentrality parameter*, and the distribution operates on the *t-statistic*. I prefer to work with more concrete notions: *sample size* (instead of degrees of freedom), *(presumed) population effect size* (instead of the noncentrality parameter), and *standardized observed effect size* aka *Cohen’s d* (instead of the t-statistic). For the limited context of my simulation, it's easy to convert between the concepts.
+Statistics lessons usually parameterize the noncentral t-distribution by *degrees of freedom* and a *noncentrality parameter*, and the distribution operates on the *t-statistic*. I prefer to work with more concrete notions: *sample size* (instead of degrees of freedom), *(presumed) population effect size* (instead of the noncentrality parameter), and *standardized observed effect size* aka *Cohen’s d* (instead of the t-statistic). For the limited context of my simulation, it's easy to convert between the concepts.
 
 Here I present my software for the noncentral t-distribution parameterized by sample size, population effect size, and observed effect size. I call this the *noncentral d2t-distribution*.  The code is in the file `R/stats.R`. I must emphasize that the d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution.
+
+I learned about 
 
 ## Simulation Scenario
 
@@ -58,7 +60,7 @@ This section defines basic notation that I use throughout. Later sections define
 <br/>
 **Notation for base R t-distribution and d2t-distribution functions**
 
-My d2t-distribution repackages the t-distribution functions from base R.
+My d2t-distribution repackages base R's t-distribution functions. The table below shows the base R functions and the corresponding d2t functions.
 
 | base R | d2t | meaning |
 | ------- | ------- | -------------------------------------------------------- |
@@ -127,11 +129,11 @@ r_d2t=function(m,n,d0=NULL) {
 
 ## Mean and Standard Deviation of d2t-Distribution
 
-I was surprised to learn that base R doesn't provide mean and standard deviation functions for even the central t-distribution, so I had to dig it all out from references on the web: **References TBD**. 
+I was surprised to learn that base R doesn't provide mean and standard deviation functions for even the central t-distribution, so I had to dig it all out from sources on the web. I first found code I could adapt in the [UnivRNG package](https://cran.r-project.org/web/packages/UnivRNG/) but subsequently found more sources including a [Wikipedia's article](https://en.wikipedia.org/wiki/Noncentral_t-distribution).
 
 Note the comments about R's `gamma` function and the workaround using `lgamma`. I'm sure I didn't devise this workaround on my own but my notes don't say where I found it.  Sorry!
 
-The code makes extensive use of the transformation above.
+The code makes extensive use of the transformations above.
 
 ``` {r eval=FALSE}
 ## mean of d2t-distribution
@@ -178,7 +180,7 @@ sdt=function(df) sqrt(df/(df-2))
 
 The bounds of the confidence interval are the smallest and largest *population* effect sizes for which the observed effect size $d_{sdz}$ would be significant. I started out using the confidence intervals from base R's `t.test` function but later learned these are for raw, not standardized, effect sizes.  I learned about confidence intervals for standardized effect sizes from Uri Simonsohn's blog post [We cannot afford to study effect size in the lab](http://datacolada.org/20) and adapted the confidence interval function from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) accompanying that post.
 
-Note that $p\_d2t()$ used in the math (`p_dt` in the code) is the cumulative probability function for the d2t-distribution defined above; it's a wrapper for base R's `pt` function.
+Note that $p\_d2t()$ used in the math (`p_dt` in the code) is the cumulative probability function for the d2t-distribution defined above.
 
 **Math**
 
@@ -191,7 +193,7 @@ d_{hi}&=d0 \mid p\_d2t(n,d_{sdz},d0)=p_{hi} \\
 
 **Code**
 
-The code uses R's `uniroot` function to solve the equations for $d_{lo}$ and $d_{hi}$. The call to `suppressWarnings` is to shut up an annoying warning from pt about possibly not attaining full precision.
+The code uses R's `uniroot` function to solve the equations for $d_{lo}$ and $d_{hi}$. The call to `suppressWarnings` is to shut up an annoying warning from `pt` about possibly not attaining full precision.
   
 ``` {r eval=FALSE}
 ## adapted from http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R
