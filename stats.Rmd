@@ -1,21 +1,21 @@
 ---
 title: "Noncentral d2t-Distribution Applied to Measures of Replication Success"
 author: "Nathan (Nat) Goodman"
-date: "December 02, 2018"
+date: "December 3, 2018"
 output:
-  html_document:
-    css: css/html_document.css
-    highlight: kate
   pdf_document: default
+  html_document:
+    css: css/html_tech.css
+    highlight: kate
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
 ---
-*Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. I call these tests "measures". Elsewhere I report results from simulating these tests and describe the measures in detail. The noncentral t-distribution underlies many replication measures. Here I describe my software for the noncentral t-distribution that repackages R's built-in functions to operate on sample size (instead of degrees of freedom), population effect size (instead of the noncentrality parameter), and observed effect size (instead of the t-statistic). I call this the d2t-distribution.*
+*Statisticians have devised numerous statistical tests for deciding whether a replication passes or fails, thus validating of refuting the original result. I call these tests "measures". The noncentral t-distribution underlies many of these tests. Here I describe my software that repackages R's built-in functions for the noncentral t-distribution to operate on sample size (instead of degrees of freedom), population effect size (instead of the noncentrality parameter), and observed effect size (instead of the t-statistic). I call this the d2t-distribution.*
 
 ## Introduction
 
-Various authors have proposed tests for deciding whether a replication succeeds or fails. I call these tests "measures". I simulated many of these tests across a range of replication conditions and report results in a working paper [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html). I describe the measures themselves in a working paper [Measures of Replication Success](https://natgoodman.github.io/repwr/mesr.stable.html).
+Various authors have proposed tests for deciding whether a replication succeeds or fails. I call these tests "measures". I simulated many of these tests across a range of replication conditions and reported results in a working paper [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html). I describe the measures themselves in a working paper [Measures of Replication Success](https://natgoodman.github.io/repwr/mesr.stable.html).
 
 Several measures depends on nuances of the *noncentral t-distribution*. I learned the hard way that the classic (*central*) t-distribution only applies when the NULL is true. When the NULL isn't true, the correct sampling distribution is the *noncentral t-distribution*. 
 
@@ -37,12 +37,13 @@ After forming the pairwise replications, I apply the measures. The result is a b
 
 ## Notation
 
-This section defines basic notation that I use throughout. Later sections define specialized notation for specifc purposes.
+This section defines basic notation that I use throughout. Later sections define specialized notation for specific purposes.
 
+<br/>
 **Notation when working with individual studies**
 
 | variable | meaning |
-| ------- | -------------------------------------------------------- |
+| ------- | --------------------------------------------------------------- |
 | `n` | sample size |
 | `d.pop` | population effect size; this arises in discussion but not the software |
 | `d` | standardized observed effect size, aka *Cohen’s d*; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
@@ -54,6 +55,7 @@ This section defines basic notation that I use throughout. Later sections define
 | `ncp` | noncentrality parameter expressed in $t$ units |
 | `sig.level` | significance level | 
 
+<br/>
 **Notation for base R t-distribution and d2t-distribution functions**
 
 My d2t-distribution repackages the t-distribution functions from base R.
@@ -65,6 +67,7 @@ My d2t-distribution repackages the t-distribution functions from base R.
 | `qt` | `q_d2t` | quantile function |
 | `rt` | `r_d2t` | random generation function |
 
+<br/>
 **Additional notation when working with pairs of studies, i.e., replications**
 
 The suffixes `1` and `2` denote the two studies, e.g, `n1`, `n2` are the sample sizes of the two studies. It is often convenient to think of study `1` as the original and `2` the replica but this isn't baked into the software.
@@ -162,6 +165,7 @@ sdt=function(df) sqrt(df/(df-2))
 
 ## Confidence and Prediction Intervals of d2t-Distribution
 
+<br/>
 **Additional notation for confidence and predictions intervals**
 
 | variable | math symbol | meaning |
@@ -172,18 +176,18 @@ sdt=function(df) sqrt(df/(df-2))
 
 ### Confidence intervals
 
-The bounds of the confidence interval are the smallest and largest *population* effect sizes for which the observed effect size $d_{sdz}$ would be significant. I started out using the confidence intervals from base R's `t.test` function but later learned these are for raw, not standardized, effect sizes.  I learned about confidence intervals for standardized effect sizes from Uri Simonsohn's blogpost [We cannot afford to study effect size in the lab](http://datacolada.org/20) and adapted the confidence interval function from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) accompanying that post.
+The bounds of the confidence interval are the smallest and largest *population* effect sizes for which the observed effect size $d_{sdz}$ would be significant. I started out using the confidence intervals from base R's `t.test` function but later learned these are for raw, not standardized, effect sizes.  I learned about confidence intervals for standardized effect sizes from Uri Simonsohn's blog post [We cannot afford to study effect size in the lab](http://datacolada.org/20) and adapted the confidence interval function from [Uri's code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) accompanying that post.
 
 Note that $p\_d2t()$ used in the math (`p_dt` in the code) is the cumulative probability function for the d2t-distribution defined above; it's a wrapper for base R's `pt` function.
 
 **Math**
 
-\begin{aligned}
+$$\begin{aligned}
 p_{lo}&=c/2 \\
 p_{hi}&=1-p_{lo} \\
 d_{lo}&=d0 \mid p\_d2t(n,d_{sdz},d0)=p_{lo} \\
 d_{hi}&=d0 \mid p\_d2t(n,d_{sdz},d0)=p_{hi} \\
-\end{aligned}
+\end{aligned}$$
 
 **Code**
 
