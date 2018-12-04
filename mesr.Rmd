@@ -121,49 +121,41 @@ Values computed before the simulation cannot depend on the data, of course. In a
 The method first computes the smallest population effect size that would confer 33% power to the original study; Uri calls this $d_{33\%}$. Then it computes the smallest observed effect size that the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{scope}$. If the replica observes an effect size $\lt d_{scope}$, the method concludes that the population effect size is too small to have been really detected by the original study.
 
 <br/>
-**Specialized notation for small telescope thresholds**
+**Notation for small telescope thresholds**
 
 | math | code | meaning |
 | ------- | ------- | -------------------------------------------------------- |
-| $pwr$ | `scope.pwr` | required power of original study; Uri fixes this at 33% |
-| $d_{pwr}$ | `d.pwr` | minimum population effect size that would confer $pwr$ power to the original study; Uri calls this $d_{33\%}$ |
-| $d_{scope}$ | `d.scope` | minimum acceptable observed effect size in the replica |
+| $n1$, $n2$ | `n1`, `n2` | sample sizes of the two studies |
+| $pwr$ | `scope.power` | required power of original study; Uri fixes this at 33% |
+| $\alpha$ | `sig.level` |  significance level |
+| $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n1$ |
+| $d_{scope}$ | `d.scope` | minimum population effect size that would confer $pwr$ power to the original study; Uri calls this $d_{33\%}$ |
+| $d_{close}$ | `d.close` | minimum acceptable observed effect size in the replica; I use the term "close", because this is the lower bound on effect sizes in the replica that are close enough to the original |
 
+<br/> 
+**Functions from [d2t document](https://natgoodman.github.io/repwr/stats.stable.html)**
 
+  - `pval2d` converts p-value to a standardized effect size
+  - `p_d2t()` is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units.
 
-
-**Notation:** $math$ (`code`)
-
-  - sample sizes of the two studies: $n1$ (`n1`), $n2$ (`n2`)
-  - required power of original study: $pwr$ (`scope.power`); Uri fixes this at 33%
-  - minimum significant effect size for a sample size of $n1$: $d_{sig}$ (`d.sig`)
-  - significance level: $\alpha$ (`scope.alpha`)
-  - minimum population effect size that would confer $pwr$ power to the original study: $d_{pwr}$ (`d.pwr`); Uri calls this $d_{33\%}$
-  - minimum acceptable observed effect size in the replica: $d_{scope}$ (`d.scope`)
-  - noncentrality parameter in $d$ units: $d0$ (`d0`)
-
-**Functions from [Statistical Preliminaries](#statistical-preliminaries) section**
-
-  - $pval2d$ converts p-value to a standardized effect size
-  - $p_d2t()$ is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units.
-
+<br/>
 **Math**
 
 \begin{aligned}
 d_{sig}&=pval2d(n1,\alpha) \\
-d_{pwr}&=d0 \mid p_d2t(n1,d_{sig},d0)=pwr \\
-d_{scope}&=d \mid p_d2t(n2,d,d_{sig})=\alpha \\
+d_{scope}&=d0 \mid p_d2t(n1,d_{sig},d0)=pwr \\
+d_{close}&=d \mid p_d2t(n2,d,d_{scope})=\alpha \\
 \end{aligned}
 
-**Code**
+<br/>
+**R**
 
-The code uses R's `uniroot` function to solve the equations for $d_{pwr}$ and $d_{scope}$.
+The code uses R's `uniroot` function to solve the equations for $d_{scope}$ and $d_{close}$. The call to `suppressWarnings` is to shut up an annoying warning from `pt` about possibly not attaining full precision.
 
 ``` {r eval=FALSE}
-d.sig=pval2d(n1,scope.alpha);
-d.pwr=uniroot(function(d0) p_d2t(n1,d=d.sig,d0,lower.tail=F)-scope.power,interval=c(0,10))$root;
-## suppress annoying warning from pt: full precision may not have been achieved in 'pnt{final}'
-d.scope=suppressWarnings(uniroot(function(d) p_d2t(n2,d,d0=d.pwr)-scope.alpha,c(-10,10))$root);
+d.sig=pval2d(n1,sig.level);
+d.scope=uniroot(function(d0) p_d2t(n1,d=d.sig,d0,lower.tail=F)-scope.power,interval=c(0,10))$root;
+d.close=suppressWarnings(uniroot(function(d) p_d2t(n2,d,d0=d.scope)-scope.close,c(-10,10))$root);
 ```
 
 #### Effect size dependent small telescope thresholds
