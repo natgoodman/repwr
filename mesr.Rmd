@@ -110,23 +110,18 @@ The table below lists the 28 measures implemented by the software. Each measure 
 
 Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes what it can before doing any simulations, then what it can on each simulated study individually, then statistics that depend only on the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$), and finally statistics that depend on the replications. Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
 
-Values computed before the simulation cannot depend on the data, of course. In addition to values that truly do not depend on the data (notably Uri Simonsohn's small telescope thresholds), I pre-compute expensive statistics on a parameter grid, then later interpolate to get the values for specific data. For interpolation, I use `aspline` from the [akima package](https://cran.r-project.org/web/packages/akima).
-
-
-
 ### Values computed before simulation
 
 Values computed before the simulation cannot depend on the data, of course. In addition to values that truly do not depend on the data (notably Uri Simonsohn's small telescope thresholds), I pre-compute expensive statistics on a parameter grid, then later interpolate to get the values for specific data. For interpolation, I use `aspline` from the [akima package](https://cran.r-project.org/web/packages/akima).
 
 #### Small telescope thresholds
 
-Uri Simonsohn's small telescope thresholds depend only on the sameple sizes of the original and replica studies. In Uri's words, the method "evaluates the original study’s *design* rather than its result — the telescope rather than the planet".
-
-**Definition**
+[Uri Simonsohn's small telescope](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) thresholds depend only on the sample sizes of the original and replica studies. In Uri's words, the method "evaluates the original study’s *design* rather than its result — the telescope rather than the planet".
 
 The method first computes the smallest population effect size that would confer 33% power to the original study; Uri calls this $d_{33\%}$. Then it computes the smallest observed effect size that the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{scope}$. If the replica observes an effect size $\lt d_{scope}$, the method concludes that the population effect size is too small to have been really detected by the original study.
 
-**Specialized notation for Uri Simonsohn's [small telescope method](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf)**
+<br/>
+**Specialized notation for small telescope thresholds**
 
 | math | code | meaning |
 | ------- | ------- | -------------------------------------------------------- |
