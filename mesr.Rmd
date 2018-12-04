@@ -5,7 +5,7 @@ date: "November 30, 2018"
 output:
   pdf_document: default
   html_document:
-    css: css/html_document.css
+    css: css/html_stats.css
     highlight: kate
 linkcolor: cyan
 citecolor: green
@@ -25,6 +25,8 @@ In this document I describe the measures themselves, providing implementation de
 - *sig1* (resp. *sig2*) - the first (resp. second) study of the pair has a significant p-value
 - *d1.c2* (resp. *d2.c1*, *d1.p2*, *d2.p1*) - the standardized observed effect size (aka Cohen's d) of the one study is in the confidence interval (resp. prediction interval) of the other study
 - *sdir* - the observed effects sizes for the two studies are in the same direction, i.e., have the same sign
+
+Several measures depends on nuances of the *noncentral t-distribution*. The usual treatment parameterizes this distribution by *degrees of freedom* and a *noncentrality parameter*, and operates on the *t-statistic*. I prefer to work with more concrete notions: *sample size* (instead of degrees of freedom), *(presumed) population effect size* (instead of the noncentrality parameter), and *standardized observed effect size* aka *Cohen’s d* (instead of the t-statistic). For the limited context of my simulation, it's easy to convert between the concepts. I developed software that repackages base R's t-distribution functions to use my preferred concepts; I call this the *noncentral d2t-distribution*. To be clear: the d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution. I describe the d2t-distribution software in [Noncentral d2t-Distribution Applied to Measures of Replication Success](https://natgoodman.github.io/repwr/stats.stable.html). The d2t software does much of the heavy lifting for the measures.
 
 ## Simulation 
 

@@ -23,8 +23,6 @@ Statistics lessons usually parameterize the noncentral t-distribution by *degree
 
 Here I present my software for the noncentral t-distribution parameterized by sample size, population effect size, and observed effect size. I call this the *noncentral d2t-distribution*.  The code is in the file `R/stats.R`. I must emphasize that the d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution.
 
-I learned about 
-
 ## Simulation Scenario
 
 I consider a basic replication scheme in which each original study is repeated once. 
@@ -49,7 +47,6 @@ This section defines basic notation that I use throughout. Later sections define
 | `n` | sample size |
 | `d.pop` | population effect size; this arises in discussion but not the software |
 | `d` | standardized observed effect size, aka *Cohen’s d*; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
-| `d.sig` | minimum significant effect size for a sample size of $n$ |
 | `d0` | noncentrality parameter expressed in $d_{sdz}$ units; this is the presumed population effect size |
 | `pval` | p-value |
 | `df` | degrees of freedom |
@@ -60,7 +57,7 @@ This section defines basic notation that I use throughout. Later sections define
 <br/>
 **Notation for base R t-distribution and d2t-distribution functions**
 
-My d2t-distribution repackages base R's t-distribution functions. The table below shows the base R functions and the corresponding d2t functions.
+My d2t-distribution repackages base R's t-distribution functions. The table below lists the base R and corresponding d2t functions.
 
 | base R | d2t | meaning |
 | ------- | ------- | -------------------------------------------------------- |
