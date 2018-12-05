@@ -135,8 +135,10 @@ The method first computes the smallest population effect size that would confer 
 <br/> 
 **Functions from [d2t document](https://natgoodman.github.io/repwr/stats.stable.html)**
 
+These functions use the identities $d=t\sqrt{2n/n^2}$ and $t=d\sqrt{n^2/2n}$ to convert between standardized effect sizes ($d$) and t-statistics ($t$)  and base R's `pt` functions to convert t-statistics into p-values. 
+
   - `pval2d` converts p-value to standardized effect size
-  - `p_d2t()` is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units.
+  - `p_d2t()` is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units
 
 <br/>
 **Math**
@@ -150,7 +152,8 @@ d_{close}&=d \mid p_d2t(n2,d,d_{scope})=\alpha \\
 <br/>
 **R**
 
-The code uses R's `uniroot` function to solve the equations for $d_{scope}$ and $d_{close}$. The call to `suppressWarnings` is to shut up an annoying warning from `pt` about possibly not attaining full precision.
+The software performs the above computation on all pairs of simulated sample sizes (`n1`, `n2`). I show here the code that implements the computation. 
+The code uses R's `uniroot` function to solve the equations for $d_{scope}$ and $d_{close}$. It wraps `uniroot` in `suppressWarnings` to shut up an annoying warning from `pt` about possibly not attaining full precision. I don't show the outer loop that invokes the core on all `n1`, `n2` pairs. 
 
 ``` {r eval=FALSE}
 d.sig=pval2d(n1,sig.level);
