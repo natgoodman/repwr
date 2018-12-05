@@ -106,19 +106,19 @@ The table below lists the 28 measures implemented by the software. Each measure 
 | big1 | $d1 \ge d2$ | 
 | big2 | $d2 \ge d1$ | 
 
-## Implementation
+## Precursor Statistics
 
-Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes what it can before doing any simulations, then what it can on each simulated study individually, then statistics that depend only on the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$), and finally statistics that depend on the replications. Once each replication set is formed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
+Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes precursor statistics that make the measures very fast. It computes each precursor statistic as early as possible in the pipeline: it computes what it can before doing any simulations, then what it can on each simulated study individually, then statistics that depend only on the replication parameters ($n1$, $n2$, $d1_{pop}$, $d2_{pop}$), and finally statistics that depend on the actual replications. Once each replication set is formed and the precursor statistics computed, the software implements the measures as vectorized in-line code (i.e., not as functions) that operates on the entire set in a single gulp. 
 
-### Values computed before simulation
+### Statistics computed before simulation
 
-Values computed before the simulation cannot depend on the data, of course. In addition to values that truly do not depend on the data (notably Uri Simonsohn's small telescope thresholds), I pre-compute expensive statistics on a parameter grid, then later interpolate to get the values for specific data. For interpolation, I use `aspline` from the [akima package](https://cran.r-project.org/web/packages/akima).
+Statistics computed before the simulation cannot depend on the data, of course. In addition to values that truly do not depend on the data (notably Uri Simonsohn's small telescope thresholds), I pre-compute expensive statistics on a parameter grid, then later interpolate to get the values for specific data. For interpolation, I use `aspline` from the [akima package](https://cran.r-project.org/web/packages/akima).
 
 #### Small telescope thresholds
 
 [Uri Simonsohn's small telescope](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) thresholds depend only on the sample sizes of the original and replica studies. In Uri's words, the method "evaluates the original study’s *design* rather than its result — the telescope rather than the planet".
 
-The method first computes the smallest population effect size that would confer 33% power to the original study; Uri calls this $d_{33\%}$. Then it computes the smallest observed effect size that the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{scope}$. If the replica observes an effect size $\lt d_{scope}$, the method concludes that the population effect size is too small to have been really detected by the original study.
+The method first computes the smallest population effect size that would confer 33% power to the original study; Uri calls this $d_{33\%}$. Then it computes the smallest observed effect size that the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{close}$. If the replica observes an effect size $\ge d_{close}$, the method deems it close enough to the original effect size to be valid; on the other hand, if the replica effect size is $\lt d_{close}$, the method deems it too small to have been really detected by the original study.
 
 <br/>
 **Notation for small telescope thresholds**
@@ -130,12 +130,12 @@ The method first computes the smallest population effect size that would confer 
 | $\alpha$ | `sig.level` |  significance level |
 | $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n1$ |
 | $d_{scope}$ | `d.scope` | minimum population effect size that would confer $pwr$ power to the original study; Uri calls this $d_{33\%}$ |
-| $d_{close}$ | `d.close` | minimum acceptable observed effect size in the replica; I use the term "close", because this is the lower bound on effect sizes in the replica that are close enough to the original |
+| $d_{close}$ | `d.close` | minimum acceptable observed effect size in the replica |
 
 <br/> 
 **Functions from [d2t document](https://natgoodman.github.io/repwr/stats.stable.html)**
 
-  - `pval2d` converts p-value to a standardized effect size
+  - `pval2d` converts p-value to standardized effect size
   - `p_d2t()` is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units.
 
 <br/>
