@@ -76,7 +76,7 @@ The table below lists the 28 measures implemented by the software. Each measure 
 **Caution** The notation *d* is potentially ambiguous.  When used in measures it means $d_{sdz}$, the standardized observed effect size (aka Cohen’s $d$). When used in figures it generally means $d_{pop}$, the population effect size. Sorry.
 
 | measure | meaning |
-| ------- | -------------------------------------------------------- |
+| ------- | ---------------------------------------------------------------------------------------------------------------- |
 | sig1 | *pval1* is significant | 
 | sig2 | *pval2* is significant | 
 | sigm | *pvalm* is significant | 
@@ -177,15 +177,28 @@ The software stores the results of Uri's method in a matrix `scope` whose row an
 
 #### Confidence intervals
 
+Confidence intervals depend on the sample size and observed effect size of an individual study. The software pre-computes confidence intervals on a grid of these values. The main work is done by the `ci_d2t` function described in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html). The result is a data frame `confvl` whose columns are `n`, `d.sdz`, 'd.lo`, `d.hi`. 
+
+**Column names of `confvl` data frame**
+
+| name | meaning |
+| ------- | --------------------------------------------------------------- |
+| `n` | sample size |
+| `d.sdz` | standardized observed effect size, aka *Cohen’s d* |
+| `d.lo`, `d.hi` | bounds of confidence interval |
+
 #### Prediction intervals
 
+Prediction intervals depend on the sample sizes of the original and replica studies and the observed effect size of the original study. The software pre-computes prediction intervals on a grid of these values. The main work is done by the `pi_d2t` function described in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html). The result is a data frame `predvl` whose columns are `n1`, `n2`, `d1.sdz`, 'd.lo`, `d.hi`. 
 
-Values computed before the simulation cannot depend on the data, of course. In addition to values that truly do not depend on the data (notably Uri Simonsohn's small telescope thresholds), I pre-compute expensive statistics on a parameter grid, then later interpolate to get the values for specific data. For interpolation, I use `aspline` from the [akima package](https://cran.r-project.org/web/packages/akima).
+**Column names of `predvl` data frame**
 
-The precomputed values are 
-
-
-`ci_d2t` in [d2t document](https://natgoodman.github.io/repwr/stats.stable.html) does the heavy lifting | 
+| name | meaning |
+| ------- | --------------------------------------------------------------- |
+| `n1`, `n2` | sample sizes of the two studies |
+| `d1.sdz` | standardized observed effect size of the original study |
+| `d.lo`, `d.hi` | bounds of prediction interval |
+ 
 
 ### Values computed on individual studies
 
