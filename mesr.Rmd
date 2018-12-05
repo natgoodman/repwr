@@ -3,10 +3,10 @@ title: "Measuring Replication Success"
 author: "Nathan (Nat) Goodman"
 date: "December 6, 2018"
 output:
+  pdf_document: default
   html_document:
     css: css/html_stats.css
     highlight: kate
-  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
@@ -65,7 +65,7 @@ The table below lists the 28 measures implemented by the software. Each measure 
 - *scpd1*, *scpd2* are my extension to Uri's small telescope method that takes into account the observed effect size
 - *.* (*dot*) combines two statistics to yield a complete measure. For example, *d1.c2* means that $d1_{sdz}$ is contained in *c2*; *c1.c2* means *c1* and *c2* overlap; *d1.scp2* means $d1_{sdz} \ge scp2$
 
-**Caution** The notation *d* is potentially ambiguous.  When used in measures it means $d_{sdz}$, the standardized observed effect size. When used in figures it generally means $d_{pop}$, the population effect size. Sorry.
+**Caution** The notation *d* is potentially ambiguous.  When used in measures it means $d_{sdz}$, the standardized observed effect size. Elsewhere it may $d_{pop}$, the population effect size. I try to be clear in the text.
 
 | measure | meaning |
 | ------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -73,19 +73,19 @@ The table below lists the 28 measures implemented by the software. Each measure 
 | sig2 | *pval2* is significant | 
 | sigm | *pvalm* is significant | 
 | sdir | *d1* and *d2* are in same direction, i.e., have same sign | 
-| d1.c2 | *d1* contained in *c2* | 
-| d2.c1 | *d2* contained in *c1* | 
-| d1.cm | *d1* contained in *cm* | 
-| d2.cm | *d2* contained in *cm* | 
-| dm.c1 | *dm* contained in *c1* | 
-| dm.c2 | *dm* contained in *c2* | 
+| d1.c2 | *d1* is contained in *c2* | 
+| d2.c1 | *d2* is contained in *c1* | 
+| d1.cm | *d1* is contained in *cm* | 
+| d2.cm | *d2* is contained in *cm* | 
+| dm.c1 | *dm* is contained in *c1* | 
+| dm.c2 | *dm* is contained in *c2* | 
 | c1.c2 | *c1* and *c2* overlap | 
 | c1.cm | *c1* and *cm* overlap |
 | c2.cm | *c2* and *cm* overlap | 
-| d1.p2 | *d1* contained in *p2* | 
-| d2.p1 | *d2* contained in *p1* | 
-| dm.p1 | *dm* contained in *p1* | 
-| dm.p2 | *dm* contained in *p2* | 
+| d1.p2 | *d1* is contained in *p2* | 
+| d2.p1 | *d2* is contained in *p1* | 
+| dm.p1 | *dm* is contained in *p1* | 
+| dm.p2 | *dm* is contained in *p2* | 
 | p1.p2 | *p1* and *p2* overlap | 
 | d1.scp2 | *d1* exceeds *scp2* | 
 | d2.scp1 | *d2* exceeds *scp1*; note that Uri's published small telescope method is this one and requires that *sig2* also hold | 
@@ -100,7 +100,7 @@ The table below lists the 28 measures implemented by the software. Each measure 
 
 ## Precursor Statistics
 
-Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes precursor statistics that make the measures very fast. It computes each precursor statistic as early as possible in the pipeline: it computes what it can before doing any simulations, then what it can on each simulated study individually, and finally statistics that depend on the actual replications. I took care to implement the code in a vectorized fashion to operate on individual studies are replications in a single gulp. 
+Performance is critical, because I apply the measures to many, many replications (more than 100 million in default full runs). The code computes precursor statistics that make the measures very fast. It computes each precursor statistic as early as possible in the pipeline: it computes what it can before doing any simulations, then what it can on each simulated study individually, and finally statistics that depend on the actual replications. I took care to implement the code in a vectorized fashion to operate on individual studies and replications in a single gulp. 
 
 ### Statistics computed before simulation
 
@@ -110,11 +110,10 @@ Statistics computed before the simulation cannot depend on the data, of course. 
 
 [Uri Simonsohn's small telescope](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) thresholds depend only on the sample sizes of the original and replica studies. In Uri's words, the method "evaluates the original study’s *design* rather than its result — the telescope rather than the planet". I extended Uri's method to take into account the observed effect size in the original study. This started out as my misunderstanding of Uri's published method. Since I had the code, I decided to keep it.
 
-Uri's method first computes the smallest population effect size that would confer 33% power to the original study for seeing the smallest possible significant effect; Uri calls this $d_{33\%}$. Then it computes the smallest effect size the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{close}$. If the replica observes an effect size $\ge d_{close}$, the method deems it close enough to the original effect size to be valid; conversely, if the replica effect size is $\lt d_{close}$, the method deems it too small to have been really detected by the original study.
+Uri's method first computes the smallest population effect size that would confer 33% power to the original study for seeing the smallest possible significant effect; Uri calls this $d_{33\%}$. Then it computes the smallest effect size the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{close}$. If the replica observes an effect size $\ge d_{close}$, the method deems it close enough to the original effect size to be valid; conversely, if the replica effect size is $< d_{close}$, the method deems it too small to have been really detected by the original study.
 
-The extended effect size dependent method differs only in the first step: it computes the smallest population effect size that would confer adequate power (default 33% as in Uri's method) for the original study to see the *original* effect size rather than the *smallest possible* significant effect size. 
+My extended (effect size dependent) method differs only in the first step: it computes the smallest population effect size that would confer adequate power (default 33% as in Uri's method) for the original study to see the *original* effect size rather than the *smallest possible* significant effect size. 
 
-<br/>
 **Notation for small telescope thresholds**
 
 | math | code | meaning |
@@ -122,37 +121,36 @@ The extended effect size dependent method differs only in the first step: it com
 | $n1$, $n2$ | `n1`, `n2` | sample sizes of the two studies |
 | $pwr$ | `scope.power` | required power of original study; Uri fixes this at 33% |
 | $\alpha$ | `sig.level` |  significance level |
-| $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n1$; for Uri's version of the method |
-| $d1_{sdz}$ | `d1.sdz` | observed effect size in the original study; for effect size dependent version of the method |
+| $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n1$; used in Uri's version of the method |
+| $d1_{sdz}$ | `d1.sdz` | observed effect size in the original study; used in my effect size dependent version of the method |
 | $d_{scope}$ | `d.scope` | minimum population effect size that would confer $pwr$ power to the original study; Uri calls this $d_{33\%}$ |
 | $d_{close}$ | `d.close` | minimum acceptable observed effect size in the replica |
 
 <br/> 
 **Functions from [d2t document](https://natgoodman.github.io/repwr/stats.stable.html)**
 
-These functions use the identities $d=t\sqrt{2n/n^2}$ and $t=d\sqrt{n^2/2n}$ to convert between standardized effect sizes ($d$) and t-statistics ($t$)  and base R's `pt` functions to convert t-statistics into p-values. 
+These functions use the identities $d=t\sqrt{2n/n^2}$ and $t=d\sqrt{n^2/2n}$ to convert between standardized effect sizes ($d$) and t-statistics ($t$) thes use base R's `pt` functions to convert t-statistics into p-values.
 
   - `pval2d` converts p-value to standardized effect size
   - `p_d2t()` is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units
 
-<br/>
 **Math**
 
 $$\begin{aligned}
 \bf{\text{Uri's method}}& \\
 d_{sig}&=pval2d(n1,\alpha) \\
-d_{scope}&=d0 \mid p_d2t(n1,d_{sig},d0)=pwr \\
-d_{close}&=d \mid p_d2t(n2,d,d_{scope})=\alpha \\
+d_{scope}&=d0 \mid p\_d2t(n1,d_{sig},d0)=pwr \\
+d_{close}&=d \mid p\_d2t(n2,d,d_{scope})=\alpha \\
 \bf{\text{effect size dependent method}}& \\
-d_{scope}&=d0 \mid p_d2t(n1,d1_{sdz},d0)=pwr \\
-d_{close}&=d \mid p_d2t(n2,d,d_{scope})=\alpha \\
+d_{scope}&=d0 \mid p\_d2t(n1,d1_{sdz},d0)=pwr \\
+d_{close}&=d \mid p\_d2t(n2,d,d_{scope})=\alpha \\
 \end{aligned}$$
 
 **R**
 
 For Uri's method, the software performs the above computation on all pairs of simulated sample sizes (`n1`, `n2`). For the effect size dependent version, the software adds a grid of $d1_{sdz}$ values. 
 
-I show here the code that implements the core computations and not the outer loop that invokes the core on all `n1`, `n2` pairs or `n1`, `n2`, `d1.dz` triples. The code uses R's `uniroot` function to solve the equations for $d_{scope}$ and $d_{close}$. It wraps `uniroot` in `suppressWarnings` to shut up an annoying warning from `pt` about possibly not attaining full precision. 
+I show here the code that implements the core computations and not the outer loop that invokes the core on all `n1`, `n2` pairs or `n1`, `n2`, `d1.sdz` triples. The code uses R's `uniroot` function to solve the equations for $d_{scope}$ and $d_{close}$. It wraps `uniroot` in `suppressWarnings` to shut up an annoying warning from `pt` about possibly not attaining full precision. 
 
 ``` {r eval=FALSE}
 ## Uri's method
@@ -165,13 +163,13 @@ d.scope=uniroot(function(d0) p_d2t(n1,d=d1.sdz,d0,lower.tail=F)-scope.power,inte
 d.close=suppressWarnings(uniroot(function(d) p_d2t(n2,d,d0=d.scope)-scope.close,c(-10,10))$root);
 ```
 
-The software stores the results of Uri's method in a matrix `scope` whose row and column names are the values of `n1`, `n2` and values are `d.close`. It stores the effect size dependent results in a data frame `scopd` whose columns are `n1`, `n2`, `d1.sdz`, and `d.close`.
+The software stores the results of Uri's method in a matrix `scope` whose row and column names are the values of `n1`, `n2` and whose values are `d.close`. It stores the effect size dependent results in a data frame `scopd` whose columns are `n1`, `n2`, `d1.sdz`, and `d.close`.
 
 #### Confidence and prediction intervals
 
 Confidence intervals approximately indicate the range of likely values for the population effect size. Technically, the confidence level is the probability that the interval contains the population effect size.
 
-Confidence intervals depend on the sample size and observed effect size of an individual study. The software precomputes confidence intervals on a grid of these values. The main work is done by the `ci_d2t` function described in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html). The result is a data frame `confvl` whose columns are `n`, `d.sdz`, 'd.lo`, `d.hi`. 
+Confidence intervals depend on the sample size and observed effect size of an individual study. The software precomputes confidence intervals on a grid of these values. The main work is done by the `ci_d2t` function described in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html). The result is a data frame `confvl` whose columns are as follows.
 
 **Column names of `confvl` data frame**
 
@@ -181,9 +179,10 @@ Confidence intervals depend on the sample size and observed effect size of an in
 | `d.sdz` | standardized observed effect size |
 | `d.lo`, `d.hi` | bounds of confidence interval |
 
+<br/>
 Prediction intervals estimate the range of effect sizes we're likely to observe in a replication.
 
-Prediction intervals depend on the sample sizes of the original and replica studies and the observed effect size of the original study. The software precomputes prediction intervals on a grid of these values. The main work is done by the `pi_d2t` function in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html). The result is a data frame `predvl` whose columns are `n1`, `n2`, `d1.sdz`, 'd.lo`, `d.hi`. 
+Prediction intervals depend on the sample sizes of the original and replica studies and the observed effect size of the original study. The software precomputes prediction intervals on a grid of these values. The main work is done by the `pi_d2t` function in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html). The result is a data frame `predvl` whose columns are as follows. 
 
 **Column names of `predvl` data frame**
 
@@ -198,7 +197,7 @@ Prediction intervals depend on the sample sizes of the original and replica stud
 The following table lists the statistics computed on individual studies. Most are obvious.
 
 | variable | meaning | details |
-| ------- | --------------------------------------------------------------- |
+| ------- | -------- |--------------------------------------------------------------- |
 | `mean0`, `mean1`, `sd0`, `sd1` | means and standard deviations of group0 and group1 | |
 | `d.raw` | raw effect size | `mean0-mean1` |
 | `sd` | pooled standard deviation | `sqrt((sd0^2+sd1^2)/2)`; see explanation below | 
@@ -208,9 +207,9 @@ The following table lists the statistics computed on individual studies. Most ar
 | `ci.lo`, `ci.hi` | lower and upper bounds of confidence interval | interpolated from precomputed `confvl` matrix |
 | `w.meta`, `d.meta` | inverse variance weight and weighted effect size for fixed effect meta-analysis | see explanation below | 
 
+<br/>
 In the current implementation, the software discards `mean0`, `mean1`, `sd0`, `sd1`, and `d.raw` early in the workflow, since they're not used later. This is a minor optimization.
 
-<br/>
 **Pooled standard deviation**
 
 My code for pooled standard deviation, though independent of the sample size $n$, is correct. Here's the derivation.
@@ -223,12 +222,11 @@ pooled.sd&=sqrt{((n0-1)sd0^2+(n1-1)sd1^2)/(n0+n1-2)} \\
 &=\sqrt{(sd0^2+sd1^2)/2} \\
 \end{aligned}$$
 
-<br/>
 **Values for fixed-effect meta-analysis**
 
-The code computes the inverse variance weight and weighted effect size for fixed-effect meta-analysis on each study, then combines the values to yield the final meta-analytic statistics for pairs of studies. 
+The code computes the inverse variance weight and weighted effect size for fixed-effect meta-analysis on each study, then later combines these values to yield the final meta-analytic statistics for pairs of studies. 
 
-The variance in question is the sampling variance of the estimated effect size ($d_{sdz}$), not the variance of the data! The sampling distribution of $d_{sdz}$ is a noncentral t-distribution centered on $d_{sdz}$ with $2(n-1)$ degrees of freedom. The weighted effect size is simply $d_{sdz}$ times the weight. I use the `sd\_d2t` function in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html) to get the standard deviation and square it to get the variance.
+The variance in question is the sampling variance of the estimated effect size ($d_{sdz}$), not the variance of the data! The sampling distribution of $d_{sdz}$ is a noncentral t-distribution centered on $d_{sdz}$ with $2(n-1)$ degrees of freedom. The weighted effect size is simply $d_{sdz}$ times the weight. I use the `sd_d2t` function in the [d2t document](https://natgoodman.github.io/repwr/stats.stable.html) to get the standard deviation, then square it to get the variance.
 
 The R code is
 ``` {r eval=FALSE}
@@ -237,11 +235,11 @@ w.meta=1/(sd_d2t(n,d.sdz)^2);
 d.meta=d.sdz*w.meta;
 ```
 
-Why fixed-effect meta-analysis? With two studies it's possible to do fixed- or random-effect but not mixed-effect which needs at least three studies. I chose fixed-effect for the pragmatic performance reasons. I tested the random-effect calculation from [metafor](https://cran.r-project.org/web/packages/metafor); it adds ~1 minute per replication which is way too slow for this simulation.
+Why fixed-effect meta-analysis? With two studies it's possible to do fixed- or random-effect but not mixed-effect which needs at least three studies. I chose fixed-effect for pragmatic performance reasons. I tested the random-effect calculation from [metafor](https://cran.r-project.org/web/packages/metafor); it adds ~1 minute per replication which is way too slow for this simulation.
 
 ### Statistics computed on replications
 
-Several of the statistics computed on replications simply interpolate or directly read-out [statistics precomputed before the simulation](#statistics-computed-before-simulation).
+Several of the statistics computed on replications simply interpolate or directly read-out statistics precomputed before the simulation [see above]](#statistics-computed-before-simulation).
 
 | variable | meaning | details |
 | ------- | --------------------------------------------------------------- |
@@ -249,13 +247,14 @@ Several of the statistics computed on replications simply interpolate or directl
 | `scp1`, `scp2` | small telescope thresholds (Uri's original version) | directly read-out from precomputed `scope` matrix | 
 | `scpd1`, `scpd2` | effect size dependent small telescope thresholds (my extended version) | interpolated from precomputed `scopd` data frame | 
 
-The rest are meta-analytic. A key point is that the sampling distribution of the meta effect size is normal with standard deviation $\sqrt{1/sum\ of\ weights}$. I checked my results against [metafor](https://cran.r-project.org/web/packages/metafor/) but don't have a good intuition as to why it's right.
+<br/>
+The rest are meta-analytic. A key point is that the sampling distribution of the meta-effect size is normal with standard deviation $\sqrt{1/sum\ of\ weights}$. I checked my results against [metafor](https://cran.r-project.org/web/packages/metafor/) but don't have a good intuition for the approach.
 
 | variable | meaning | details |
-| ------- | --------------------------------------------------------------- |
+| ------- | -------- | --------------------------------------------------------------- |
 | `w.sum` | sum of weights for the two studies |  |
-| `meta.d` | meta effect size | sum of the weighted effect sizes divided by `w.sum` |
-| `meta.abs` | absolute value of `meta.d` | |
+| `meta.d` | meta-effect size | sum of the weighted effect sizes divided by `w.sum` |
+| `meta.abs` | absolute value of `meta.d` | `abs(meta.d)` |
 | `meta.sd` | standard deviation of distribution of `meta.d` | `sqrt(1/(w.sum))` |
 | `meta.pval` | p-value of `meta.d` | `2*pnorm(-abs(meta.d/meta.sd))` | 
 | `meta.ci` | distance from `meta.d` to bounds of confidence interval | `qnorm(p=0.5+conf.level/2,sd=meta.sd)` |
@@ -263,7 +262,7 @@ The rest are meta-analytic. A key point is that the sampling distribution of the
 
 ## Implementation of measures
 
-With the precursor statistics in hand, the measures are trivial.  Here is the code.  In this code, `s1`, `s2` are data frames with statistics for the two studies; `p1`, `p2` are prediction intervals relative to the effect sizes of study 1 and study 2, respectively; and `$` is R's standard notation for accessing the columns of a data frame. `between` is a simple function that tests whether the first argument is between the other two: `between=function(x,lo,hi) x>=lo&x<hi`.
+With the precursor statistics in hand, the measures are trivial.  Here is the code.  In this code, `s1`, `s2` are data frames containing statistics for the two studies; `p1`, `p2` are prediction intervals relative to the effect sizes of the two studies; and `$` is R's standard notation for accessing the columns of a data frame. `between` is a simple function that tests whether the first argument is between the other two: `between=function(x,lo,hi) x>=lo&x<hi`.
 
 ``` {r eval=FALSE}
   ## apply the rules. do them in-line for efficiency
