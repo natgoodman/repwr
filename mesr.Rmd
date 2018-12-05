@@ -3,10 +3,10 @@ title: "Measuring Replication Success"
 author: "Nathan (Nat) Goodman"
 date: "December 6, 2018"
 output:
-  pdf_document: default
   html_document:
     css: css/html_stats.css
     highlight: kate
+  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
@@ -116,9 +116,11 @@ Statistics computed before the simulation cannot depend on the data, of course. 
 
 #### Small telescope thresholds
 
-[Uri Simonsohn's small telescope](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) thresholds depend only on the sample sizes of the original and replica studies. In Uri's words, the method "evaluates the original study’s *design* rather than its result — the telescope rather than the planet".
+[Uri Simonsohn's small telescope](http://datacolada.org/wp-content/uploads/2015/05/Small-Telescopes-Published.pdf) thresholds depend only on the sample sizes of the original and replica studies. In Uri's words, the method "evaluates the original study’s *design* rather than its result — the telescope rather than the planet". I extended Uri's method to take into account the observed effect size in the original study. This started out as my misunderstanding of Uri's published method. Since I had the code, I decided to keep it.
 
-The method first computes the smallest population effect size that would confer 33% power to the original study; Uri calls this $d_{33\%}$. Then it computes the smallest observed effect size that the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{close}$. If the replica observes an effect size $\ge d_{close}$, the method deems it close enough to the original effect size to be valid; on the other hand, if the replica effect size is $\lt d_{close}$, the method deems it too small to have been really detected by the original study.
+Uri's method first computes the smallest population effect size that would confer 33% power to the original study for seeing the smallest possible significant effect; Uri calls this $d_{33\%}$. Then it computes the smallest effect size the replica study could see consistent with the hypothesis that the true effect size is $\ge d_{33\%}$. I call this $d_{close}$. If the replica observes an effect size $\ge d_{close}$, the method deems it close enough to the original effect size to be valid; conversely, if the replica effect size is $\lt d_{close}$, the method deems it too small to have been really detected by the original study.
+
+The extended effect size dependent method differs only in the first step: it computes the smallest population effect size that would confer adequate power (default 33% as in Uri's method) for the original study to see the *original* effect size rather than the *smallest possible* significant effect size. 
 
 <br/>
 **Notation for small telescope thresholds**
@@ -128,7 +130,8 @@ The method first computes the smallest population effect size that would confer 
 | $n1$, $n2$ | `n1`, `n2` | sample sizes of the two studies |
 | $pwr$ | `scope.power` | required power of original study; Uri fixes this at 33% |
 | $\alpha$ | `sig.level` |  significance level |
-| $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n1$ |
+| $d_{sig}$ | `d.sig` | minimum significant effect size for a sample size of $n1$; for Uri's version of the method |
+| $d1_{sdz}$ | `d1.sdz` | observed effect size in the original study; for effect size dependent version of the method |
 | $d_{scope}$ | `d.scope` | minimum population effect size that would confer $pwr$ power to the original study; Uri calls this $d_{33\%}$ |
 | $d_{close}$ | `d.close` | minimum acceptable observed effect size in the replica |
 
@@ -143,25 +146,34 @@ These functions use the identities $d=t\sqrt{2n/n^2}$ and $t=d\sqrt{n^2/2n}$ to 
 <br/>
 **Math**
 
-\begin{aligned}
+$$\begin{aligned}
+\bf{\text{Uri's method}}& \\
 d_{sig}&=pval2d(n1,\alpha) \\
 d_{scope}&=d0 \mid p_d2t(n1,d_{sig},d0)=pwr \\
 d_{close}&=d \mid p_d2t(n2,d,d_{scope})=\alpha \\
-\end{aligned}
+\bf{\text{effect size dependent method}}& \\
+d_{scope}&=d0 \mid p_d2t(n1,d1_{sdz},d0)=pwr \\
+d_{close}&=d \mid p_d2t(n2,d,d_{scope})=\alpha \\
+\end{aligned}$$
 
-<br/>
 **R**
 
-The software performs the above computation on all pairs of simulated sample sizes (`n1`, `n2`). I show here the code that implements the computation. 
-The code uses R's `uniroot` function to solve the equations for $d_{scope}$ and $d_{close}$. It wraps `uniroot` in `suppressWarnings` to shut up an annoying warning from `pt` about possibly not attaining full precision. I don't show the outer loop that invokes the core on all `n1`, `n2` pairs. 
+For Uri's method, the software performs the above computation on all pairs of simulated sample sizes (`n1`, `n2`). For the effect size dependent version, the software adds a grid of $d1_{sdz}$ values. 
+
+I show here the code that implements the core computations and not the outer loop that invokes the core on all `n1`, `n2` pairs or `n1`, `n2`, `d1.dz` triples. The code uses R's `uniroot` function to solve the equations for $d_{scope}$ and $d_{close}$. It wraps `uniroot` in `suppressWarnings` to shut up an annoying warning from `pt` about possibly not attaining full precision. 
 
 ``` {r eval=FALSE}
+## Uri's method
 d.sig=pval2d(n1,sig.level);
 d.scope=uniroot(function(d0) p_d2t(n1,d=d.sig,d0,lower.tail=F)-scope.power,interval=c(0,10))$root;
 d.close=suppressWarnings(uniroot(function(d) p_d2t(n2,d,d0=d.scope)-scope.close,c(-10,10))$root);
+
+## effect size dependent method
+d.scope=uniroot(function(d0) p_d2t(n1,d=d1.sdz,d0,lower.tail=F)-scope.power,interval=c(0,10))$root;
+d.close=suppressWarnings(uniroot(function(d) p_d2t(n2,d,d0=d.scope)-scope.close,c(-10,10))$root);
 ```
 
-#### Effect size dependent small telescope thresholds
+The software stores the results of Uri's method in a matrix `scope` whose row and column names are the values of `n1`, `n2` and values are `d.close`. It stores the effect size dependent results in a data frame `scopd` whose columns are `n1`, `n2`, `d1.sdz`, and `d.close`.
 
 #### Confidence intervals
 
