@@ -3,10 +3,10 @@ title: "Measuring Replication Success"
 author: "Nathan (Nat) Goodman"
 date: "December 6, 2018"
 output:
-  pdf_document: default
   html_document:
     css: css/html_stats.css
     highlight: kate
+  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
@@ -68,7 +68,7 @@ The table below lists the 28 measures implemented by the software. Each measure 
 **Caution** The notation *d* is potentially ambiguous.  When used in measures it means $d_{sdz}$, the standardized observed effect size. Elsewhere it may $d_{pop}$, the population effect size. I try to be clear in the text.
 
 | measure | meaning |
-| ------- | ---------------------------------------------------------------------------------------------------------------- |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | sig1 | *pval1* is significant | 
 | sig2 | *pval2* is significant | 
 | sigm | *pvalm* is significant | 
@@ -197,7 +197,7 @@ Prediction intervals depend on the sample sizes of the original and replica stud
 The following table lists the statistics computed on individual studies. Most are obvious.
 
 | variable | meaning | details |
-| ------- | -------- |--------------------------------------------------------------- |
+| ------------------------------- | -------------------------------- |--------------------------------------------------------------- |
 | `mean0`, `mean1`, `sd0`, `sd1` | means and standard deviations of group0 and group1 | |
 | `d.raw` | raw effect size | `mean0-mean1` |
 | `sd` | pooled standard deviation | `sqrt((sd0^2+sd1^2)/2)`; see explanation below | 
@@ -242,7 +242,7 @@ Why fixed-effect meta-analysis? With two studies it's possible to do fixed- or r
 Several of the statistics computed on replications simply interpolate or directly read-out statistics precomputed before the simulation [see above]](#statistics-computed-before-simulation).
 
 | variable | meaning | details |
-| ------- | --------------------------------------------------------------- |
+| ------------------------------- | -------------------------------- |--------------------------------------------------------------- |
 | `pi.lo`, `pi.hi` | bounds of prediction intervals | interpolated from precomputed `predvl` data frame |
 | `scp1`, `scp2` | small telescope thresholds (Uri's original version) | directly read-out from precomputed `scope` matrix | 
 | `scpd1`, `scpd2` | effect size dependent small telescope thresholds (my extended version) | interpolated from precomputed `scopd` data frame | 
@@ -251,7 +251,7 @@ Several of the statistics computed on replications simply interpolate or directl
 The rest are meta-analytic. A key point is that the sampling distribution of the meta-effect size is normal with standard deviation $\sqrt{1/sum\ of\ weights}$. I checked my results against [metafor](https://cran.r-project.org/web/packages/metafor/) but don't have a good intuition for the approach.
 
 | variable | meaning | details |
-| ------- | -------- | --------------------------------------------------------------- |
+| ------------------------------- | -------------------------------- | --------------------------------------------------------------- |
 | `w.sum` | sum of weights for the two studies |  |
 | `meta.d` | meta-effect size | sum of the weighted effect sizes divided by `w.sum` |
 | `meta.abs` | absolute value of `meta.d` | `abs(meta.d)` |
