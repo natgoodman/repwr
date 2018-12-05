@@ -4,6 +4,13 @@ Nathan (Nat) Goodman
 December 3, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.45 2018-12-05
+-----------------------
+
+Support document describing [measures](https://natgoodman.github.io/repwr/mesr.stable.html) (`mesr.Rmd`)
+
+Minor edits to `mesr.Rmd`
+
 Release 1.40 2018-12-03
 -----------------------
 

@@ -19,9 +19,9 @@ Various authors have proposed tests for deciding whether a replication succeeds 
 
 Several measures depends on nuances of the *noncentral t-distribution*. I learned the hard way that the classic (*central*) t-distribution only applies when the NULL is true. When the NULL isn't true, the correct sampling distribution is the *noncentral t-distribution*. 
 
-Statistics lessons usually parameterize the noncentral t-distribution by *degrees of freedom* and a *noncentrality parameter*, and the distribution operates on the *t-statistic*. I prefer to work with more concrete notions: *sample size* (instead of degrees of freedom), *(presumed) population effect size* (instead of the noncentrality parameter), and *standardized observed effect size* aka *Cohen’s d* (instead of the t-statistic). For the limited context of my simulation, it's easy to convert between the concepts.
+Statistics lessons usually parameterize the noncentral t-distribution by *degrees of freedom* and a *noncentrality parameter*, and the distribution operates on the *t-statistic*. I prefer to work with more concrete notions: *sample size* (instead of degrees of freedom), *(presumed) population effect size* (instead of the noncentrality parameter), and *standardized observed effect size* (aka *Cohens's d*) (instead of the t-statistic). For the limited context of my simulation, it's easy to convert between the concepts.
 
-Here I present my software for the noncentral t-distribution parameterized by sample size, population effect size, and observed effect size. I call this the *noncentral d2t-distribution*.  The code is in the file `R/stats.R`. I must emphasize that the d2t-distribution is not a new distribution in any sense; it's merely a repackaging of the t-distribution.
+Here I present my software for the noncentral t-distribution parameterized by sample size, population effect size, and observed effect size. I call this the *noncentral d2t-distribution*.  The code is in the file `R/stats.R`. I must emphasize that the d2t-distribution is not a new distribution in any sense; it merely repackages the t-distribution.
 
 ## Simulation Scenario
 
@@ -46,7 +46,7 @@ This section defines basic notation that I use throughout. Later sections define
 | ------- | --------------------------------------------------------------- |
 | `n` | sample size |
 | `d.pop` | population effect size; this arises in discussion but not the software |
-| `d` | standardized observed effect size, aka *Cohen’s d*; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
+| `d` | standardized observed effect size; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
 | `d0` | noncentrality parameter expressed in $d_{sdz}$ units; this is the presumed population effect size |
 | `pval` | p-value |
 | `df` | degrees of freedom |
