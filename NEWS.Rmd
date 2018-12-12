@@ -1,17 +1,21 @@
 ---
 title: "Revision history for repwr repository"
 author: "Nathan (Nat) Goodman"
-date: "December 3, 2018"
+date: "December 12, 2018"
 output:
+  pdf_document: default
   html_document: default
   github_document:
     html_preview: no
-  pdf_document: default
 linkcolor: cyan
 citecolor: green
 urlcolor: blue
 ---
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+
+## Release 1.46 2018-12-12
+
+- Add css file used by stats and mesr documents
 
 ## Release 1.45 2018-12-05
 

@@ -1,9 +1,14 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-December 3, 2018
+December 12, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.46 2018-12-12
+-----------------------
+
+-   Add css file used by stats and mesr documents
+
 Release 1.45 2018-12-05
 -----------------------
 
