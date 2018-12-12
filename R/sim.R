@@ -289,9 +289,9 @@ dosmry=function(detl=NULL,n1,n2,d1,d2) {
 ## contruct default positive rate objects
 doposr=function(smry=NULL) {
   if (is.null(smry)) smry=get_data(smry);
-  ## init measures and summary types unless already done
+  ## init measures unless already done
   init_mesr();
-  init_smry(smry=smry);
+  smry.type=unique(smry$type);
   ## construct positive rates for cases of interest
   ## 1) standard
   ## 2) from sig1 relto sig1
@@ -311,7 +311,7 @@ doposr=function(smry=NULL) {
 ## posr.id used to create file and saved object. if missing, set from from.type, relto.type 
 do_posr=
   function(smry,from.type=parent(from.type,'bsln'),relto.type=parent(relto.type,'sig1'),
-           posr.id=NULL,mesr=mesr.all) {
+           posr.id=NULL,mesr=mesr.all,smry.type=parent(smry.type,unique(smry$type))) {
     if (is.null(posr.id)) posr.id=paste(sep='_',from.type[1],relto.type[1]);
     ## use saved posr if exists and args permit
     posr=get_posr(posr.id,must.exist=F);
@@ -319,8 +319,8 @@ do_posr=
     ## no saved posr or args say not to use it. construct posr
     if (verbose) print(paste(sep=' ','+++ doposr',casename_posr(posr.id)));
     ## make sure measures & types legal and limit to type we need
-    from.type=check_type(from.type,mesr,multiok=T);
-    relto.type=check_type(relto.type,mesr,multiok=T);
+    from.type=check_type(from.type,multiok=T);
+    relto.type=check_type(relto.type,multiok=T);
     check_mesr();
     smry.bytype=split(smry,smry$type);
     posr=do.call(cbind,lapply(mesr,function(mesr) {

@@ -23,9 +23,7 @@
 ## make sure smry.type initialized and provided types are valid
 ##   limit type to mesr
 ##   fix single valued one
-check_type=function(type,mesr=parent(mesr,NULL),multiok=F) {
-  ## initialize smry.type unless already done
-  init_smry();
+check_type=function(type,multiok=F,mesr=parent(mesr,NULL),smry.type=parent(smry.type,NULL)) {
   ## make sure all types in smry.type
   bad=!(type %in% smry.type);
   if (any(bad)) {

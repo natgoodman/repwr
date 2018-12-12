@@ -282,7 +282,6 @@ doposr=function(smry=NULL) {
   if (is.null(smry)) smry=get_data(smry);
   ## init measures and summary types unless already done
   init_mesr();
-  init_smry(smry=smry);
   ## construct positive rates for cases of interest
   ## 1) standard
   ## 2) from sig1 relto sig1 - to show effect of sdir in supplement
@@ -313,8 +312,8 @@ do_posr=
     ## no saved posr or args say not to use it. construct posr
     if (verbose) print(paste(sep=' ','+++ doposr',casename_posr(posr.id)));
     ## make sure measures & types legal and limit to type we need
-    from.type=check_type(from.type,mesr,multiok=T);
-    relto.type=check_type(relto.type,mesr,multiok=T);
+    from.type=check_type(from.type,multiok=T);
+    relto.type=check_type(relto.type,multiok=T);
     check_mesr();
     smry.bytype=split(smry,smry$type);
     posr=do.call(cbind,lapply(mesr,function(mesr) {
