@@ -1,7 +1,7 @@
 ---
 title: "Systematic Replication Has Limited Power to Detect Bad Science"
 author: "Nathan (Nat) Goodman"
-date: "September 3, 2018"
+date: "December 13, 2018"
 output:
   html_document:
     css: css/html_document.css
@@ -18,7 +18,19 @@ urlcolor: blue
 
 The basic replication rationale goes something like this: (1) many published papers are wrong; (2) this is a serious problem the community must fix; and (3) systematic replication is an effective solution. (In recent months, I've seen an uptick in pre-registration as another solution. That's a topic for another day.)  In this post, I focus on the third point and ask: viewed as a statistical test, how well does systematic replication work; how well does it tell the difference between valid and invalid results?
 
-By "systematic replication" I mean projects like [Reproducibility Project: Psychology](https://osf.io/ezcuj/wiki/home) that systematically select studies in a particular field and repeat them in a uniform fashion. I consider a basic replication scheme in which each original study is repeated once and imagine that the replicators are trying to closely match the original study. Some authors call this *direct replication*.
+By "systematic replication" I mean projects like 
+[Many Lab](https://osf.io/89vqh/),
+[Reproducibility Project: Psychology (RPP)](https://osf.io/ezcuj/wiki/home),
+[Experimental Economics Replication Project (EERP)](https://experimentaleconreplications.com), and
+[Social Sciences Replication Project (SSRP)](http://www.socialsciencesreplicationproject.com)
+that systematically select studies in a particular field and repeat them in a uniform fashion. The main publications for these projects are 
+[Many Lab](https://econtent.hogrefe.com/doi/full/10.1027/1864-9335/a000178), 
+[RPP](http://science.sciencemag.org/content/349/6251/aac4716),
+[EERP](http://science.sciencemag.org/content/early/2016/03/02/science.aaf0918.full),
+[SSRP](https://www.nature.com/articles/s41562-018-0399-z).
+
+I consider a basic replication scheme in which each original study is repeated once. This is like [RPP](https://osf.io/ezcuj/wiki/home) and [EERP](https://experimentaleconreplications.com), but unlike [Many Lab](https://osf.io/89vqh/) as published which repeated each study 36 times and [SSRP](http://www.socialsciencesreplicationproject.com) which used a two-stage replication strategy. 
+I imagine that the replicators are trying to closely match the original study (*direct replication*) while doing the replications in a uniform fashion for cost and logistical reasons.
 
 Various authors have proposed tests for deciding whether a replication succeeds or fails. These include significance testing of the replica study, seeing whether the observed effect size of one study falls in the confidence or prediction interval of the other, checking whether the confidence or prediction intervals of the two studies overlap, significance testing of the studies combined via meta-analysis, and comparing the observed effect size of the replica study with a "small telescope" threshold derived from the smallest true effect size the original study could have plausibly detected. These tests answer different questions, but each is used by one or more authors to accept or reject replications.
 
@@ -59,30 +71,30 @@ Kind readers of an earlier version recommended these additional references.
 
 David Colquhoun reminded me that it's important to take into account the prior probability that studies are true, a topic I explored in a [previous post](http://daniellakens.blogspot.nl/2017/10/science-wise-false-discovery-rate-does.html). Relevant papers by Colquhoun include his recent proposal to [supplement p-values with false positive risk](https://arxiv.org/abs/1802.04888) and [2014](http://rsos.royalsocietypublishing.org/content/1/3/140216) and [2017](http://rsos.royalsocietypublishing.org/content/4/12/171085) papers discussing why p-values don't tell you the probability that a result is a false positive. 
 
-As I prepared to post this article, a [new systematic replication study](http://www.nature.com/articles/s41562-018-0399-z) "Evaluating the replicability of social science experiments in Nature and Science between 2010 and 2015" appeared in Nature Human Behavior.
+Please see my [incipient website](https://natgoodman.github.io/blog) for related blog posts and working papers including a [detailed description of the replication tests](https://natgoodman.github.io/repwr/mesr.stable.html).
 
 ## The Simulation 
 
 The software first simulates *studies* across a range of conditions, then combines pairs of studies into *pairwise replications*, applies rules (called *measures*) for deciding which pairwise replications pass, summarizes the results as counts and pass rates, and finally computes true and false positive and negative rates for measures and conditions of interest.
 
-The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is standard normal with $mean=d_{pop} \ge0$. I then calculate basic statistics of interest, most notably the *standardized observed effect size*, $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups. The software simulates many studies (default $10^4$) for each combination of $n$ and $d_{pop}$. 
+The studies are simple two group comparisons parameterized by sample size $n$ and population effect size $d_{pop}$ ($d_{pop}\ge0$). For each study, I generate two groups of random numbers, each of size $n$.  One group, *group0*, comes from a standard normal distribution with $mean=0$; the other, *group1*, is standard normal with $mean=d_{pop}$. I then calculate basic statistics of interest, most notably the *standardized observed effect size*, $d_{sdz}$, aka *Cohen’s d*, as the mean of *group1* minus the mean of *group0* divided by the pooled standard deviation of the two groups. The software simulates many studies (default $10^4$) for each combination of $n$ and $d_{pop}$. 
 
 When I need to be pedantic, I use the terms *study instance* for each individual study and *study set* for the ensemble of study instances for a given combination of $n$ and $d_{pop}$.
 
 The program varies $n$ from 10 to 1000 and $d_{pop}$ from 0 to 1. When analyzing results, I interpolate to get values that weren't simulated directly.
 
-To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row to get *pairwise replication instances*. It's convenient to think of the first study of the pair as the *original* and the second as the *replica*. 
+To generate pairwise replications, I consider all (ordered) pairs of study sets. For each pair, the software permutes the instances of each study, then combines the instances row-by-row to get *pairwise replication instances*. It's often convenient to think of the first study of the pair as the *original* and the second as the *replica*. 
 
 A *pairwise replication set* is the ensemble of pairwise replication instances for a given pair of study sets. Four variables parameterize each pairwise replication set: $n1$, $n2$, $d1_{pop}$, $d2_{pop}$. These are, naturally enough, the sample and population effect sizes for the two study sets. In meta-analysis, the situation where $d1_{pop} \ne d2_{pop}$ is called *study heterogeneity*.
 
-After forming the pairwise replications, I apply *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent instances and columns represent measures. 
+After forming the pairwise replications, I apply the *measures*, i.e., rules for deciding which replications pass. Each measure takes a pairwise replication set as input and returns a vector of boolean values telling which instances pass or fail. The result is a boolean matrix whose rows represent instances and columns represent measures. 
 
-This post focuses on eight measures that seem most important. These measures answer different questions, but all appear in papers or posts as tests to accept or reject replications.
+This post focuses on eight measures that seem most important. These measures answer different questions but all appear in papers or posts as tests to accept or reject replications.
 
 - *sig2*: the second study of the pair has a significant p-value
 - *sigm*: the fixed effect meta-analysis of the studies has a significant p-value
 - *d1.c2* (resp. *d2.c1*): $d1_{sdz}$ (resp. $d2_{sdz}$), the standardized observed effect size (aka *Cohen's d*) of the first (resp. second) study is in the confidence interval of the second (resp. first) study; my implementation of confidence intervals is based on Uri Simonsohn's [code](http://urisohn.com/sohn_files/BlogAppendix/Colada20.ConfidenceIntervalsForD.R) supporting this [post](http://datacolada.org/20)
-- *d1.p2* (resp. *d2.p1*): $d1_{sdz}$ (resp. $d2_{sdz}$) is in the prediction interval of the second (resp. first) study; my implementation of prediction intervals adapts code from David Stanley's [predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval)
+- *d1.p2* (resp. *d2.p1*): $d1_{sdz}$ (resp. $d2_{sdz}$) is in the prediction interval of the second (resp. first) study; my implementation of prediction intervals adapts code from David Stanley's [predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval) and [Spence and Stanley's paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/)
 - *c1.c2* (resp. *p1.p2*): the confidence (resp. prediction) intervals of the two studies overlap
 
 All measures assume that the first study is significant (*sig1* in my notation) and the observed effect sizes of the two studies have the same sign (both positive or both negative). 
@@ -107,7 +119,7 @@ I'm tempted to ignore the second concern, but most proposed replication methods 
 Here are the precise technical definitions.
 
 1. *non-zero*: a replication instance is *true* if $d1_{pop}\ne0$, i.e., the population effect size of the first study is non-zero
-2. *same-effect*: a replication instance is *true* if $d1_{pop}=d2_{pop}$, i.e., both studies have the same population effect size; with *tolerance* $\delta$, a replication instance is *true* if $abs(d1_{pop}-d2_{pop})\le\delta$, i.e., the two population effect sizes differ by at most $\delta$
+2. *same-effect*: a replication instance is *true* if $d1_{pop}=d2_{pop}$, i.e., both studies have the same population effect size; with *tolerance* $\epsilon$, a replication instance is *true* if $abs(d1_{pop}-d2_{pop})\le\epsilon$, i.e., the two population effect sizes differ by at most $\epsilon$
 
 Note that these criteria depend only on the population effect sizes.  
 
@@ -142,13 +154,13 @@ _Pairwise replications_
 _Correctness criteria_
 
 - *non-zero* is *true* if $d1_{pop}=0$
-- *same-effect* is *true* if $d1_{pop}=d2_{pop}$; with tolerance $\delta$, *same-effect* is *true* if $abs(d1_{pop}-d2_{pop})\le\delta$
+- *same-effect* is *true* if $d1_{pop}=d2_{pop}$; with tolerance $\epsilon$, *same-effect* is *true* if $abs(d1_{pop}-d2_{pop})\le\epsilon$
 - for *non-zero*
     - *false positive* occurs when $d1_{pop}=0$, but the measure returns true
     - *false negative* occurs when $d1_{pop}\neq0$, but the measure returns false
-- for *same-effect* with tolerance $\delta$
-    - *false positive* occurs when $abs(d1_{pop}-d2_{pop})>\delta$, but the measure returns true
-    - *false negative* occurs when $abs(d1_{pop}-d2_{pop})\le\delta$, but the measure returns false
+- for *same-effect* with tolerance $\epsilon$
+    - *false positive* occurs when $abs(d1_{pop}-d2_{pop})>\epsilon$, but the measure returns true
+    - *false negative* occurs when $abs(d1_{pop}-d2_{pop})\le\epsilon$, but the measure returns false
 
 To simplify the presentation
 
@@ -243,16 +255,16 @@ knitr::include_graphics('figure/repwr/m=1e4/figure_010_nonzro_nearexact_ragm.png
 
 ### Replication used to check effect size
 
-I now turn to the second correctness criterion, *same-effect*, which tests whether the population effect sizes of the replica and original studies are similar. Figures 11-14 show rate-vs-rate plots for two values of $\delta$ (0.1 or 0.5), and for fully inexact replications (figures 11-12) and assuming $d2_{pop} \le d1_{pop}$ (figures 13-14). The rationale for showing $\delta=0.1$ is this is the largest nearness value with any acceptable points in the *non-zero* analysis; the rationale for $\delta=0.5$ is this is the difference between *small* and *large* effect sizes in *Cohen's d* terminology. The assumption $d2_{pop} \le d1_{pop}$ reflects the view that investigators, consciously or not, tend to do original studies with populations that best exhibit the phenomenon of interest  
+I now turn to the second correctness criterion, *same-effect*, which tests whether the population effect sizes of the replica and original studies are similar. Figures 11-14 show rate-vs-rate plots for two values of $\epsilon$ (0.1 or 0.5), and for fully inexact replications (figures 11-12) and assuming $d2_{pop} \le d1_{pop}$ (figures 13-14). The rationale for showing $\epsilon=0.1$ is this is the largest nearness value with any acceptable points in the *non-zero* analysis; the rationale for $\epsilon=0.5$ is this is the difference between *small* and *large* effect sizes in *Cohen's d* terminology. The assumption $d2_{pop} \le d1_{pop}$ reflects the view that investigators, consciously or not, tend to do original studies with populations that best exhibit the phenomenon of interest  
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
-knitr::include_graphics('figure/repwr/m=1e4/figure_011_sameff_nearexact_unconstrained_delta=0.1.png');
-knitr::include_graphics('figure/repwr/m=1e4/figure_012_sameff_nearexact_unconstrained_delta=0.5.png');
-knitr::include_graphics('figure/repwr/m=1e4/figure_013_sameff_nearexact_d2<=d1_delta=0.1.png');
-knitr::include_graphics('figure/repwr/m=1e4/figure_014_sameff_nearexact_d2<=d1_delta=0.5.png');
+knitr::include_graphics('figure/repwr/m=1e4/figure_011_sameff_nearexact_unconstrained_epsilon=0.1.png');
+knitr::include_graphics('figure/repwr/m=1e4/figure_012_sameff_nearexact_unconstrained_epsilon=0.5.png');
+knitr::include_graphics('figure/repwr/m=1e4/figure_013_sameff_nearexact_d2<=d1_epsilon=0.1.png');
+knitr::include_graphics('figure/repwr/m=1e4/figure_014_sameff_nearexact_d2<=d1_epsilon=0.5.png');
 ```
 
-The results are bad in all cases. Error rates are better for $\delta=0.5$ and with $d2_{pop} \le d1_{pop}$ but not enough.
+The results are bad in all cases. Error rates are better for $\epsilon=0.5$ and with $d2_{pop} \le d1_{pop}$ but not enough.
 
 ### Small telescopes
 
@@ -261,7 +273,7 @@ Uri Simonsohn's *small telescopes* method combines both correctness criteria in 
 1. *sig2* is positive (presumably to test *non-zero*) and 
 2. $d2_{sdz}$, the replica's observed effect size, exceeds a threshold deemed to be the smallest effect size likely to be observed if *same-effect* is true.
 
-Figures 15-18 compare *sig2* and *d2.scp1* for the two correctness criteria.  The figures reuse conditions from previous sections: for *non-zero*, I use nearness of 0.1; for *same-effect*, I use $\delta=0.5$ and with $d2_{pop} \le d1_{pop}$. Figures 15 and 17 are rate-vs-rate plots; figures 16 and 18 show the same data as aggregate line graphs. 
+Figures 15-18 compare *sig2* and *d2.scp1* for the two correctness criteria.  The figures reuse conditions from previous sections: for *non-zero*, I use nearness of 0.1; for *same-effect*, I use $\epsilon=0.5$ and with $d2_{pop} \le d1_{pop}$. Figures 15 and 17 are rate-vs-rate plots; figures 16 and 18 show the same data as aggregate line graphs. 
 
 ```{r out.width="50%",echo=FALSE,fig.show='asis'}
 knitr::include_graphics('figure/repwr/m=1e4/figure_015_small_telescopes_nonzro_roc.png');
