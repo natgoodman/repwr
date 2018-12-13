@@ -85,15 +85,15 @@ doc_repwr=function(sect=parent(sect,NULL)) {
 ########## sameff
     if (sect=='sameff_nearexact') {
       xdata=xdata_repwr(near=1);
-      dofig(plotroc,'unconstrained_delta=0.1',rate.rule='sameff',rate.tol=0.1,xdata=xdata,
+      dofig(plotroc,'unconstrained_epsilon=0.1',rate.rule='sameff',rate.tol=0.1,xdata=xdata,
             title.desc='d1, d2 unconstrained');
-      dofig(plotroc,'unconstrained_delta=0.5',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
+      dofig(plotroc,'unconstrained_epsilon=0.5',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
             title.desc='d1, d2 unconstrained');
 
       xdata=subset(xdata,subset=d2<=d1);
-      dofig(plotroc,'d2<=d1_delta=0.1',rate.rule='sameff',rate.tol=0.1,xdata=xdata,
+      dofig(plotroc,'d2<=d1_epsilon=0.1',rate.rule='sameff',rate.tol=0.1,xdata=xdata,
             title.desc='d2 <= d1');
-      dofig(plotroc,'d2<=d1_delta=0.5',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
+      dofig(plotroc,'d2<=d1_epsilon=0.5',rate.rule='sameff',rate.tol=0.5,xdata=xdata,
             title.desc='d2 <= d1');
     }
 ##########
