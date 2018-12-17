@@ -45,10 +45,6 @@ init=function(
   sig.level=0.05,                   # for conventional significance
   conf.level=0.95,                  # for confidence intervals
   pred.level=0.95,                  # for prediction intervals
-  pwr.level=0.80,                   # default power
-  fpr.cutoff=sig.level,             # false positive rate cutoff for plots
-  fnr.cutoff=1-pwr.level,           # false negative rate cutoff for plots
-                                    # TODO: probably set fnr.cutoff to sig.level
                                     # grid for various precacluated data
   dsdz.grid=seq(min(d)-3,max(d)+3,by=.05),
   scope.power=0.33,                 # power for small telescope
@@ -257,8 +253,7 @@ init_docmesr=function(must.exist=T) {
     ## CAUTION: have to use loop (not sapply) for scoping to work
     for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
       assign(name,setNames(get(name),mesr.dflt));
-  } else if (doc=='repwr') {
-    ## TODO: expand to all measures
+  } else if (doc=='repwr'&is.null(subdoc)) {
     mesr.dflt=cq(sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1);
     mesr.plotdflt=mesr.heatdflt=mesr.rocdflt=mesr.ragdflt=grep('scp',mesr.dflt,invert=T,value=T);
     mesr.order=mesr.dflt;
@@ -277,7 +272,7 @@ init_docmesr=function(must.exist=T) {
     ## CAUTION: have to use loop (not sapply) for scoping to work
     for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
       assign(name,setNames(get(name),mesr.dflt));
-  } else if (doc=='tech') {
+  } else if (doc=='repwr'&subdoc=='supp') {
     ## TODO: these are old. refine based on experience
     ## mesr.plotdflt=cq(sig2,sigm,d1.c2,d2.c1,d1.p2,d2.p1);
     mesr.plotdflt=c(mesr.sig,mesr.dcc,'d1.scp2','d2.scp1');
@@ -385,6 +380,9 @@ init_doc=function(
   xfigsfx=outsfx,
   xfignum=1,
   xfigblk=NULL,                 # index into xfigsfx if in figure block
+  ## error cutoffs for plots
+  fpr.cutoff=0.05,              # false positive rate cutoff for plots
+  fnr.cutoff=0.20,              # false negative rate cutoff for plots
   ## clean, save
   save.out=T,
   save.fig=save.out,            # save figures (when called via dofig)
