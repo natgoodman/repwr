@@ -253,7 +253,7 @@ init_docmesr=function(must.exist=T) {
     ## CAUTION: have to use loop (not sapply) for scoping to work
     for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
       assign(name,setNames(get(name),mesr.dflt));
-  } else if (doc=='repwr'&is.null(subdoc)) {
+  } else if (doc=='repwr') {
     mesr.dflt=cq(sig2,d1.c2,sigm,d2.c1,c1.c2,d1.p2,d2.p1,p1.p2,d2.scp1);
     mesr.plotdflt=mesr.heatdflt=mesr.rocdflt=mesr.ragdflt=grep('scp',mesr.dflt,invert=T,value=T);
     mesr.order=mesr.dflt;
@@ -272,7 +272,7 @@ init_docmesr=function(must.exist=T) {
     ## CAUTION: have to use loop (not sapply) for scoping to work
     for (name in cq(col.mesr,lwd.mesr,cex.mesr,lty.mesr))
       assign(name,setNames(get(name),mesr.dflt));
-  } else if (doc=='repwr'&subdoc=='supp') {
+  } else if (doc=='tech') {
     ## TODO: these are old. refine based on experience
     ## mesr.plotdflt=cq(sig2,sigm,d1.c2,d2.c1,d1.p2,d2.p1);
     mesr.plotdflt=c(mesr.sig,mesr.dcc,'d1.scp2','d2.scp1');
