@@ -22,7 +22,7 @@
 ##
 #################################################################################
 source('R/docfun_resigsupp.R');
-## --- Generate Figures and Tables for resig Blog Post supplement ___
+## --- Generate Figures and Tables for resig Blog Post supplement ---
 ## sect is which sections to run - for use during development
 ##   uses prefix matching and runs all that match
 doc_resigsupp=function(sect=parent(sect,NULL)) {
