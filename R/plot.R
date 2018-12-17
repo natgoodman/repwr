@@ -617,7 +617,6 @@ plotragm=
               else y.smooth=loessm(x,y,xout=x.smooth);
               ## clamp y.smooth to [0,1]. interpolation can under- or over-shoot
               y.smooth=apply(y.smooth,1:2,function(y) if (!is.na(y)) max(min(y,1),0) else y);
-              ## BREAKPOINT();
               matlines(x.smooth,y.smooth,col=col,lty=lty,lwd=lwd);
             }}}
       if (plot.points|length(x)==1) matpoints(x,y,col=col,cex=cex,pch=16);
