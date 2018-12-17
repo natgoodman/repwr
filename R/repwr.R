@@ -24,6 +24,7 @@ source('R/datman.R');
 source('R/doc.R');
 source('R/doc_readme.R');
 source('R/doc_repwr.R');
+## source('R/doc_repwrsupp.R');
 source('R/doc_resig.R');
 source('R/doc_resigsupp.R');
 source('R/doc_tech.R');
