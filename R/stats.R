@@ -30,11 +30,15 @@ pooled_sd=function(sd0,sd1) sqrt((sd0^2+sd1^2)/2);
 
 ## t statistic (not used)
 tstat=function(n,mean0,mean1,sd0,sd1) (mean0-mean1)/sqrt((sd0^2+sd1^2)/n);
+## NG 19-01-21: Geez Louise - how did I not simplify t2d & d2t from the gitgo???
+## t2d=function(n,t) t*sqrt((2*n)/n^2)
+## d2t=function(n,d) d*sqrt(n^2/(2*n))
+
 ## t statistic to Cohen's d & pval
-t2d=function(n,t) t*sqrt((2*n)/n^2)
+t2d=function(n,t) t*sqrt(2/n);
 t2pval=function(n,t) 2*pt(-abs(t),df=2*(n-1))
 ## Cohen's d to t statistic & pval
-d2t=function(n,d) d*sqrt(n^2/(2*n))
+d2t=function(n,d) d*sqrt(n/2);
 d2pval=function(n,d) t2pval(n,d2t(n,d))
 ## pval to t statistic & Cohen's d
 pval2t=function(n,pval) qt(pval/2,df=2*(n-1),lower.tail=F)
