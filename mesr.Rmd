@@ -129,7 +129,7 @@ My extended (effect size dependent) method differs only in the first step: it co
 <br/> 
 **Functions from [d2t document](https://natgoodman.github.io/repwr/stats.stable.html)**
 
-These functions use the identities $d=t\sqrt{2n/n^2}$ and $t=d\sqrt{n^2/2n}$ to convert between standardized effect sizes ($d$) and t-statistics ($t$) thes use base R's `pt` functions to convert t-statistics into p-values.
+These functions use the identities $d=t\sqrt{2/n}$ and $t=d\sqrt{n/2}$ to convert between standardized effect sizes ($d$) and t-statistics ($t$) then use base R's `pt` functions to convert t-statistics into p-values.
 
   - `pval2d` converts p-value to standardized effect size
   - `p_d2t()` is a wrapper for R's `pt()` that expresses the t-distribution cumulative probability in $d$ units
@@ -320,3 +320,6 @@ With the precursor statistics in hand, the measures are trivial.  Here is the co
     big1,big2);
 ```
 
+## Comments Please!
+
+Please post comments on [Twitter](https://twitter.com/gnatgoodman) or [Facebook](https://www.facebook.com/nathan.goodman.3367), or contact me by email [natg@shore.net](mailto:natg@shore.net).
