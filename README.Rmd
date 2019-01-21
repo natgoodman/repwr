@@ -170,9 +170,11 @@ Documents discussing the approach and results are available on the [GitHub Pages
 
 Nathan (Nat) Goodman, (natg at shore.net)
 
-## Bugs and Caveats
+## Comments Please!
 
-Please report any bugs, other problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/repwr/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistent.
+Please post comments on [Twitter](https://twitter.com/gnatgoodman) or [Facebook](https://www.facebook.com/nathan.goodman.3367), or contact me by email [natg@shore.net](mailto:natg@shore.net). 
+
+Please report bugs, other software problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/repwr/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistent.
 
 ## Copyright & License
 
