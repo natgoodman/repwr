@@ -1,7 +1,7 @@
 ---
 title: "Noncentral d2t-Distribution Applied to Measures of Replication Success"
 author: "Nathan (Nat) Goodman"
-date: "December 3, 2018"
+date: "January 21, 2018"
 output:
   pdf_document: default
   html_document:
@@ -42,17 +42,17 @@ This section defines basic notation that I use throughout. Later sections define
 <br/>
 **Notation when working with individual studies**
 
-| variable | meaning |
-| ------- | --------------------------------------------------------------- |
-| `n` | sample size |
-| `d.pop` | population effect size; this arises in discussion but not the software |
-| `d` | standardized observed effect size; I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity |
-| `d0` | noncentrality parameter expressed in $d_{sdz}$ units; this is the presumed population effect size |
-| `pval` | p-value |
-| `df` | degrees of freedom |
-| `t` | t-statistic |
-| `ncp` | noncentrality parameter expressed in $t$ units |
-| `sig.level` | significance level | 
+| code | math when non-obvious | meaning |
+| ------- | ----- | --------------------------------------------------------------- |
+| `n` | | sample size |
+| `d.pop` | $d_{pop}$ | population effect size; this arises in discussion but not the software |
+| `d` | $d_{sdz}$ | standardized observed effect size. I use `d` in this code, instead of `d.sdz`, to save space since there's no possible ambiguity. I use $d_{sdz}$ in math |
+| `pval` | | p-value |
+| `df` | | degrees of freedom |
+| `t` | | t-statistic |
+| `d0` | | noncentrality parameter expressed in standardized $d$ units; this is the presumed population effect size |
+| `ncp` | | noncentrality parameter expressed in $t$ units |
+| `sig.level` | $\alpha$ | significance level | 
 
 <br/>
 **Notation for base R t-distribution and d2t-distribution functions**
@@ -71,10 +71,32 @@ My d2t-distribution repackages base R's t-distribution functions. The table belo
 
 The suffixes `1` and `2` denote the two studies, e.g, `n1`, `n2` are the sample sizes of the two studies. It is often convenient to think of study `1` as the original and `2` the replica but this isn't baked into the software.
 
-## Transformations between `t`, `d `, `pval`
+**Transformations between $d_{sdz}$ and $t$**
 
-For the limited context of my simulation, it's easy to convert between the t-statistic, standardized effect size, and p-value.
+The following transformation between $d_{sdz}$ and $t$ are specialized for the limited context of my simulation.
 
+**Convert d_{sdz} to t**
+
+$t=d\sqrt{n/2}$
+$$\begin{aligned}
+\bf{\text{derivation}} &\\[5pt]
+t&=\frac{mean_{0}-mean_{1}}{sd_{pooled}\sqrt{2/n}} &({\text{textbook definition}}) \\[5pt]
+&=\frac{d_{sdz}}{\sqrt{2/n}} &(\text{because} \space d_{sdz}=\frac{mean_{0}-mean_{1}}{sd_{pooled}}) \\[5pt]
+&=d_{sdz}\sqrt{n/2} &(\text{because} \space \sqrt{n/2}=\frac {1}{\sqrt{2/n}})
+\end{aligned}$$ |
+
+**Convert t to d_{sdz}**
+
+$d=t\sqrt{2/n}$
+$$\begin{aligned}
+\bf{\text{derivation}}& \\[5pt]
+t&=d_{sdz}\sqrt{n/2} &({\text{above}}) \\[5pt]
+\frac{t}{\sqrt{n/2}}&=\frac{d_{sdz}\sqrt{n/2}}{\sqrt{n/2}}=d_{sdz} &(\text{divide both sides by} \space \sqrt{n/2}) \\[5pt]
+d_{sdz}&=\frac{t}{\sqrt{n/2}} &(\text{rearrange terms}) \\[5pt]
+&=t\sqrt{2/n} &(\text{because} \space \sqrt{2/n}=\frac {1}{\sqrt{n/2}})
+\end{aligned}$$
+
+**R**
 ``` {r eval=FALSE}
 ## t-statistic to Cohen's d & p-value
 t2d=function(n,t) t*sqrt((2*n)/n^2)
@@ -209,7 +231,7 @@ ci_d2t=function(n,d,conf.level=0.95) {
 
 A prediction interval indicates the range of effect sizes we're likely to observe in a replication, given the sample sizes of the original and replica studies and the observed effect size in the original study.
 
-I adapted the prediction interval function from [Spence and Stanley's paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) and [Stanleys predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval/). The method seems to work, but I have no intuition why.
+I adapted the prediction interval function from [Spence and Stanley's paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/) and [Stanley's predictionInterval package](https://cran.r-project.org/web/packages/predictionInterval/). The method seems to work, but I have no intuition why.
 
 Note that `ci_dt` is the confidence interval function for the d2t-distribution defined above.
 
@@ -237,4 +259,6 @@ The noncentral t-distribution underlies many statistical tests (*measures*) for 
 
 I describe the measures themselves in a working paper [Measures of Replication Success](https://natgoodman.github.io/repwr/mesr.stable.html) which relies heavily on the d2t functions in the present document. I describe the results of the simulation in another working paper [Systematic Replication Has Limited Power to Detect Bad Science](https://natgoodman.github.io/repwr/repwr.stable.html), a shorter blog post [Systematic Replication May Make Many Mistakes](https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/), and a [supplement to the blog post](https://natgoodman.github.io/repwr/resigsupp.stable.html).
 
+## Comments Please!
 
+Please post comments on [Twitter](https://twitter.com/gnatgoodman) or [Facebook](https://www.facebook.com/nathan.goodman.3367), or contact me by email [natg@shore.net](mailto:natg@shore.net).
