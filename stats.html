@@ -11,6 +11,7 @@
 
 <meta name="author" content="Nathan (Nat) Goodman" />
 
+<meta name="date" content="2018-01-21" />
 
 <title>Noncentral d2t-Distribution Applied to Measures of Replication Success</title>
 
@@ -146,7 +147,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Noncentral d2t-Distribution Applied to Measures of Replication Success</h1>
 <h4 class="author"><em>Nathan (Nat) Goodman</em></h4>
-<h4 class="date"><em>December 3, 2018</em></h4>
+<h4 class="date"><em>January 21, 2018</em></h4>
 
 </div>
 
@@ -173,50 +174,61 @@ $(document).ready(function () {
 <p><br /> <strong>Notation when working with individual studies</strong></p>
 <table>
 <colgroup>
-<col width="11%"></col>
-<col width="88%"></col>
+<col width="10%"></col>
+<col width="7%"></col>
+<col width="82%"></col>
 </colgroup>
 <thead>
 <tr class="header">
-<th>variable</th>
+<th>code</th>
+<th>math when non-obvious</th>
 <th>meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><code>n</code></td>
+<td></td>
 <td>sample size</td>
 </tr>
 <tr class="even">
 <td><code>d.pop</code></td>
+<td><span class="math inline">\(d_{pop}\)</span></td>
 <td>population effect size; this arises in discussion but not the software</td>
 </tr>
 <tr class="odd">
 <td><code>d</code></td>
-<td>standardized observed effect size; I use <code>d</code> in this code, instead of <code>d.sdz</code>, to save space since there’s no possible ambiguity</td>
+<td><span class="math inline">\(d_{sdz}\)</span></td>
+<td>standardized observed effect size. I use <code>d</code> in this code, instead of <code>d.sdz</code>, to save space since there’s no possible ambiguity. I use <span class="math inline">\(d_{sdz}\)</span> in math</td>
 </tr>
 <tr class="even">
-<td><code>d0</code></td>
-<td>noncentrality parameter expressed in <span class="math inline">\(d_{sdz}\)</span> units; this is the presumed population effect size</td>
-</tr>
-<tr class="odd">
 <td><code>pval</code></td>
+<td></td>
 <td>p-value</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>df</code></td>
+<td></td>
 <td>degrees of freedom</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>t</code></td>
+<td></td>
 <td>t-statistic</td>
+</tr>
+<tr class="odd">
+<td><code>d0</code></td>
+<td></td>
+<td>noncentrality parameter expressed in standardized <span class="math inline">\(d\)</span> units; this is the presumed population effect size</td>
 </tr>
 <tr class="even">
 <td><code>ncp</code></td>
+<td></td>
 <td>noncentrality parameter expressed in <span class="math inline">\(t\)</span> units</td>
 </tr>
 <tr class="odd">
 <td><code>sig.level</code></td>
+<td><span class="math inline">\(\alpha\)</span></td>
 <td>significance level</td>
 </tr>
 </tbody>
@@ -256,10 +268,24 @@ $(document).ready(function () {
 </table>
 <p><br /> <strong>Additional notation when working with pairs of studies, i.e., replications</strong></p>
 <p>The suffixes <code>1</code> and <code>2</code> denote the two studies, e.g, <code>n1</code>, <code>n2</code> are the sample sizes of the two studies. It is often convenient to think of study <code>1</code> as the original and <code>2</code> the replica but this isn’t baked into the software.</p>
-</div>
-<div id="transformations-between-t-d-pval" class="section level2">
-<h2>Transformations between <code>t</code>, <code>d</code>, <code>pval</code></h2>
-<p>For the limited context of my simulation, it’s easy to convert between the t-statistic, standardized effect size, and p-value.</p>
+<p><strong>Transformations between <span class="math inline">\(d_{sdz}\)</span> and <span class="math inline">\(t\)</span></strong></p>
+<p>The following transformation between <span class="math inline">\(d_{sdz}\)</span> and <span class="math inline">\(t\)</span> are specialized for the limited context of my simulation.</p>
+<p><strong>Convert d_{sdz} to t</strong></p>
+<p><span class="math inline">\(t=d\sqrt{n/2}\)</span> <span class="math display">\[\begin{aligned}
+\bf{\text{derivation}} &amp;\\[5pt]
+t&amp;=\frac{mean_{0}-mean_{1}}{sd_{pooled}\sqrt{2/n}} &amp;({\text{textbook definition}}) \\[5pt]
+&amp;=\frac{d_{sdz}}{\sqrt{2/n}} &amp;(\text{because} \space d_{sdz}=\frac{mean_{0}-mean_{1}}{sd_{pooled}}) \\[5pt]
+&amp;=d_{sdz}\sqrt{n/2} &amp;(\text{because} \space \sqrt{n/2}=\frac {1}{\sqrt{2/n}})
+\end{aligned}\]</span> |</p>
+<p><strong>Convert t to d_{sdz}</strong></p>
+<p><span class="math inline">\(d=t\sqrt{2/n}\)</span> <span class="math display">\[\begin{aligned}
+\bf{\text{derivation}}&amp; \\[5pt]
+t&amp;=d_{sdz}\sqrt{n/2} &amp;({\text{above}}) \\[5pt]
+\frac{t}{\sqrt{n/2}}&amp;=\frac{d_{sdz}\sqrt{n/2}}{\sqrt{n/2}}=d_{sdz} &amp;(\text{divide both sides by} \space \sqrt{n/2}) \\[5pt]
+d_{sdz}&amp;=\frac{t}{\sqrt{n/2}} &amp;(\text{rearrange terms}) \\[5pt]
+&amp;=t\sqrt{2/n} &amp;(\text{because} \space \sqrt{2/n}=\frac {1}{\sqrt{n/2}})
+\end{aligned}\]</span></p>
+<p><strong>R</strong></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## t-statistic to Cohen's d &amp; p-value
 t2d=function(n,t) t*<span class="kw">sqrt</span>((<span class="dv">2</span>*n)/n^<span class="dv">2</span>)
 t2pval=function(n,t) <span class="dv">2</span>*<span class="kw">pt</span>(-<span class="kw">abs</span>(t),<span class="dt">df=</span><span class="dv">2</span>*(n<span class="dv">-1</span>))
@@ -393,7 +419,7 @@ ci_d2t=function(n,d,<span class="dt">conf.level=</span><span class="fl">0.95</sp
 <div id="prediction-intervals" class="section level3">
 <h3>Prediction intervals</h3>
 <p>A prediction interval indicates the range of effect sizes we’re likely to observe in a replication, given the sample sizes of the original and replica studies and the observed effect size in the original study.</p>
-<p>I adapted the prediction interval function from <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/">Spence and Stanley’s paper</a> and <a href="https://cran.r-project.org/web/packages/predictionInterval/">Stanleys predictionInterval package</a>. The method seems to work, but I have no intuition why.</p>
+<p>I adapted the prediction interval function from <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/">Spence and Stanley’s paper</a> and <a href="https://cran.r-project.org/web/packages/predictionInterval/">Stanley’s predictionInterval package</a>. The method seems to work, but I have no intuition why.</p>
 <p>Note that <code>ci_dt</code> is the confidence interval function for the d2t-distribution defined above.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## adapted from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5028066/ and predictionInterval package
 pi_d2t=function(n1,n2,d,<span class="dt">ci1=</span><span class="ot">NULL</span>,<span class="dt">ci2=</span><span class="ot">NULL</span>,<span class="dt">pred.level=</span><span class="fl">0.95</span>) {
@@ -416,6 +442,10 @@ pi_d2t=function(n1,n2,d,<span class="dt">ci1=</span><span class="ot">NULL</span>
 <h2>Discussion</h2>
 <p>The noncentral t-distribution underlies many statistical tests (<em>measures</em>) for deciding whether a replication passes or fails. In this document I describe my software for the <em>noncentral d2t-distribution</em>; this software wraps R’s built-in t-distribution functions to operate on sample size (instead of degrees of freedom), population effect size (instead of the noncentrality parameter), and observed effect size (instead of the t-statistic). The code is in the file <code>R/stats.R</code>. The d2t-distribution is not a new distribution in any sense; it’s merely a repackaging of the t-distribution.</p>
 <p>I describe the measures themselves in a working paper <a href="https://natgoodman.github.io/repwr/mesr.stable.html">Measures of Replication Success</a> which relies heavily on the d2t functions in the present document. I describe the results of the simulation in another working paper <a href="https://natgoodman.github.io/repwr/repwr.stable.html">Systematic Replication Has Limited Power to Detect Bad Science</a>, a shorter blog post <a href="https://replicationnetwork.com/2018/09/28/goodman-systematic-replication-may-make-many-mistakes/">Systematic Replication May Make Many Mistakes</a>, and a <a href="https://natgoodman.github.io/repwr/resigsupp.stable.html">supplement to the blog post</a>.</p>
+</div>
+<div id="comments-please" class="section level2">
+<h2>Comments Please!</h2>
+<p>Please post comments on <a href="https://twitter.com/gnatgoodman">Twitter</a> or <a href="https://www.facebook.com/nathan.goodman.3367">Facebook</a>, or contact me by email <a href="mailto:natg@shore.net">natg@shore.net</a>.</p>
 </div>
 
 

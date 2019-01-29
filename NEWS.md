@@ -1,9 +1,14 @@
 Revision history for repwr repository
 ================
 Nathan (Nat) Goodman
-December 12, 2018
+January 28, 2018
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+Release 1.47 2019-01-28
+-----------------------
+
+-   Add words to all documents on posting comments using social media
+
 Release 1.46 2018-12-12
 -----------------------
 
